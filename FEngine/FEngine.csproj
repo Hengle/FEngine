@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{18F8E559-2A3F-4F3C-B0E6-5D7CAA860331}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FEngine</RootNamespace>
+    <AssemblyName>FEngine</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Collision\BroadPhase\AbstractBroadPhaseDetector.cs" />
+    <Compile Include="Collision\BroadPhase\BroadPhaseDetector.cs" />
+    <Compile Include="Collision\BroadPhase\BroadPhaseFilter.cs" />
+    <Compile Include="Collision\BroadPhase\BroadphaseFilterAdapter.cs" />
+    <Compile Include="Collision\BroadPhase\BroadphaseItem.cs" />
+    <Compile Include="Collision\BroadPhase\BroadphaseKey.cs" />
+    <Compile Include="Collision\BroadPhase\BroadphasePair.cs" />
+    <Compile Include="Collision\BroadPhase\DefaultBroadphaseFilter.cs" />
+    <Compile Include="Collision\BroadPhase\DynamicAABBTree.cs" />
+    <Compile Include="Collision\BroadPhase\DynamicAABBTreeLeaf.cs" />
+    <Compile Include="Collision\BroadPhase\DynamicAABBTreeNode.cs" />
+    <Compile Include="Collision\Collidable.cs" />
+    <Compile Include="Collision\Collisions.cs" />
+    <Compile Include="Collision\Filter.cs" />
+    <Compile Include="Collision\Fixture.cs" />
+    <Compile Include="Collision\NarrowPhase\DistanceDetector.cs" />
+    <Compile Include="Collision\NarrowPhase\GJK.cs" />
+    <Compile Include="Collision\NarrowPhase\MinkovskiSum.cs" />
+    <Compile Include="Collision\NarrowPhase\NarrowphaseDetector.cs" />
+    <Compile Include="Collision\NarrowPhase\Penetration.cs" />
+    <Compile Include="Collision\NarrowPhase\Raycast.cs" />
+    <Compile Include="Collision\NarrowPhase\RaycastDetector.cs" />
+    <Compile Include="Collision\NarrowPhase\Seperation.cs" />
+    <Compile Include="Geometry\AABB.cs" />
+    <Compile Include="Geometry\Interval.cs" />
+    <Compile Include="Geometry\Mass.cs" />
+    <Compile Include="Geometry\Ray.cs" />
+    <Compile Include="Geometry\ShapeFoundation.cs" />
+    <Compile Include="Math\AcosLookupTable.cs" />
+    <Compile Include="Math\Atan2LookupTable.cs" />
+    <Compile Include="Math\FixedMath.cs" />
+    <Compile Include="Math\SinCosLookupTable.cs" />
+    <Compile Include="Math\VFixedPoint.cs" />
+    <Compile Include="Math\VInt3.cs" />
+    <Compile Include="Math\VIntQuaternion.cs" />
+    <Compile Include="Math\VIntTransform.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UUID.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
