@@ -413,99 +413,7 @@ namespace MobaGame.Collision
 
         public bool raycast(Ray ray, VFixedPoint maxLength, Convex convex, VIntTransform transform, Raycast raycast)
         {
-            VFixedPoint lambda = VFixedPoint.Zero;
 
-            bool lengthCheck = maxLength > VFixedPoint.Zero;
-
-            Vector2 a = null;
-            Vector2 b = null;
-
-            VInt3 start = ray.getStart();
-
-            VInt3 x = start;
-
-            VInt3 r = ray.getDirectionVector();
-
-            if (convex.contains(start, transform))
-            {
-                return false;
-            }
-            VInt3 c = transform.TransformPoint(convex.getCenter());
-
-            VInt3 d = x - c;
-
-            VFixedPoint distanceSqrd = VFixedPoint.MaxValue;
-            int iterations = 0;
-            while (distanceSqrd > this.distanceEpsilon)
-            {
-                VInt3 p = convex.getFarthestPoint(d, transform);
-
-                VInt3 w = x - p;
-
-                VFixedPoint dDotW = VInt3.Dot(d, w);
-                if (dDotW > 0.0D)
-                {
-                    double dDotR = d.dot(r);
-                    if (dDotR >= 0.0D)
-                    {
-                        return false;
-                    }
-                    lambda -= dDotW / dDotR;
-                    if ((lengthCheck) && (lambda > maxLength))
-                    {
-                        return false;
-                    }
-                    x = r.product(lambda).add(start);
-
-                    n.set(d);
-                }
-                if (a != null)
-                {
-                    if (b != null)
-                    {
-                        Vector2 p1 = Segment.getPointOnSegmentClosestToPoint(x, a, p);
-                        Vector2 p2 = Segment.getPointOnSegmentClosestToPoint(x, p, b);
-                        if (p1.distanceSquared(x) < p2.distanceSquared(x))
-                        {
-                            b.set(p);
-
-                            distanceSqrd = p1.distanceSquared(x);
-                        }
-                        else
-                        {
-                            a.set(p);
-
-                            distanceSqrd = p2.distanceSquared(x);
-                        }
-                        Vector2 ab = a.to(b);
-                        Vector2 ax = a.to(x);
-                        d = Vector2.tripleProduct(ab, ax, ab);
-                    }
-                    else
-                    {
-                        b = p;
-
-                        Vector2 ab = a.to(b);
-                        Vector2 ax = a.to(x);
-                        d = Vector2.tripleProduct(ab, ax, ab);
-                    }
-                }
-                else
-                {
-                    a = p;
-                    d.negate();
-                }
-                if (iterations == this.maxIterations)
-                {
-                    return false;
-                }
-                iterations++;
-            }
-            raycast.point = x;
-            raycast.normal = n.Normalize();
-            raycast.distance = lambda;
-
-            return true;
         }
 
         public int getMaxIterations()
@@ -525,6 +433,153 @@ namespace MobaGame.Collision
         VInt3 CrossAba(VInt3 a, VInt3 b)
         {
             return VInt3.Cross(a, VInt3.Cross(b, a));
+        }
+
+		VInt3 closestPtPointTriangle(List<MinkowskiSumPoint>, ref int size)
+	    {
+			size = 3;
+		
+			VFixedPoint eps = FEps();
+			MinkowskiSumPoint a = Q[0];
+			MinkowskiSumPoint b = Q[1];
+			MinkowskiSumPoint c = Q[2];
+			VInt3 ab = b - a;
+			VInt3 ac = c - a;
+			VInt3 signArea = VInt3.Cross(ab, ac);//0.5*(abXac)
+			VFixedPoint area = V3Dot(signArea, signArea);
+			if(area <= eps)
+			{
+				//degenerate
+				size = 2;
+				return Segment.getPointOnSegmentClosestToPoint(ORIGIN, Q[0], Q[1]);
+			}
+
+			int _size;
+			int[] indices= new int[]{0, 1, 2};
+			VInt3 closest = closestPtPointTriangleBaryCentric(a.point, b.point, c.point, indices, _size);
+
+			if(_size != 3)
+			{
+				Q[0] = Q[indices[0]]; Q[1] = Q[indices[1]];
+				size = _size;
+			}
+
+			return closest;
+		}
+
+        VInt3 closestPtPointTriangleBaryCentric(VInt3 a, VInt3 b, VInt3 c, int[] indices, ref int size)
+        {
+            size = 3;
+            VFixedPoint eps = FEps();
+            
+            VInt3 ab = b - a;
+            VInt3 ac = c - a;
+
+            VInt3 n = VInt3.Cross(ab, ac);
+
+            VInt3 bCrossC = VInt3.Cross(b, c);
+            VInt3 cCrossA = VInt3.Cross(c, a);
+            VInt3 aCrossB = VInt3.Cross(a, b);
+
+            VFixedPoint va = V3Dot(n, bCrossC);//edge region of BC, signed area rbc, u = S(rbc)/S(abc) for a
+            VFixedPoint vb = V3Dot(n, cCrossA);//edge region of AC, signed area rac, v = S(rca)/S(abc) for b
+            VFixedPoint vc = V3Dot(n, aCrossB);//edge region of AB, signed area rab, w = S(rab)/S(abc) for c
+
+            bool isFacePoints = va >= VFixedPoint.zero && vb >= VFixedPoint.zero && vc >= VFixedPoint.zero;
+
+
+            //face region
+            if(isFacePoints)
+            {   
+                nn= VInt3.Dot(n, n);
+                VFixedPoint t = VInt3.Dot(n, a) / nn;
+                return n * t;
+            }
+
+            VInt3 ap = -a;
+            VInt3 bp = -b;
+            VInt3 cp = -c;
+
+            VFixedPoint d1 = VInt3.Dot(ab, ap); //  snom
+            VFixedPoint d2 = VInt3.Dot(ac, ap); //  tnom
+            VFixedPoint d3 = VInt3.Dot(ab, bp); // -sdenom
+            VFixedPoint d4 = VInt3.Dot(ac, bp); //  unom = d4 - d3
+            VFixedPoint d5 = VInt3.Dot(ab, cp); //  udenom = d5 - d6
+            VFixedPoint d6 = VInt3.Dot(ac, cp); // -tdenom
+
+
+            VFixedPoint unom = d4 - d3;
+            VFixedPoint udenom = d5 - d6;
+
+            size = 2;
+            //check if p in edge region of AB
+            bool con30 =  vc <= VFixedPoint.zero;
+            bool con31 = d1 >= VFixedPoint.zero;
+            bool con32 = d3 <= VFixedPoint.zero;
+            bool con3 = con30 && con31 && con32;//edge AB region
+            if(con3)
+            {
+                VFixedPoint toRecipAB = d1 - d3;
+                VFixedPoint recipAB = toRecipAB.Abs() >= eps ? VFixedPoint.One / toRecipAB: VFixedPoint.zero;
+                VFixedPoint t = d1 * recipAB;
+                return ab * t + a;
+            }
+        
+            //check if p in edge region of BC
+            bool con40 = va <= VFixedPoint.zero;
+            bool con41 = d4 >= d3;
+            bool con42 = d5 >= d6;
+            bool con4 = con40 && con41 && con42; //edge BC region
+            if(con4)
+            {
+                VInt3 bc = c - b;
+                VFixedPoint toRecipBC = unom + udenom;
+                VFixedPoint recipBC = toRecipBC.Abs() >= eps ? VFixedPoint.One / toRecipBC: VFixedPoint.zero;
+                VFixedPoint t = unom * recipBC;
+                indices[0] = indices[1];
+                indices[1] = indices[2];
+                return bc * t + b;
+            }
+            
+            //check if p in edge region of AC
+            bool con50 = FIsGrtrOrEq(zero, vb);
+            bool con51 = FIsGrtrOrEq(d2, zero);
+            bool con52 = FIsGrtrOrEq(zero, d6);
+        
+            bool con5 = BAnd(con50, BAnd(con51, con52));//edge AC region
+            if(con5)
+            {
+                VFixedPoint toRecipAC = d2 - d6;
+                VFixedPoint recipAC = toRecipAC.Abs()) >= eps ? VFixedPoint.One / toRecipAC : VFixedPoint.zero;
+                VFixedPoint t = FMul(d2, recipAC);
+                indices[1]=indices[2];
+                return ac * t + a;
+            }
+
+            size = 1;
+            //check if p in vertex region outside a
+            bool con00 = d1 <= VFixedPoint.zero; // snom <= 0
+            bool con01 = d2 <= VFixedPoint.zero; // tnom <= 0
+            bool con0 = con00 && con01; // vertex region a
+            if(con0)
+            {
+                return a;
+            }
+
+            //check if p in vertex region outside b
+            bool con10 = d3 >= VFixedPoint.zero;
+            bool con11 = d3 >= d4;
+            bool con1 = con10 && con11; // vertex region b
+            if(con1)
+            {
+                indices[0] = indices[1];
+                return b;
+            }
+            
+            //p is in vertex region outside c
+            indices[0] = indices[2];
+            return c;
+
         }
     }
 }
