@@ -376,7 +376,7 @@ namespace MobaGame.Collision
             separation.point2 = input[0].supportPoint2 * (VFixedPoint.One - v - w) + input[1].supportPoint2 * v + input[2].supportPoint2 * w;
         }
 
-        protected bool containsOrigin(List<MinkowskiSumPoint> input)
+        protected bool containsOrigin(MinkowskiSumPoint[] input)
         {
             if(input.Count < 4)
             {
@@ -435,7 +435,7 @@ namespace MobaGame.Collision
             return VInt3.Cross(a, VInt3.Cross(b, a));
         }
 
-		VInt3 closestPtPointTriangle(List<MinkowskiSumPoint>, ref int size)
+		VInt3 closestPtPointTriangle(MinkowskiSumPoint[] Q, ref int size)
 	    {
 			size = 3;
 		
@@ -460,7 +460,8 @@ namespace MobaGame.Collision
 
 			if(_size != 3)
 			{
-				Q[0] = Q[indices[0]]; Q[1] = Q[indices[1]];
+                MinkowskiSumPoint q0 = Q[indices[0]]; MinkowskiSumPoint q1 = Q[indices[1]];
+				Q[0] = q0; Q[1] = q1;
 				size = _size;
 			}
 
@@ -580,6 +581,107 @@ namespace MobaGame.Collision
             indices[0] = indices[2];
             return c;
 
+        }
+
+        VInt3 closestPtPointTetrahedron(MinkowskiSumPoint[] Q, ref int size)
+        {
+            
+            VFixedPoint eps = VFixedPoint.Create(1e-4f);
+            MinkowskiSumPoint a = Q[0];
+            MinkowskiSumPoint b = Q[1];
+            MinkowskiSumPoint c = Q[2];  
+            MinkowskiSumPoint d = Q[3];
+
+            //degenerated
+            VInt3 ab = b - a;
+            VInt3 ac = c - a;
+            VInt3 n = VInt3.Cross(ab, ac).Normalize();
+            VFixedPoint signDist = VInt3.Dot(n, V3Sub(d, a));
+            if(signDist.Abs() <= eps)
+            {
+                size = 3;
+                return closestPtPointTriangle(Q, ref size);
+            }
+
+            VInt3 result = VInt3.zero;
+            VFixedPoint bestSqDist = VFixedPoint.MaxValue;
+            int[] _indices = new int[]{0, 1, 2};
+
+            if(Tetrahedron.PointOUtsideOfPlane(ORIGIN, a, b, c, d))
+            {
+                result = closestPtPointTriangleBaryCentric(Q[0], Q[1], Q[2], indices, ref size);
+                bestSqDist = V3Dot(result, result);
+            }
+
+            if (Tetrahedron.PointOUtsideOfPlane(ORIGIN, a, c, d, b))
+            {
+                int _size = 3;
+                _indices[0] = 0; _indices[1] = 2; _indices[2] = 3; 
+                VInt3 q = closestPtPointTriangleBaryCentric(Q[0], Q[2], Q[3],  _indices, ref _size);
+
+                VFixedPoint sqDist = VInt3.Dot(q, q);
+                bool con = bestSqDist >= sqDist;
+                if(con)
+                {
+                    result = q;
+                    bestSqDist = sqDist;
+
+                    indices[0] = _indices[0];
+                    indices[1] = _indices[1];
+                    indices[2] = _indices[2];
+
+                    size = _size;
+                }
+            }
+
+            if (Tetrahedron.PointOUtsideOfPlane(ORIGIN, a, d, b, c))
+            {
+                int _size = 3;
+            
+                _indices[0] = 0; _indices[1] = 3; _indices[2] = 1; 
+
+                VInt3 q = closestPtPointTriangleBaryCentric(Q[0], Q[3], Q[1], _indices, ref _size);
+                VFixedPoint sqDist = VInt3.Dot(q, q);
+                bool con = bestSqDist >= sqDist;
+                if(con)
+                {
+                    result = q;
+                    bestSqDist = sqDist;
+
+                    indices[0] = _indices[0];
+                    indices[1] = _indices[1];
+                    indices[2] = _indices[2];
+
+                    size = _size;
+                }
+            }
+
+            if (Tetrahedron.PointOUtsideOfPlane(ORIGIN, b, c, d, a))
+            {
+                int _size = 3;
+            
+                _indices[0] = 1; _indices[1] = 3; _indices[2] = 2; 
+
+                VInt3 q = closestPtPointTriangleBaryCentric(Q[1], Q[3], Q[2], _indices, ref _size);
+                VFixedPoint sqDist = VInt3.Dot(q, q);
+                bool con = bestSqDist >= sqDist;
+                if(con)
+                {
+                    result = q;
+                    bestSqDist = sqDist;
+
+                    indices[0] = _indices[0];
+                    indices[1] = _indices[1];
+                    indices[2] = _indices[2];
+
+                    size = _size;
+                }
+            }
+
+            MinkowskiSumPoint q0 = Q[indices[0]]; MinkowskiSumPoint q1 = Q[indices[1]]; MinkowskiSumPoint q2 = Q[indices[2]];
+            Q[0] = q0; Q[1] = q1; Q[2] = q2;
+
+            return VInt3.zero;
         }
     }
 }
