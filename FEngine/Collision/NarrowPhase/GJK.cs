@@ -378,7 +378,7 @@ namespace MobaGame.Collision
 
         protected bool containsOrigin(MinkowskiSumPoint[] input)
         {
-            if(input.Count < 4)
+            if(input.Length < 4)
             {
                 return false;
             }
@@ -443,20 +443,20 @@ namespace MobaGame.Collision
 			MinkowskiSumPoint a = Q[0];
 			MinkowskiSumPoint b = Q[1];
 			MinkowskiSumPoint c = Q[2];
-			VInt3 ab = b - a;
-			VInt3 ac = c - a;
+			VInt3 ab = b.point - a.point;
+			VInt3 ac = c.point - a.point;
 			VInt3 signArea = VInt3.Cross(ab, ac);//0.5*(abXac)
-			VFixedPoint area = V3Dot(signArea, signArea);
+			VFixedPoint area = VInt3.Dot(signArea, signArea);
 			if(area <= eps)
 			{
 				//degenerate
 				size = 2;
-				return Segment.getPointOnSegmentClosestToPoint(ORIGIN, Q[0], Q[1]);
+				return Segment.getPointOnSegmentClosestToPoint(ORIGIN, Q[0].point, Q[1].point);
 			}
 
 			int _size;
 			int[] indices= new int[]{0, 1, 2};
-			VInt3 closest = closestPtPointTriangleBaryCentric(a.point, b.point, c.point, indices, _size);
+			VInt3 closest = closestPtPointTriangleBaryCentric(a.point, b.point, c.point, indices, ref _size);
 
 			if(_size != 3)
 			{
@@ -482,17 +482,17 @@ namespace MobaGame.Collision
             VInt3 cCrossA = VInt3.Cross(c, a);
             VInt3 aCrossB = VInt3.Cross(a, b);
 
-            VFixedPoint va = V3Dot(n, bCrossC);//edge region of BC, signed area rbc, u = S(rbc)/S(abc) for a
-            VFixedPoint vb = V3Dot(n, cCrossA);//edge region of AC, signed area rac, v = S(rca)/S(abc) for b
-            VFixedPoint vc = V3Dot(n, aCrossB);//edge region of AB, signed area rab, w = S(rab)/S(abc) for c
+            VFixedPoint va = VInt3.Dot(n, bCrossC);//edge region of BC, signed area rbc, u = S(rbc)/S(abc) for a
+            VFixedPoint vb = VInt3.Dot(n, cCrossA);//edge region of AC, signed area rac, v = S(rca)/S(abc) for b
+            VFixedPoint vc = VInt3.Dot(n, aCrossB);//edge region of AB, signed area rab, w = S(rab)/S(abc) for c
 
-            bool isFacePoints = va >= VFixedPoint.zero && vb >= VFixedPoint.zero && vc >= VFixedPoint.zero;
+            bool isFacePoints = va >= VFixedPoint.Zero && vb >= VFixedPoint.Zero && vc >= VFixedPoint.Zero;
 
 
             //face region
             if(isFacePoints)
             {   
-                nn= VInt3.Dot(n, n);
+                VFixedPoint nn= VInt3.Dot(n, n);
                 VFixedPoint t = VInt3.Dot(n, a) / nn;
                 return n * t;
             }
@@ -514,20 +514,20 @@ namespace MobaGame.Collision
 
             size = 2;
             //check if p in edge region of AB
-            bool con30 =  vc <= VFixedPoint.zero;
-            bool con31 = d1 >= VFixedPoint.zero;
-            bool con32 = d3 <= VFixedPoint.zero;
+            bool con30 =  vc <= VFixedPoint.Zero;
+            bool con31 = d1 >= VFixedPoint.Zero;
+            bool con32 = d3 <= VFixedPoint.Zero;
             bool con3 = con30 && con31 && con32;//edge AB region
             if(con3)
             {
                 VFixedPoint toRecipAB = d1 - d3;
-                VFixedPoint recipAB = toRecipAB.Abs() >= eps ? VFixedPoint.One / toRecipAB: VFixedPoint.zero;
+                VFixedPoint recipAB = toRecipAB.Abs() >= eps ? VFixedPoint.One / toRecipAB: VFixedPoint.Zero;
                 VFixedPoint t = d1 * recipAB;
                 return ab * t + a;
             }
         
             //check if p in edge region of BC
-            bool con40 = va <= VFixedPoint.zero;
+            bool con40 = va <= VFixedPoint.Zero;
             bool con41 = d4 >= d3;
             bool con42 = d5 >= d6;
             bool con4 = con40 && con41 && con42; //edge BC region
@@ -535,7 +535,7 @@ namespace MobaGame.Collision
             {
                 VInt3 bc = c - b;
                 VFixedPoint toRecipBC = unom + udenom;
-                VFixedPoint recipBC = toRecipBC.Abs() >= eps ? VFixedPoint.One / toRecipBC: VFixedPoint.zero;
+                VFixedPoint recipBC = toRecipBC.Abs() >= eps ? VFixedPoint.One / toRecipBC: VFixedPoint.Zero;
                 VFixedPoint t = unom * recipBC;
                 indices[0] = indices[1];
                 indices[1] = indices[2];
@@ -543,24 +543,24 @@ namespace MobaGame.Collision
             }
             
             //check if p in edge region of AC
-            bool con50 = FIsGrtrOrEq(zero, vb);
-            bool con51 = FIsGrtrOrEq(d2, zero);
-            bool con52 = FIsGrtrOrEq(zero, d6);
+            bool con50 = vb <= VFixedPoint.Zero;
+            bool con51 = d2 >= VFixedPoint.Zero;
+            bool con52 = d6 <= VFixedPoint.Zero;
         
-            bool con5 = BAnd(con50, BAnd(con51, con52));//edge AC region
+            bool con5 = con50 && con51 && con52;//edge AC region
             if(con5)
             {
                 VFixedPoint toRecipAC = d2 - d6;
-                VFixedPoint recipAC = toRecipAC.Abs()) >= eps ? VFixedPoint.One / toRecipAC : VFixedPoint.zero;
-                VFixedPoint t = FMul(d2, recipAC);
+                VFixedPoint recipAC = toRecipAC.Abs() >= eps ? VFixedPoint.One / toRecipAC : VFixedPoint.Zero;
+                VFixedPoint t = d2 * recipAC;
                 indices[1]=indices[2];
                 return ac * t + a;
             }
 
             size = 1;
             //check if p in vertex region outside a
-            bool con00 = d1 <= VFixedPoint.zero; // snom <= 0
-            bool con01 = d2 <= VFixedPoint.zero; // tnom <= 0
+            bool con00 = d1 <= VFixedPoint.Zero; // snom <= 0
+            bool con01 = d2 <= VFixedPoint.Zero; // tnom <= 0
             bool con0 = con00 && con01; // vertex region a
             if(con0)
             {
@@ -568,7 +568,7 @@ namespace MobaGame.Collision
             }
 
             //check if p in vertex region outside b
-            bool con10 = d3 >= VFixedPoint.zero;
+            bool con10 = d3 >= VFixedPoint.Zero;
             bool con11 = d3 >= d4;
             bool con1 = con10 && con11; // vertex region b
             if(con1)
@@ -593,10 +593,10 @@ namespace MobaGame.Collision
             MinkowskiSumPoint d = Q[3];
 
             //degenerated
-            VInt3 ab = b - a;
-            VInt3 ac = c - a;
+            VInt3 ab = b.point - a.point;
+            VInt3 ac = c.point - a.point;
             VInt3 n = VInt3.Cross(ab, ac).Normalize();
-            VFixedPoint signDist = VInt3.Dot(n, V3Sub(d, a));
+            VFixedPoint signDist = VInt3.Dot(n, d.point - a.point);
             if(signDist.Abs() <= eps)
             {
                 size = 3;
@@ -605,19 +605,20 @@ namespace MobaGame.Collision
 
             VInt3 result = VInt3.zero;
             VFixedPoint bestSqDist = VFixedPoint.MaxValue;
+            int[] indices = new int[] { 0, 1, 2 };
             int[] _indices = new int[]{0, 1, 2};
 
-            if(Tetrahedron.PointOUtsideOfPlane(ORIGIN, a, b, c, d))
+            if(Tetrahedron.PointOUtsideOfPlane(ORIGIN, a.point, b.point, c.point, d.point))
             {
-                result = closestPtPointTriangleBaryCentric(Q[0], Q[1], Q[2], indices, ref size);
-                bestSqDist = V3Dot(result, result);
+                result = closestPtPointTriangleBaryCentric(Q[0].point, Q[1].point, Q[2].point, indices, ref size);
+                bestSqDist = VInt3.Dot(result, result);
             }
 
-            if (Tetrahedron.PointOUtsideOfPlane(ORIGIN, a, c, d, b))
+            if (Tetrahedron.PointOUtsideOfPlane(ORIGIN, a.point, c.point, d.point, b.point))
             {
                 int _size = 3;
                 _indices[0] = 0; _indices[1] = 2; _indices[2] = 3; 
-                VInt3 q = closestPtPointTriangleBaryCentric(Q[0], Q[2], Q[3],  _indices, ref _size);
+                VInt3 q = closestPtPointTriangleBaryCentric(Q[0].point, Q[2].point, Q[3].point,  _indices, ref _size);
 
                 VFixedPoint sqDist = VInt3.Dot(q, q);
                 bool con = bestSqDist >= sqDist;
@@ -634,13 +635,13 @@ namespace MobaGame.Collision
                 }
             }
 
-            if (Tetrahedron.PointOUtsideOfPlane(ORIGIN, a, d, b, c))
+            if (Tetrahedron.PointOUtsideOfPlane(ORIGIN, a.point, d.point, b.point, c.point))
             {
                 int _size = 3;
             
                 _indices[0] = 0; _indices[1] = 3; _indices[2] = 1; 
 
-                VInt3 q = closestPtPointTriangleBaryCentric(Q[0], Q[3], Q[1], _indices, ref _size);
+                VInt3 q = closestPtPointTriangleBaryCentric(Q[0].point, Q[3].point, Q[1].point, _indices, ref _size);
                 VFixedPoint sqDist = VInt3.Dot(q, q);
                 bool con = bestSqDist >= sqDist;
                 if(con)
@@ -656,13 +657,13 @@ namespace MobaGame.Collision
                 }
             }
 
-            if (Tetrahedron.PointOUtsideOfPlane(ORIGIN, b, c, d, a))
+            if (Tetrahedron.PointOUtsideOfPlane(ORIGIN, b.point, c.point, d.point, a.point))
             {
                 int _size = 3;
             
                 _indices[0] = 1; _indices[1] = 3; _indices[2] = 2; 
 
-                VInt3 q = closestPtPointTriangleBaryCentric(Q[1], Q[3], Q[2], _indices, ref _size);
+                VInt3 q = closestPtPointTriangleBaryCentric(Q[1].point, Q[3].point, Q[2].point, _indices, ref _size);
                 VFixedPoint sqDist = VInt3.Dot(q, q);
                 bool con = bestSqDist >= sqDist;
                 if(con)
