@@ -64,10 +64,14 @@
     <Compile Include="Collision\NarrowPhase\RaycastDetector.cs" />
     <Compile Include="Collision\NarrowPhase\Seperation.cs" />
     <Compile Include="Geometry\AABB.cs" />
+    <Compile Include="Geometry\Common\BarycentricCoordinates.cs" />
     <Compile Include="Geometry\Interval.cs" />
     <Compile Include="Geometry\Mass.cs" />
     <Compile Include="Geometry\Ray.cs" />
+    <Compile Include="Geometry\Segment.cs" />
     <Compile Include="Geometry\ShapeFoundation.cs" />
+    <Compile Include="Geometry\Tetrahedron.cs" />
+    <Compile Include="Geometry\Triangle.cs" />
     <Compile Include="Math\AcosLookupTable.cs" />
     <Compile Include="Math\Atan2LookupTable.cs" />
     <Compile Include="Math\FixedMath.cs" />
