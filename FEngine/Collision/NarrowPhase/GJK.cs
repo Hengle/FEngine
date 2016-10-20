@@ -191,7 +191,7 @@ namespace MobaGame.Collision
                 case 2:
                     {
                         VFixedPoint v = VFixedPoint.Zero;
-                        BarycentricCoordinates.barycentricCoordinates(closest, Q[0], Q[1], ref v);
+                        BarycentricCoordinates.barycentricCoordinates(closest, Q[0].point, Q[1].point, ref v);
                         separation.point1 = (Q[1].supportPoint1 - Q[0].supportPoint1) * v + Q[0].supportPoint1;
                         separation.point2 = (Q[1].supportPoint2 - Q[0].supportPoint2) * v + Q[0].supportPoint2;
 
@@ -202,7 +202,7 @@ namespace MobaGame.Collision
                         //calculate the Barycentric of closest point p in the mincowsky sum
                         VFixedPoint v = VFixedPoint.Zero;
                         VFixedPoint w = VFixedPoint.Zero;
-                        BarycentricCoordinates.barycentricCoordinates(closest, Q[0], Q[1], Q[2], v, w);
+                        BarycentricCoordinates.barycentricCoordinates(closest, Q[0].point, Q[1].point, Q[2].point, ref v, ref w);
 
                         separation.point1 = Q[0].supportPoint1 + (Q[1].supportPoint1 - Q[0].supportPoint1) * v + (Q[2].supportPoint1 - Q[0].supportPoint1) * w;
                         separation.point2 = Q[0].supportPoint2 + (Q[1].supportPoint2 - Q[0].supportPoint2) * v + (Q[2].supportPoint2 - Q[0].supportPoint2) * w;

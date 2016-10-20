@@ -5,7 +5,7 @@ namespace MobaGame.Collision
 {
     public class BarycentricCoordinates
     {
-        void barycentricCoordinates(VInt3 p, VInt3 a, VInt3 b, ref VFixedPoint v)
+        public static void barycentricCoordinates(VInt3 p, VInt3 a, VInt3 b, ref VFixedPoint v)
         {
             VInt3 v0 = a - p;
             VInt3 v1 = b - p;
@@ -15,7 +15,7 @@ namespace MobaGame.Collision
             v = numerator / denominator;
         }
 
-        void barycentricCoordinates(VInt3 p, VInt3 a, VInt3 b, VInt3 c, ref VFixedPoint v, ref VFixedPoint w)
+        public static void barycentricCoordinates(VInt3 p, VInt3 a, VInt3 b, VInt3 c, ref VFixedPoint v, ref VFixedPoint w)
         {
             VInt3 ab = b - a;
             VInt3 ac = c - a;
