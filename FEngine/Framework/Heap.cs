@@ -55,17 +55,30 @@ namespace FEngine.Framework
                 /* Find highest priority child */
                 int rightChild = child + 1;
 
-                child += (rightChild < tempHs) & Data[rightChild.CompareTo(Data[child]) < 0 ? 1 : 0;
+                child += (rightChild < tempHs) && Data[rightChild].CompareTo(Data[child]) < 0 ? 1 : 0;
 
-                if (compare(last, mData[child]))
+                if (last.CompareTo(Data[child]) < 0)
                     break;
-
-                PX_ASSERT(i < Capacity);
-                mData[i] = mData[child];
+                Data[i] = Data[child];
             }
-            PX_ASSERT(i < Capacity);
             Data[i] = last;
             return min;
         }
+
+        public int size()
+		{
+			return HeapSize;
+		}
+
+        static int left(int nodeIndex)
+        {
+            return (nodeIndex << 1) + 1;
+        }
+
+        static int parent(int nodeIndex)
+        {
+            return (nodeIndex - 1) >> 1;
+        }
+
     }
 }

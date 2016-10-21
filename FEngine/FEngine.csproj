@@ -63,6 +63,7 @@
     <Compile Include="Collision\NarrowPhase\Raycast.cs" />
     <Compile Include="Collision\NarrowPhase\RaycastDetector.cs" />
     <Compile Include="Collision\NarrowPhase\Seperation.cs" />
+    <Compile Include="Framework\Heap.cs" />
     <Compile Include="Geometry\AABB.cs" />
     <Compile Include="Geometry\Common\BarycentricCoordinates.cs" />
     <Compile Include="Geometry\Interval.cs" />
