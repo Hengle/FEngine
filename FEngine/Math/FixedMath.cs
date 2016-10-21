@@ -13,6 +13,7 @@ namespace MobaGame
             {
                 SQRT_MINUS,
                 DIVIDE_ZERO,
+                LN_NON_POSITIVE
             }
 
             public REASON reason;
@@ -29,6 +30,8 @@ namespace MobaGame
             #region Meta
             public static readonly VFixedPoint Pi = VFixedPoint.Create(355) / VFixedPoint.Create(113);
             public static readonly VFixedPoint TwoPi = Pi * VFixedPoint.Create(2);
+            public static readonly VFixedPoint e = VFixedPoint.Create(2.71828182845f);
+            public static readonly VFixedPoint ln2 = VFixedPoint.Create(0.69314718f);
             #endregion
 
             #region Math
@@ -59,6 +62,83 @@ namespace MobaGame
                     }
                 }
                 return new VFixedPoint(((long)(num2 >> 1) & 0xffffffffL) << (VFixedPoint.SHIFT_AMOUNT / 2));
+            }
+
+            public static VFixedPoint Pow(VFixedPoint f1, int n)
+            {
+                if(n < 0)
+                {
+                    return VFixedPoint.One / Pow(f1, -n);
+                }
+
+                VFixedPoint result = VFixedPoint.One;
+                while(n != 0)
+                {
+                    if((n & 1) != 0)
+                    {
+                        result *= f1;
+                    }
+                    f1 *= f1;
+                    n = n >> 1;
+                }
+                return result;
+            }
+
+            public static VFixedPoint Exp(VFixedPoint a)
+            {
+                if (a < VFixedPoint.Zero)
+                {
+                    return VFixedPoint.One / Exp(-a);
+                }
+                int n = (int)a.ToInt;
+                a -= VFixedPoint.Create(n);
+                VFixedPoint e1 = Pow(e, n);
+                VFixedPoint e2 = eee(a);
+                return e1 * e2;
+            }
+
+            static VFixedPoint eee(VFixedPoint a)
+            {
+                if (a > VFixedPoint.Create(0.01f))
+                {
+                    VFixedPoint ee = eee(a / VFixedPoint.Create(2));
+                    return ee * ee;
+                }
+
+                return VFixedPoint.One + a + a * a / VFixedPoint.Create(2) + Pow(a, 3) / VFixedPoint.Create(6);
+            }
+
+            public static VFixedPoint Ln(VFixedPoint a)
+            {
+                if(a <=VFixedPoint.Zero)
+                {
+                    throw new FMathException(FMathException.REASON.LN_NON_POSITIVE);
+                }
+
+
+                VFixedPoint n1 = VFixedPoint.Zero;
+                while(a >= VFixedPoint.Two || a <= VFixedPoint.Half)
+                {
+                    if(a >= VFixedPoint.Two)
+                    {
+                        n1 += ln2;
+                        a = VFixedPoint.FromBinary(a.ToBinary() >>  1);
+                    }
+                    else if(a <= VFixedPoint.Half)
+                    {
+                        n1 -= ln2;
+                        a = VFixedPoint.FromBinary(a.ToBinary() << 1);
+                    }
+                }
+
+                VFixedPoint t = (a - VFixedPoint.One) / (a + VFixedPoint.One);
+                VFixedPoint n2 = (t + Pow(t, 3) / 3 + Pow(t, 5) / 5) * 2;
+                return n1 + n2;
+            }
+
+            public static VFixedPoint Pow(VFixedPoint a, VFixedPoint b)
+            {
+                return Exp(b * Ln(a));
             }
 
             #endregion
