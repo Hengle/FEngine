@@ -13,24 +13,53 @@ namespace MobaGame.Collision
 
         public bool detect(Convex convex1, VIntTransform transform1, Convex convex2, VIntTransform transform2, Penetration penetration)
         {
-            List<VInt3> simplex = new List<VInt3>(4);
+            int size = 0;
+            MinkowskiSumPoint[] Q = new MinkowskiSumPoint[4];
 
-            MinkowskiSum ms = new MinkowskiSum(convex1, transform1, convex2, transform2);
-
-            VInt3 d = getInitialDirection(convex1, transform1, convex2, transform2);
-            if (!distance(convex1, transform1, convex2, transform2, new Separation()))
+            VInt3 v = getInitialDirection(convex1, transform1, convex2, transform2);
+            if (v.sqrMagnitude == VFixedPoint.Zero)
             {
-                //this.minkowskiPenetrationSolver.getPenetration(simplex, ms, penetration);
-                return true;
+                v = VInt3.forward;
             }
-            return false;
-        }
 
-        public bool detect(Convex convex1, VIntTransform transform1, Convex convex2, VIntTransform transform2)
-        {
-            List<VInt3> simplex = new List<VInt3>(3);
-            VInt3 d = getInitialDirection(convex1, transform1, convex2, transform2);
-            return distance(convex1, transform1, convex2, transform2, new Separation());
+            VFixedPoint eps2 = VFixedPoint.Create(0.01f);
+
+            VFixedPoint sDist = VFixedPoint.MaxValue;
+            VFixedPoint minDist = sDist;
+
+            int iterations = 0;
+            bool notTerminated = true;
+            bool Con = true;
+            VInt3 prevV = v;
+
+            do
+            {
+                minDist = sDist;
+                prevV = v;
+
+                MinkowskiSumPoint support = new MinkowskiSumPoint(convex1.getFarthestPoint(-v, transform1), convex2.getFarthestPoint(v, transform2));
+                VFixedPoint signDist = VInt3.Dot(support.point, v);
+                VFixedPoint tmp0 = sDist - signDist;
+
+                Q[size] = support;
+                if (tmp0 <= VFixedPoint.zero) 
+                {
+                    return false;
+                }
+                else if(containsOrigin(Q))
+                {
+                    return true;
+                }
+
+                size++;
+                v = DoSimplex(Q, support.point, ref size);
+                sDist = v.sqrMagnitude;
+                Con = minDist > sDist;
+                iterations++;
+                notTerminated = sDist > eps2 && Con && iterations < maxIterations;
+            }
+            while (notTerminated);
+            return true;
         }
 
         protected VInt3 getInitialDirection(Convex convex1, VIntTransform transform1, Convex convex2, VIntTransform transform2)
@@ -54,8 +83,6 @@ namespace MobaGame.Collision
 
             VFixedPoint eps2 = VFixedPoint.Create(0.01f);
 
-            VFixedPoint epsRel = VFixedPoint.Create(0.000225f);//1.5%.
-
             VFixedPoint sDist = VFixedPoint.MaxValue;
             VFixedPoint minDist = sDist;
 
@@ -73,7 +100,7 @@ namespace MobaGame.Collision
                 VFixedPoint tmp0 = sDist - signDist;
 
                 Q[size] = support;
-                if (epsRel * sDist > tmp0)
+                if (tmp0 <= VFixedPoint.zero)
                 {
                     getClosestPoint(Q, v, size, separation);
                     separation.distance = v.magnitude;
