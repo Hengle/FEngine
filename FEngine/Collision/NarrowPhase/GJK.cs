@@ -11,9 +11,12 @@ namespace MobaGame.Collision
         public static readonly VFixedPoint DEFAULT_DISTANCE_EPSILON = VFixedPoint.Create(0.01f);
         protected VFixedPoint distanceEpsilon = DEFAULT_DISTANCE_EPSILON;
 
+        private MinkowskiPenetrationSolver penetrationSolver = new Epa();
+
         public bool detect(Convex convex1, VIntTransform transform1, Convex convex2, VIntTransform transform2, Penetration penetration)
         {
             int size = 0;
+            MinkowskiSum sum = new MinkowskiSum(convex1, transform1, convex2, transform2);
             MinkowskiSumPoint[] Q = new MinkowskiSumPoint[4];
 
             VInt3 v = getInitialDirection(convex1, transform1, convex2, transform2);
@@ -37,13 +40,18 @@ namespace MobaGame.Collision
                 minDist = sDist;
                 prevV = v;
 
-                MinkowskiSumPoint support = new MinkowskiSumPoint(convex1.getFarthestPoint(-v, transform1), convex2.getFarthestPoint(v, transform2));
+                MinkowskiSumPoint support = sum.getSupportPoints(-v);
                 VFixedPoint signDist = VInt3.Dot(support.point, v);
                 VFixedPoint tmp0 = sDist - signDist;
 
                 Q[size] = support;
                 if (tmp0 <= VFixedPoint.zero) 
                 {
+                    if(penetrationSolver != null)
+                    {
+                        penetrationSolver.getPenetration(Q, sum, penetration);
+                    }
+
                     return false;
                 }
                 else if(containsOrigin(Q))
@@ -73,6 +81,7 @@ namespace MobaGame.Collision
         public bool distance(Convex convex1, VIntTransform transform1, Convex convex2, VIntTransform transform2, Separation separation)
         {
             int size = 0;
+            MinkowskiSum sum = new MinkowskiSum(convex1, transform1, convex2, transform2);
             MinkowskiSumPoint[] Q = new MinkowskiSumPoint[4];
 
             VInt3 v = getInitialDirection(convex1, transform1, convex2, transform2);
@@ -95,7 +104,7 @@ namespace MobaGame.Collision
                 minDist = sDist;
                 prevV = v;
 
-                MinkowskiSumPoint support = new MinkowskiSumPoint(convex1.getFarthestPoint(-v, transform1), convex2.getFarthestPoint(v, transform2));
+                MinkowskiSumPoint support = sum.getSupportPoints(-v);
                 VFixedPoint signDist = VInt3.Dot(support.point, v);
                 VFixedPoint tmp0 = sDist - signDist;
 

@@ -18,7 +18,7 @@ namespace MobaGame.Collision
 		/** The {@link Epa} distance epsilon in meters */
 		protected VFixedPoint distanceEpsilon = Epa.DEFAULT_DISTANCE_EPSILON;
 
-        public void getPenetration(List<VInt3> simplex, MinkowskiSum MinkowskiSum, Penetration Penetration)
+        public void getPenetration(MinkowskiSumPoint[] simplex, MinkowskiSum MinkowskiSum, Penetration Penetration)
         {
             ExpandingSimplex smplx = new ExpandingSimplex(simplex);
 			ExpandingSimplexEdge edge = null;
