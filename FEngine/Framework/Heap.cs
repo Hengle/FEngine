@@ -41,6 +41,11 @@ namespace FEngine.Framework
             HeapSize++;
         }
 
+        public T peak()
+        {
+            return Data[0];
+        }
+
         public T pop()
         {
             int i, child;

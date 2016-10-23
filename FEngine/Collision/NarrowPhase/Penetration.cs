@@ -5,8 +5,8 @@ namespace MobaGame.Collision
 {
     public class Penetration
     {
-        protected VInt3 normal;
-        protected VFixedPoint depth;
+        public VInt3 normal;
+        public VFixedPoint depth;
 
         public Penetration(VInt3 normal, VFixedPoint depth)
         {

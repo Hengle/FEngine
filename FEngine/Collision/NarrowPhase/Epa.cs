@@ -10,7 +10,7 @@ namespace MobaGame.Collision
     	public static readonly int DEFAULT_MAX_ITERATIONS = 100;
 
 		/** The default {@link Epa} distance epsilon in meters; near 1E-8 */
-		public static readonly VFixedPoint DEFAULT_DISTANCE_EPSILON = ;
+		public static readonly VFixedPoint DEFAULT_DISTANCE_EPSILON = VFixedPoint.Create(0.01f);
 		
 		/** The maximum number of {@link Epa} iterations */
 		protected int maxIterations = Epa.DEFAULT_MAX_ITERATIONS;
@@ -18,11 +18,11 @@ namespace MobaGame.Collision
 		/** The {@link Epa} distance epsilon in meters */
 		protected VFixedPoint distanceEpsilon = Epa.DEFAULT_DISTANCE_EPSILON;
 
-        public void getPenetration(MinkowskiSumPoint[] simplex, MinkowskiSum MinkowskiSum, Penetration Penetration)
+        public void getPenetration(MinkowskiSumPoint[] simplex, MinkowskiSum minkowskiSum, Penetration penetration)
         {
             ExpandingSimplex smplx = new ExpandingSimplex(simplex);
 			ExpandingSimplexEdge edge = null;
-			Vector2 point = null;
+			VInt3 point = VInt3.zero;
 			for (int i = 0; i < this.maxIterations; i++) {
 				// get the closest edge to the origin
 				edge = smplx.getClosestEdge();
@@ -30,7 +30,7 @@ namespace MobaGame.Collision
 				point = minkowskiSum.getSupportPoint(edge.normal);
 				
 				// see if the new point is significantly past the edge
-				double projection = point.dot(edge.normal);
+				VFixedPoint projection = VInt3.Dot(point, edge.normal);
 				if ((projection - edge.distance) < this.distanceEpsilon) {
 					// then the new point we just made is not far enough
 					// in the direction of n so we can stop now and
@@ -51,7 +51,7 @@ namespace MobaGame.Collision
 			// this is really a catch all termination case
 			// set the normal and depth equal to the last edge we created
 			penetration.normal = edge.normal;
-			penetration.depth = point.dot(edge.normal);
+			penetration.depth = VInt3.Dot(point, edge.normal);
         }
 
         /**
@@ -97,7 +97,7 @@ namespace MobaGame.Collision
 		 */
 		public void setDistanceEpsilon(VFixedPoint distanceEpsilon) 
 		{
-			if (distanceEpsilon <= 0) 
+			if (distanceEpsilon <= VFixedPoint.Zero) 
 				return;
 			this.distanceEpsilon = distanceEpsilon;
 		}

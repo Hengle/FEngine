@@ -28,16 +28,9 @@ namespace MobaGame.Collision
             VFixedPoint eps2 = VFixedPoint.Create(0.01f);
 
             VFixedPoint sDist = VFixedPoint.MaxValue;
-            VFixedPoint minDist = sDist;
-
-            int iterations = 0;
-            bool notTerminated = true;
-            bool Con = true;
             VInt3 prevV = v;
-
             do
             {
-                minDist = sDist;
                 prevV = v;
 
                 MinkowskiSumPoint support = sum.getSupportPoints(-v);
@@ -45,29 +38,25 @@ namespace MobaGame.Collision
                 VFixedPoint tmp0 = sDist - signDist;
 
                 Q[size] = support;
-                if (tmp0 <= VFixedPoint.zero) 
+                if (tmp0 <= VFixedPoint.Zero) 
                 {
-                    if(penetrationSolver != null)
-                    {
-                        penetrationSolver.getPenetration(Q, sum, penetration);
-                    }
-
                     return false;
                 }
                 else if(containsOrigin(Q))
                 {
+                    if (penetrationSolver != null)
+                    {
+                        penetrationSolver.getPenetration(Q, sum, penetration);
+                    }
+
                     return true;
                 }
 
                 size++;
                 v = DoSimplex(Q, support.point, ref size);
                 sDist = v.sqrMagnitude;
-                Con = minDist > sDist;
-                iterations++;
-                notTerminated = sDist > eps2 && Con && iterations < maxIterations;
             }
-            while (notTerminated);
-            return true;
+            while (true);     
         }
 
         protected VInt3 getInitialDirection(Convex convex1, VIntTransform transform1, Convex convex2, VIntTransform transform2)
@@ -93,42 +82,41 @@ namespace MobaGame.Collision
             VFixedPoint eps2 = VFixedPoint.Create(0.01f);
 
             VFixedPoint sDist = VFixedPoint.MaxValue;
+            bool notTerminated = true;
+            VInt3 prevV = v;
+            VFixedPoint sDist = VFixedPoint.MaxValue;
             VFixedPoint minDist = sDist;
 
-            bool notTerminated = true;
-            bool Con = true;
-            VInt3 prevV = v;
+            int iteration = 0;
 
             do
             {
-                minDist = sDist;
                 prevV = v;
+                minDist = sDist;
 
                 MinkowskiSumPoint support = sum.getSupportPoints(-v);
                 VFixedPoint signDist = VInt3.Dot(support.point, v);
                 VFixedPoint tmp0 = sDist - signDist;
 
                 Q[size] = support;
-                if (tmp0 <= VFixedPoint.zero)
+                if(containsOrigin(Q))
                 {
-                    getClosestPoint(Q, v, size, separation);
-                    separation.distance = v.magnitude;
-                    separation.normal = v.Normalize() * -1;
-                    return false;
+                    separation.distance = VFixedPoint.Zero;
+                    separation.normal = VInt3.zero;
+                    return true;
                 }
 
                 size++;
                 v = DoSimplex(Q, support.point, ref size);
                 sDist = v.sqrMagnitude;
-                Con = minDist > sDist;
-                notTerminated = sDist > eps2 && Con;
+                notTerminated =  minDist - sDist > eps2 && iterations < maxIterations;
             }
             while (notTerminated);
 
             getClosestPoint(Q, v, size, separation);
             separation.distance = Con ? sDist : minDist;
             separation.normal = v.Normalize() * -1;
-            return true;
+            return false;
         }
 
         public bool raycast(Ray ray, VFixedPoint maxLength, Convex convex, VIntTransform transform, Raycast raycast)

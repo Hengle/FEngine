@@ -56,8 +56,11 @@
     <Compile Include="Collision\Filter.cs" />
     <Compile Include="Collision\Fixture.cs" />
     <Compile Include="Collision\NarrowPhase\DistanceDetector.cs" />
+    <Compile Include="Collision\NarrowPhase\Epa.cs" />
+    <Compile Include="Collision\NarrowPhase\ExpandingSimplexFacet.cs" />
     <Compile Include="Collision\NarrowPhase\GJK.cs" />
     <Compile Include="Collision\NarrowPhase\MinkovskiSum.cs" />
+    <Compile Include="Collision\NarrowPhase\MinkowskiPenetrationSolver.cs" />
     <Compile Include="Collision\NarrowPhase\NarrowphaseDetector.cs" />
     <Compile Include="Collision\NarrowPhase\Penetration.cs" />
     <Compile Include="Collision\NarrowPhase\Raycast.cs" />
