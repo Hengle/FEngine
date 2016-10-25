@@ -85,9 +85,6 @@ namespace MobaGame.Collision
                 minDist = sDist;
 
                 MinkowskiSumPoint support = sum.getSupportPoints(v);
-                VFixedPoint signDist = VInt3.Dot(support.point, v);
-                VFixedPoint tmp0 = sDist - signDist;
-
                 Q[size] = support;
                 if(containsOrigin(Q))
                 {
