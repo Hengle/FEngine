@@ -4,13 +4,13 @@ using System;
 
 namespace MobaGame.Collision
 {
-    class ExpandingSimplexFacet:IComparable<ExpandingSimplexFacet>
+	class ExpandingSimplexFacet:IComparable<ExpandingSimplexFacet>
     {
         public ExpandingSimplexFacetEdge[] Edges;
 
         public VInt3 normal;
         public VFixedPoint PlaneDist;
-        bool obsolete;
+        public bool obsolete;
 
         public ExpandingSimplexFacet(VInt3 a, VInt3 b, VInt3 c)
         {
@@ -18,12 +18,12 @@ namespace MobaGame.Collision
 
             Edges = new ExpandingSimplexFacetEdge[3];
 
-            VInt3[] Points = new Points[]{a, b, c};
+			VInt3[] Points = new VInt3[]{a, b, c};
             for(int i = 0; i < 3; i++)
             {
                 ExpandingSimplexFacetEdge aedge = new ExpandingSimplexFacetEdge();
-                aedge.Point1Index = Points[i];
-                aedge.Point2Index = Points[(i + 1) % 3];
+                aedge.Point1 = Points[i];
+                aedge.Point2 = Points[(i + 1) % 3];
                 aedge.index = i;
                 Edges[i] = aedge;
             }
@@ -31,7 +31,7 @@ namespace MobaGame.Collision
             VInt3 ab = b - a;
             VInt3 ac = c - a;
             normal = VInt3.Cross(ab, ac);
-            if(VInt3.Dot(normal, a) <= VInt3.Zero)
+			if(VInt3.Dot(normal, a) <= VFixedPoint.Zero)
             {
                 normal = -normal;
             }
@@ -41,7 +41,7 @@ namespace MobaGame.Collision
 
         }
 
-        public override int CompareTo(ExpandingSimplexFacet other)
+		public int CompareTo(ExpandingSimplexFacet other)
         {
             if(PlaneDist < other.PlaneDist)
             {

@@ -527,8 +527,8 @@ public static class SinCosLookupTable
 
     static SinCosLookupTable()
     {
-        MDebug.Assert(sin_table.Length == COUNT);
-        MDebug.Assert(cos_table.Length == COUNT);
+        //MDebug.Assert(sin_table.Length == COUNT);
+        //MDebug.Assert(cos_table.Length == COUNT);
     }
     
     public static int getIndex(long nom, long den)

@@ -5,6 +5,6 @@ namespace MobaGame.Collision
 {
     public interface MinkowskiPenetrationSolver
     {
-        void getPenetration(MinkowskiSumPoint[], MinkowskiSum paramMinkowskiSum, Penetration paramPenetration);
+        void getPenetration(MinkowskiSumPoint[] simplex, MinkowskiSum paramMinkowskiSum, Penetration paramPenetration);
     }
 }

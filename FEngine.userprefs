@@ -1,8 +1,8 @@
 ﻿<Properties StartupItem="FEngine/FEngine.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="FEngine/Collision/NarrowPhase/GJK.cs">
+  <MonoDevelop.Ide.Workbench>
     <Files>
-      <File FileName="FEngine/Collision/NarrowPhase/GJK.cs" Line="438" Column="36" />
+      <File FileName="FEngine/Collision/NarrowPhase/GJK.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FEngine.Framework
+namespace MobaGame.Framework
 {
     public class Heap<T> where T : IComparable<T>
     {

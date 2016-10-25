@@ -74,7 +74,7 @@ public static class AcosLookupTable
 
     static AcosLookupTable()
     {
-        MDebug.Assert(table.Length == (COUNT + 1));
+        //MDebug.Assert(table.Length == (COUNT + 1));
     }
 }
 

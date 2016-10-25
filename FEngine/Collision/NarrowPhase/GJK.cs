@@ -84,10 +84,9 @@ namespace MobaGame.Collision
             VFixedPoint sDist = VFixedPoint.MaxValue;
             bool notTerminated = true;
             VInt3 prevV = v;
-            VFixedPoint sDist = VFixedPoint.MaxValue;
             VFixedPoint minDist = sDist;
 
-            int iteration = 0;
+            int iterations = 0;
 
             do
             {
@@ -114,7 +113,7 @@ namespace MobaGame.Collision
             while (notTerminated);
 
             getClosestPoint(Q, v, size, separation);
-            separation.distance = Con ? sDist : minDist;
+			separation.distance = FMath.Min(sDist, minDist);
             separation.normal = v.Normalize() * -1;
             return false;
         }
@@ -359,7 +358,7 @@ namespace MobaGame.Collision
 	    {
 			size = 3;
 		
-			VFixedPoint eps = FEps();
+			VFixedPoint eps = distanceEpsilon;
 			MinkowskiSumPoint a = Q[0];
 			MinkowskiSumPoint b = Q[1];
 			MinkowskiSumPoint c = Q[2];
@@ -391,7 +390,7 @@ namespace MobaGame.Collision
         VInt3 closestPtPointTriangleBaryCentric(VInt3 a, VInt3 b, VInt3 c, int[] indices, ref int size)
         {
             size = 3;
-            VFixedPoint eps = FEps();
+			VFixedPoint eps = distanceEpsilon;
             
             VInt3 ab = b - a;
             VInt3 ac = c - a;

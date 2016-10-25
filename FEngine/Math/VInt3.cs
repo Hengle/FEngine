@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-
+using UnityEngine;
 
 namespace MobaGame
 {
@@ -17,6 +17,13 @@ namespace MobaGame
             public static readonly VInt3 forward;
             public static readonly VInt3 up;
             public static readonly VInt3 right;
+
+			public VInt3(Vector3 vec3)
+			{
+				x = VFixedPoint.Create (vec3.x);
+				y = VFixedPoint.Create (vec3.y);
+				z = VFixedPoint.Create (vec3.z);
+			}
 
             VInt3(int _x, int _y, int _z)
             {

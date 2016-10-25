@@ -36,13 +36,13 @@ namespace MobaGame.Collision
 				
 				// see if the new point is significantly past the edge
 				VFixedPoint projection = VInt3.Dot(point, facet.normal);
-				if ((projection - edge.distance) < this.distanceEpsilon) {
+				if ((projection - facet.PlaneDist) < this.distanceEpsilon) {
 					// then the new point we just made is not far enough
 					// in the direction of n so we can stop now and
 					// return n as the direction and the projection
 					// as the depth since this is the closest found
 					// edge and it cannot increase any more
-					penetration.normal = edge.normal;
+					penetration.normal = facet.normal;
 					penetration.depth = projection;
 					return;
 				}
@@ -55,8 +55,8 @@ namespace MobaGame.Collision
 			// if we made it here then we know that we hit the maximum number of iterations
 			// this is really a catch all termination case
 			// set the normal and depth equal to the last edge we created
-			penetration.normal = edge.normal;
-			penetration.depth = VInt3.Dot(point, edge.normal);
+			penetration.normal = facet.normal;
+			penetration.depth = VInt3.Dot(point, facet.normal);
         }
 
         /**

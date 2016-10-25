@@ -1,4 +1,5 @@
 using MobaGame.FixedMath;
+using MobaGame.Framework;
 using System.Collections.Generic;
 using System;
 
@@ -31,7 +32,7 @@ namespace MobaGame.Collision
     		for(int i = 0; i < heap.size(); i++)
     		{
     			ExpandingSimplexFacet afacet = heap[i];
-    			if(VInt3.Dot(point, afacet.normal) > 0)
+				if(VInt3.Dot(point, afacet.normal) > VFixedPoint.Zero)
     			{
     				visibleFacets.Add(afacet);
     				afacet.obsolete = true;
@@ -59,7 +60,7 @@ namespace MobaGame.Collision
     				}
     				if(!alreadyHasEdge)
     				{
-    					boundaryEdges.Add(aedge.AdjancentEdge);
+    					boundaryEdges.Add(aedge);
     				}
     			}
     		}
@@ -67,8 +68,8 @@ namespace MobaGame.Collision
     		for(int i = 0; i < boundaryEdges.Count; i++)
     		{
     			ExpandingSimplexFacetEdge aedge = boundaryEdges[i];
-    			VInt3 edgePoint1 = aedge.Point1Index;
-    			VInt3 edgePoint2 = aedge.Point2Index;
+    			VInt3 edgePoint1 = aedge.Point1;
+    			VInt3 edgePoint2 = aedge.Point2;
     			ExpandingSimplexFacet newFacet = new ExpandingSimplexFacet(edgePoint1, edgePoint2, point);    			
     			heap.Push(newFacet);
     		}

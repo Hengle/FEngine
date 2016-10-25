@@ -10,6 +10,7 @@ namespace MobaGame
             public static readonly int SHIFT_AMOUNT = 16;
             public static readonly VFixedPoint Zero = Create(0);
             public static readonly VFixedPoint One = Create(1);
+			public static readonly VFixedPoint Two = Create(2);
             public static readonly VFixedPoint Half = new VFixedPoint(One.ValueBar/2);
             public static readonly VFixedPoint MaxValue = new VFixedPoint(long.MaxValue);
 
