@@ -6,35 +6,63 @@ namespace MobaGame.Collision
 {
     class ExpandingSimplexFacet:IComparable<ExpandingSimplexFacet>
     {
-        public Edge[] Edges;
-        public VInt3[] Points;
-        public ExpandingSimplexFacet[] AdjancentFacets;
+        public ExpandingSimplexFacetEdge[] Edges;
 
         public VInt3 normal;
+        public VFixedPoint PlaneDist;
         bool obsolete;
-		bool inHeap;
 
         public ExpandingSimplexFacet(VInt3 a, VInt3 b, VInt3 c)
         {
             obsolete = false;
-            inHeap = false;
-            Edges = new Edge[3];
-            Points = new VInt3[3];
-            AdjancentFacets = new ExpandingSimplexFacet[3];
+
+            Edges = new ExpandingSimplexFacetEdge[3];
+
+            VInt3[] Points = new Points[]{a, b, c};
+            for(int i = 0; i < 3; i++)
+            {
+                ExpandingSimplexFacetEdge aedge = new ExpandingSimplexFacetEdge();
+                aedge.Point1Index = Points[i];
+                aedge.Point2Index = Points[(i + 1) % 3];
+                aedge.index = i;
+                Edges[i] = aedge;
+            }
 
             VInt3 ab = b - a;
             VInt3 ac = c - a;
-            VInt3 normal = VInt3.Cross(ab, ac);
-            if()
+            normal = VInt3.Cross(ab, ac);
+            if(VInt3.Dot(normal, a) <= VInt3.Zero)
+            {
+                normal = -normal;
+            }
+            normal = normal.Normalize();
+
+            PlaneDist = VInt3.Dot(normal, a);
+
+        }
+
+        public override int CompareTo(ExpandingSimplexFacet other)
+        {
+            if(PlaneDist < other.PlaneDist)
+            {
+                return -1;
+            }
+            else if(PlaneDist == other.PlaneDist)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
         }
     }
 
-    class Edge
+    public class ExpandingSimplexFacetEdge
     {
-        public ExpandingSimplexFacet Triangle;
-        public Edge AdjancentEdge;
+        public VInt3 Point1;
+        public VInt3 Point2;
 
-        public int Point1Index;
-        public int Point2Index;
+        public int index;
     } 
 }

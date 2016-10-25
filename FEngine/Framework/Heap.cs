@@ -24,6 +24,14 @@ namespace FEngine.Framework
             HeapSize = 0;
         }
 
+        public T this[int key]
+        {
+            get
+            {
+                return Data[key];
+            }
+        }
+
         public void Push(T value)
         {
             int newIndex;

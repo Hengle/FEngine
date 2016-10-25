@@ -21,16 +21,21 @@ namespace MobaGame.Collision
         public void getPenetration(MinkowskiSumPoint[] simplex, MinkowskiSum minkowskiSum, Penetration penetration)
         {
             ExpandingSimplex smplx = new ExpandingSimplex(simplex);
-			ExpandingSimplexEdge edge = null;
+			ExpandingSimplexFacet facet = null;
 			VInt3 point = VInt3.zero;
 			for (int i = 0; i < this.maxIterations; i++) {
 				// get the closest edge to the origin
-				edge = smplx.getClosestEdge();
+				facet = smplx.getClosestFacet();
+				if(facet.obsolete == false)
+				{
+					i--;
+					continue;
+				}
 				// get a new support point in the direction of the edge normal
-				point = minkowskiSum.getSupportPoint(edge.normal);
+				point = minkowskiSum.getSupportPoint(facet.normal);
 				
 				// see if the new point is significantly past the edge
-				VFixedPoint projection = VInt3.Dot(point, edge.normal);
+				VFixedPoint projection = VInt3.Dot(point, facet.normal);
 				if ((projection - edge.distance) < this.distanceEpsilon) {
 					// then the new point we just made is not far enough
 					// in the direction of n so we can stop now and
