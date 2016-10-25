@@ -25,14 +25,8 @@ namespace MobaGame.Collision
                 v = VInt3.forward;
             }
 
-            VFixedPoint eps2 = VFixedPoint.Create(0.01f);
-
-            VFixedPoint sDist = VFixedPoint.MaxValue;
-            VInt3 prevV = v;
             do
             {
-                prevV = v;
-
                 MinkowskiSumPoint support = sum.getSupportPoints(-v);
                 VFixedPoint signDist = VInt3.Dot(support.point, v);
                 VFixedPoint tmp0 = sDist - signDist;
@@ -54,7 +48,6 @@ namespace MobaGame.Collision
 
                 size++;
                 v = DoSimplex(Q, support.point, ref size);
-                sDist = v.sqrMagnitude;
             }
             while (true);     
         }
@@ -83,14 +76,12 @@ namespace MobaGame.Collision
 
             VFixedPoint sDist = VFixedPoint.MaxValue;
             bool notTerminated = true;
-            VInt3 prevV = v;
             VFixedPoint minDist = sDist;
 
             int iterations = 0;
 
             do
             {
-                prevV = v;
                 minDist = sDist;
 
                 MinkowskiSumPoint support = sum.getSupportPoints(-v);
