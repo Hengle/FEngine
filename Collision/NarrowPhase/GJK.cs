@@ -27,7 +27,7 @@ namespace MobaGame.Collision
 
             do
             {
-                MinkowskiSumPoint support = sum.getSupportPoints(-v);
+                MinkowskiSumPoint support = sum.getSupportPoints(v);
                 VFixedPoint signDist = VInt3.Dot(support.point, v);
                 VFixedPoint tmp0 = sDist - signDist;
 
@@ -47,7 +47,7 @@ namespace MobaGame.Collision
                 }
 
                 size++;
-                v = DoSimplex(Q, support.point, ref size);
+                v = DoSimplex(Q, support.point, ref size) * -1;
             }
             while (true);     
         }
@@ -84,7 +84,7 @@ namespace MobaGame.Collision
             {
                 minDist = sDist;
 
-                MinkowskiSumPoint support = sum.getSupportPoints(-v);
+                MinkowskiSumPoint support = sum.getSupportPoints(v);
                 VFixedPoint signDist = VInt3.Dot(support.point, v);
                 VFixedPoint tmp0 = sDist - signDist;
 
@@ -97,7 +97,7 @@ namespace MobaGame.Collision
                 }
 
                 size++;
-                v = DoSimplex(Q, support.point, ref size);
+                v = DoSimplex(Q, support.point, ref size) * -1;
                 sDist = v.sqrMagnitude;
                 notTerminated =  minDist - sDist > eps2 && iterations < maxIterations;
             }
