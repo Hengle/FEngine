@@ -109,20 +109,9 @@ namespace MobaGame.Collision
         public bool raycast(Ray ray, VFixedPoint maxLength, Convex convex, VIntTransform transform, Raycast raycast)
         {
             VFixedPoint lambda = VFixedPoint.Zero;
-
             bool lengthCheck = maxLength > VFixedPoint.Zero;
-
-            VInt3 a = VInt3.zero;
-            bool aInit = false;
-            VInt3 b = VInt3.zero;
-            bool bInit = false;
-
-            VInt3 start = ray.getStart();
-
-            VInt3 x = start;
-
+            VInt3 x = ray.getStart();
             VInt3 r = ray.getDirectionVector();
-
             VInt3 n = VInt3.forward;
 
             if (convex.contains(start, transform))
@@ -130,21 +119,23 @@ namespace MobaGame.Collision
                 return false;
             }
             VInt3 c = transform.TransformPoint(convex.getCenter());
-
-            VInt3 d = x - c;
+            VInt3 v = x - c;
 
             VFixedPoint distanceSqrd = VFixedPoint.MaxValue;
             int iterations = 0;
+
+            int size = 0;
+            MinkowskiSumPoint[] Q = new MinkowskiSumPoint[4];
+
             while (distanceSqrd > this.distanceEpsilon)
             {
                 VInt3 p = convex.getFarthestPoint(d, transform);
-
                 VInt3 w = x - p;
 
-                VFixedPoint dDotW = VInt3.Dot(d, w);
+                VFixedPoint vDotW = VInt3.Dot(v, w);
                 if (dDotW > VFixedPoint.Zero)
                 {
-                    VFixedPoint dDotR = VInt3.Dot(d, r);
+                    VFixedPoint vDotR = VInt3.Dot(v, r);
                     if (dDotR >= VFixedPoint.Zero)
                     {
                         return false;
@@ -155,49 +146,19 @@ namespace MobaGame.Collision
                         return false;
                     }
                     x = r * lambda + start;
-
-                    n = d;
+                    n = v;
                 }
-                if (aInit)
-                {
-                    if (bInit)
-                    {
-                        VInt3 p1 = Segment.getPointOnSegmentClosestToPoint(x, a, p);
-                        VInt3 p2 = Segment.getPointOnSegmentClosestToPoint(x, p, b);
-                        if ((p1 - x).sqrMagnitude < (p2 - x).sqrMagnitude)
-                        {
-                            b = p;
-                            distanceSqrd = (p1 - x).sqrMagnitude;
-                        }
-                        else
-                        {
-                            a = p;
-                            distanceSqrd = (p2 - x).sqrMagnitude;
-                        }
-                        VInt3 ab = b - a;
-                        VInt3 ax = x - a;
-                        d = VInt3.Cross(VInt3.Cross(ab, ax), ab);
-                    }
-                    else
-                    {
-                        b = p;
-                        bInit = true;
-                        VInt3 ab = b - a;
-                        VInt3 ax = x - a;
-                        d = VInt3.Cross(VInt3.Cross(ab, ax), ab);
-                    }
-                }
-                else
-                {
-                    a = p;
-                    aInit = true;
-                    d *= -1;
-                }
+                
                 if (iterations == this.maxIterations)
                 {
                     return false;
                 }
                 iterations++;
+
+                Q[size] = new MinkowskiSumPoint(x, p);
+                size++;
+                v = DoSimplex(Q, w, ref size);
+                distanceSqrd = v.sqrMagnitude;
             }
             raycast.point = x;
             raycast.normal = n.Normalize();
