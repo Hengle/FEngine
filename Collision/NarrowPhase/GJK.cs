@@ -25,6 +25,8 @@ namespace MobaGame.Collision
                 v = VInt3.forward;
             }
 
+            VFixedPoint sDist = VFixedPoint.MaxValue;
+
             do
             {
                 MinkowskiSumPoint support = sum.getSupportPoints(v);
@@ -48,6 +50,7 @@ namespace MobaGame.Collision
 
                 size++;
                 v = DoSimplex(Q, support.point, ref size) * -1;
+                sDist = v.sqrMagnitude;
             }
             while (true);     
         }
@@ -111,6 +114,7 @@ namespace MobaGame.Collision
             VFixedPoint lambda = VFixedPoint.Zero;
             bool lengthCheck = maxLength > VFixedPoint.Zero;
             VInt3 x = ray.getStart();
+            VInt3 start = x;
             VInt3 r = ray.getDirectionVector();
             VInt3 n = VInt3.forward;
 
@@ -129,18 +133,18 @@ namespace MobaGame.Collision
 
             while (distanceSqrd > this.distanceEpsilon)
             {
-                VInt3 p = convex.getFarthestPoint(d, transform);
+                VInt3 p = convex.getFarthestPoint(v, transform);
                 VInt3 w = x - p;
 
                 VFixedPoint vDotW = VInt3.Dot(v, w);
-                if (dDotW > VFixedPoint.Zero)
+                if (vDotW > VFixedPoint.Zero)
                 {
                     VFixedPoint vDotR = VInt3.Dot(v, r);
-                    if (dDotR >= VFixedPoint.Zero)
+                    if (vDotR >= VFixedPoint.Zero)
                     {
                         return false;
                     }
-                    lambda -= dDotW / dDotR;
+                    lambda -= vDotW / vDotR;
                     if ((lengthCheck) && (lambda > maxLength))
                     {
                         return false;
