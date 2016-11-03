@@ -12,6 +12,9 @@ namespace MobaGame
             VInt3 _right;
             VInt3 _forward;
             VInt3 _localScale;
+
+            public static readonly VIntTransform Identity = new VIntTransform(VInt3.zero, VIntQuaternion.identity);
+
             public VIntTransform(Transform trans)
             {
                 position = new VInt3(trans.position);
@@ -20,6 +23,16 @@ namespace MobaGame
                 _forward = new VInt3(trans.forward);
                 _localScale = new VInt3(trans.localScale);
                 _rotation = new VIntQuaternion(trans.rotation);
+            }
+
+            public VIntTransform(VInt3 position, VIntQuaternion rotation)
+            {
+                this.position = position;
+                _rotation = rotation;
+                _up = rotation * VInt3.up;
+                _right = rotation * VInt3.right;
+                _forward = rotation * VInt3.forward;
+                _localScale = VInt3.one;
             }
 
             public VIntQuaternion rotation
