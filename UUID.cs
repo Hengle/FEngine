@@ -27,5 +27,35 @@
             }
             return false;
         }
+
+        public static bool operator<(UUID lhs, UUID rhs)
+        {
+            return lhs.id < rhs.id;
+        }
+
+        public static bool operator>(UUID lhs, UUID rhs)
+        {
+            return lhs.id > rhs.id;
+        }
+
+        public static bool operator==(UUID lhs, UUID rhs)
+        {
+            return lhs.id == rhs.id;
+        }
+
+        public static bool operator!=(UUID lhs, UUID rhs)
+        {
+            return lhs.id != rhs.id;
+        }
+
+        public static bool operator <=(UUID lhs, UUID rhs)
+        {
+            return lhs.id <= rhs.id;
+        }
+
+        public static bool operator >=(UUID lhs, UUID rhs)
+        {
+            return lhs.id >= rhs.id;
+        }
     }
 }

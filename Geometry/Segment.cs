@@ -15,5 +15,6 @@ namespace MobaGame.Collision
             t = FMath.Clamp(t, VFixedPoint.Zero, VFixedPoint.One);
             return line * t + linePoint1;
         }
+
     }
 }

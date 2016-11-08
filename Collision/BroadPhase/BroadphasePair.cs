@@ -1,84 +1,47 @@
-﻿using MobaGame.FixedMath;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
 namespace MobaGame.Collision
 {
-    public class BroadphasePair<E, T> where E :Collidable<T> where T :Fixture
+    public class BroadphasePair: IComparable<BroadphasePair>
     {
-        readonly E collidable1;
-        readonly T fixture1;
-        readonly E collidable2;
-        readonly T fixture2;
-  
-        public BroadphasePair(E collidable1, T fixture1, E collidable2, T fixture2)
+        public BroadphaseProxy pProxy0;
+        public BroadphaseProxy pProxy1;
+        public CollisionAlgorithm algorithm;
+
+
+        public BroadphasePair(BroadphaseProxy pProxy0, BroadphaseProxy pProxy1)
         {
-            this.collidable1 = collidable1;
-            this.fixture1 = fixture1;
-            this.collidable2 = collidable2;
-            this.fixture2 = fixture2;
+            this.pProxy0 = pProxy0;
+            this.pProxy1 = pProxy1;
+            this.algorithm = null;
         }
 
-        public override bool Equals(object obj)
+        public BroadphasePair(BroadphasePair p)
+        {
+            pProxy0 = p.pProxy0;
+            pProxy1 = p.pProxy1;
+            algorithm = p.algorithm;
+        }
+
+        public bool Equals(BroadphasePair obj)
         {
             if (obj == null)
-            {
                 return false;
-            }
-            if (obj == this)
+            return pProxy0 == obj.pProxy0 && pProxy1 == obj.pProxy1;
+        }
+
+        public int CompareTo(BroadphasePair other)
+        {
+            if(pProxy0.getUid() > other.pProxy0.getUid())
             {
-                return true;
+                return -1;
             }
-            if ((obj is BroadphasePair<E, T>))
+            else if (pProxy0.getUid() == other.pProxy0.getUid() && pProxy1.getUid() >= other.pProxy1.getUid())
             {
-                BroadphasePair<E, T> pair = (BroadphasePair<E, T>)obj;
-                return ((pair.collidable1.Equals(this.collidable1)) &&
-                  (pair.fixture1.Equals(this.fixture1)) &&
-                  (pair.collidable2.Equals(this.collidable2)) &&
-                  (pair.fixture2.Equals(this.fixture2)));
+                return -1;
             }
-            return false;
+            return 1;
         }
 
-        public override int GetHashCode()
-        {
-            int hash = 17;
-            hash = hash * 31 + this.collidable1.GetHashCode();
-            hash = hash * 31 + this.fixture1.GetHashCode();
-            hash = hash * 31 + this.collidable2.GetHashCode();
-            hash = hash * 31 + this.fixture2.GetHashCode();
-            return hash;
-        }
-
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("BroadphasePair[Collidable1=").Append(this.collidable1.getId())
-              .Append("|Fixture1=").Append(this.fixture1.getId())
-              .Append("|Collidable2=").Append(this.collidable2.getId())
-              .Append("|Fixture2=").Append(this.fixture2.getId())
-              .Append("]");
-            return sb.ToString();
-        }
-
-        public E getCollidable1()
-        {
-            return this.collidable1;
-        }
-
-        public T getFixture1()
-        {
-            return this.fixture1;
-        }
-
-        public E getCollidable2()
-        {
-            return this.collidable2;
-        }
-
-        public T getFixture2()
-        {
-            return this.fixture2;
-        }
     }
 }
