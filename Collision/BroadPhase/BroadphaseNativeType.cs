@@ -3,7 +3,7 @@ using System.Text;
 
 namespace MobaGame.Collision
 {
-    public enum NativeType
+    public enum BroadphaseNativeType
     { // polyhedral convex shapes:
         BOX_SHAPE_PROXYTYPE,
         TRIANGLE_SHAPE_PROXYTYPE,

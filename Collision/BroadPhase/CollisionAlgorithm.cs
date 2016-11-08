@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MobaGame.Collision
+﻿namespace MobaGame.Collision
 {
     public abstract class CollisionAlgorithm 
     {
