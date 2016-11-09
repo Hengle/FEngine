@@ -13,11 +13,8 @@ namespace MobaGame.Collision
         private bool staticWarningReported = false;
         private ManifoldResult defaultManifoldResult;
         private NearCallback nearCallback;
-        //private PoolAllocator*	m_collisionAlgorithmPoolAllocator;
-        //private PoolAllocator*	m_persistentManifoldPoolAllocator;
         private readonly CollisionAlgorithmCreateFunc[,] doubleDispatch = new CollisionAlgorithmCreateFunc[MAX_BROADPHASE_COLLISION_TYPES,MAX_BROADPHASE_COLLISION_TYPES];
 	    private CollisionConfiguration collisionConfiguration;
-        //private static int gNumManifold = 0;
 
         private CollisionAlgorithmConstructionInfo tmpCI = new CollisionAlgorithmConstructionInfo();
 
@@ -26,9 +23,6 @@ namespace MobaGame.Collision
             this.collisionConfiguration = collisionConfiguration;
 
             setNearCallback(new DefaultNearCallback());
-
-            //m_collisionAlgorithmPoolAllocator = collisionConfiguration->getCollisionAlgorithmPool();
-            //m_persistentManifoldPoolAllocator = collisionConfiguration->getPersistentManifoldPool();
 
             for (int i = 0; i < MAX_BROADPHASE_COLLISION_TYPES; i++)
             {
@@ -89,10 +83,6 @@ namespace MobaGame.Collision
 
         public override PersistentManifold getNewManifold(Object b0, Object b1)
         {
-            //gNumManifold++;
-
-            //btAssert(gNumManifold < 65535);
-
             CollisionObject body0 = (CollisionObject)b0;
             CollisionObject body1 = (CollisionObject)b1;
 
@@ -107,28 +97,15 @@ namespace MobaGame.Collision
 
         public override void releaseManifold(PersistentManifold manifold)
         {
-            //gNumManifold--;
-
-            //printf("releaseManifold: gNumManifold %d\n",gNumManifold);
             clearManifold(manifold);
 
             // TODO: optimize
             int findIndex = manifold.index1a;
-            Collections.swap(manifoldsPtr, findIndex, manifoldsPtr.size() - 1);
-            manifoldsPtr.getQuick(findIndex).index1a = findIndex;
-            manifoldsPtr.removeQuick(manifoldsPtr.size() - 1);
+            manifoldsPtr[findIndex] = manifoldsPtr[manifoldsPtr.Count - 1];
+            manifoldsPtr[findIndex].index1a = findIndex;
+            manifoldsPtr.RemoveAt(manifoldsPtr.Count - 1);
 
             manifoldsPool.Release(manifold);
-            /*
-            manifold->~btPersistentManifold();
-            if (m_persistentManifoldPoolAllocator->validPtr(manifold))
-            {
-                m_persistentManifoldPoolAllocator->freeMemory(manifold);
-            } else
-            {
-                btAlignedFree(manifold);
-            }
-            */
         }
 
         public override void clearManifold(PersistentManifold manifold)
@@ -156,7 +133,7 @@ namespace MobaGame.Collision
             {
                 needsCollision = false;
             }
-            else if (!body0.checkCollideWith(body1))
+            else if (!body0.CheckCollideWith(body1))
             {
                 needsCollision = false;
             }
