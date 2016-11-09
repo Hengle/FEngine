@@ -27,8 +27,8 @@ namespace MobaGame.Collision
             {
                 BroadphasePair collisionPair = pairPtr[i];
 
-                CollisionObject colObj0 = (CollisionObject)collisionPair.pProxy0.clientObject;
-                CollisionObject colObj1 = (CollisionObject)collisionPair.pProxy1.clientObject;
+                CollisionObject colObj0 = collisionPair.pProxy0.clientObject;
+                CollisionObject colObj1 = collisionPair.pProxy1.clientObject;
 
                 if (((colObj0 != null) && ((colObj0).mergesSimulationIslands())) &&
                         ((colObj1 != null) && ((colObj1).mergesSimulationIslands())))

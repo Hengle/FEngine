@@ -17,7 +17,7 @@ namespace MobaGame.Collision
          */
         public void addOverlappingObjectInternal(BroadphaseProxy otherProxy, BroadphaseProxy thisProxy)
         {
-            CollisionObject otherObject = (CollisionObject)otherProxy.clientObject;
+            CollisionObject otherObject = otherProxy.clientObject;
 
             // if this linearSearch becomes too slow (too many overlapping objects) we should add a more appropriate data structure
             int index = overlappingObjects.IndexOf(otherObject);
@@ -33,7 +33,7 @@ namespace MobaGame.Collision
          */
         public void removeOverlappingObjectInternal(BroadphaseProxy otherProxy, Dispatcher dispatcher, BroadphaseProxy thisProxy)
         {
-            CollisionObject otherObject = (CollisionObject)otherProxy.clientObject;
+            CollisionObject otherObject = otherProxy.clientObject;
 
             int index = overlappingObjects.IndexOf(otherObject);
             if (index != -1)

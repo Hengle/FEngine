@@ -8,8 +8,8 @@ namespace MobaGame.Collision
 
         public override void handleCollision(BroadphasePair collisionPair, CollisionDispatcher dispatcher, DispatcherInfo dispatchInfo)
         {
-            CollisionObject colObj0 = (CollisionObject)collisionPair.pProxy0.clientObject;
-            CollisionObject colObj1 = (CollisionObject)collisionPair.pProxy1.clientObject;
+            CollisionObject colObj0 = collisionPair.pProxy0.clientObject;
+            CollisionObject colObj1 = collisionPair.pProxy1.clientObject;
 
             if (dispatcher.needsCollision(colObj0, colObj1))
             {

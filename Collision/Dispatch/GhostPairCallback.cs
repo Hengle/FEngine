@@ -1,13 +1,13 @@
 ﻿namespace MobaGame.Collision
 {
-    public class GhostPairCallback: OverlappingPairCache
+    public class GhostPairCallback: OverlappingPairCallback
     {
         public override BroadphasePair addOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1)
         {
-            CollisionObject colObj0 = (CollisionObject)proxy0.clientObject;
-            CollisionObject colObj1 = (CollisionObject)proxy1.clientObject;
-            GhostObject ghost0 = GhostObject.upcast(colObj0);
-            GhostObject ghost1 = GhostObject.upcast(colObj1);
+            CollisionObject colObj0 = proxy0.clientObject;
+            CollisionObject colObj1 = proxy1.clientObject;
+            GhostObject ghost0 = colObj0 as GhostObject;
+            GhostObject ghost1 = colObj1 as GhostObject;
 
             if (ghost0 != null)
             {
@@ -20,12 +20,12 @@
             return null;
         }
 
-        public override Object removeOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1, Dispatcher dispatcher)
+        public override void removeOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1, Dispatcher dispatcher)
         {
-            CollisionObject colObj0 = (CollisionObject)proxy0.clientObject;
-            CollisionObject colObj1 = (CollisionObject)proxy1.clientObject;
-            GhostObject ghost0 = GhostObject.upcast(colObj0);
-            GhostObject ghost1 = GhostObject.upcast(colObj1);
+            CollisionObject colObj0 = proxy0.clientObject;
+            CollisionObject colObj1 = proxy1.clientObject;
+            GhostObject ghost0 = colObj0 as GhostObject;
+            GhostObject ghost1 = colObj1 as GhostObject;
 
             if (ghost0 != null)
             {
@@ -35,7 +35,6 @@
             {
                 ghost1.removeOverlappingObjectInternal(proxy0, dispatcher, proxy1);
             }
-            return null;
         }
 
         public override void removeOverlappingPairsContainingProxy(BroadphaseProxy proxy0, Dispatcher dispatcher)

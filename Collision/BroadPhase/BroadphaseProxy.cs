@@ -4,7 +4,7 @@ namespace MobaGame.Collision
 {
     public class BroadphaseProxy
     {
-        public object clientObject;
+        public CollisionObject clientObject;
 
         // TODO: mask
         public short collisionFilterGroup;
