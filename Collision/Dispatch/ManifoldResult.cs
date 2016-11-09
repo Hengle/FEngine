@@ -2,11 +2,11 @@
 
 namespace MobaGame.Collision
 {
-    public class ManifoldResult: DiscreteCollisionDetectorInterface.Result
-    {;
-	    protected readonly ObjectPool<ManifoldPoint> pointsPool = new ObjectPool<ManifoldPoint>();
-	
-	    private PersistentManifold manifoldPtr;
+    public class ManifoldResult : DiscreteCollisionDetectorInterface.Result
+    {
+        protected readonly ObjectPool<ManifoldPoint> pointsPool = new ObjectPool<ManifoldPoint>();
+
+        private PersistentManifold manifoldPtr;
 
         // we need this for compounds
         private VIntTransform rootTransA = VIntTransform.Identity;
@@ -64,59 +64,100 @@ namespace MobaGame.Collision
 
             bool isSwapped = manifoldPtr.getBody0() != body0;
 
-            Vector3f pointA = Stack.alloc(Vector3f.class);
-		    pointA.scaleAdd(depth, normalOnBInWorld, pointInWorld);
+            VInt3 pointA = normalOnBInWorld * depth + pointInWorld;
 
-		    Vector3f localA = Stack.alloc(Vector3f.class);
-		    Vector3f localB = Stack.alloc(Vector3f.class);
+            VInt3 localA = new VInt3();
+            VInt3 localB = new VInt3();
 
-		    if (isSwapped) {
-			    rootTransB.invXform(pointA, localA);
-			    rootTransA.invXform(pointInWorld, localB);
-		    }
-		    else {
-			    rootTransA.invXform(pointA, localA);
-			    rootTransB.invXform(pointInWorld, localB);
-		    }
+            if (isSwapped)
+            {
+                localA = rootTransB.InverseTransformPoint(pointA);
+                localB = rootTransA.InverseTransformPoint(pointA);
+            }
+            else {
+                localA = rootTransA.InverseTransformPoint(pointA);
+                localB = rootTransB.InverseTransformPoint(pointA);
+            }
 
-    ManifoldPoint newPt = pointsPool.get();
-    newPt.init(localA, localB, normalOnBInWorld, depth);
+            ManifoldPoint newPt = pointsPool.Get();
+            newPt.init(localA, localB, normalOnBInWorld, depth);
 
-		    newPt.positionWorldOnA.set(pointA);
-		    newPt.positionWorldOnB.set(pointInWorld);
+            newPt.positionWorldOnA = pointA;
+            newPt.positionWorldOnB = pointInWorld;
 
-		    int insertIndex = manifoldPtr.getCacheEntry(newPt);
+            int insertIndex = manifoldPtr.getCacheEntry(newPt);
 
-    newPt.combinedFriction = calculateCombinedFriction(body0, body1);
-    newPt.combinedRestitution = calculateCombinedRestitution(body0, body1);
+            newPt.combinedFriction = calculateCombinedFriction(body0, body1);
+            newPt.combinedRestitution = calculateCombinedRestitution(body0, body1);
 
-    // BP mod, store contact triangles.
-    newPt.partId0 = partId0;
-		    newPt.partId1 = partId1;
-		    newPt.index0 = index0;
-		    newPt.index1 = index1;
+            // BP mod, store contact triangles.
+            newPt.partId0 = partId0;
+            newPt.partId1 = partId1;
+            newPt.index0 = index0;
+            newPt.index1 = index1;
 
-		    /// todo, check this for any side effects
-		    if (insertIndex >= 0) {
-			    //const btManifoldPoint& oldPoint = m_manifoldPtr->getContactPoint(insertIndex);
-			    manifoldPtr.replaceContactPoint(newPt, insertIndex);
-		    }
-		    else {
-			    insertIndex = manifoldPtr.addManifoldPoint(newPt);
-		    }
+            /// todo, check this for any side effects
+            if (insertIndex >= 0)
+            {
+                //const btManifoldPoint& oldPoint = m_manifoldPtr->getContactPoint(insertIndex);
+                manifoldPtr.replaceContactPoint(newPt, insertIndex);
+            }
+            else {
+                insertIndex = manifoldPtr.addManifoldPoint(newPt);
+            }
 
-		    // User can override friction and/or restitution
-		    if (BulletGlobals.getContactAddedCallback() != null &&
-				    // and if either of the two bodies requires custom material
-				    ((body0.getCollisionFlags() & CollisionFlags.CUSTOM_MATERIAL_CALLBACK) != 0 ||
-				    (body1.getCollisionFlags() & CollisionFlags.CUSTOM_MATERIAL_CALLBACK) != 0)) {
-			    //experimental feature info, for per-triangle material etc.
-			    CollisionObject obj0 = isSwapped ? body1 : body0;
-    CollisionObject obj1 = isSwapped ? body0 : body1;
-    BulletGlobals.getContactAddedCallback().contactAdded(manifoldPtr.getContactPoint(insertIndex), obj0, partId0, index0, obj1, partId1, index1);
-		    }
+            // User can override friction and/or restitution
+            if (BulletGlobals.getContactAddedCallback() != null &&
+                    // and if either of the two bodies requires custom material
+                    ((body0.getCollisionFlags() & CollisionFlags.CUSTOM_MATERIAL_CALLBACK) != 0 ||
+                    (body1.getCollisionFlags() & CollisionFlags.CUSTOM_MATERIAL_CALLBACK) != 0))
+            {
+                //experimental feature info, for per-triangle material etc.
+                CollisionObject obj0 = isSwapped ? body1 : body0;
+                CollisionObject obj1 = isSwapped ? body0 : body1;
+                BulletGlobals.getContactAddedCallback().contactAdded(manifoldPtr.getContactPoint(insertIndex), obj0, partId0, index0, obj1, partId1, index1);
+            }
 
-		    pointsPool.release(newPt);
-	    }
+            pointsPool.Release(newPt);
+        }
+
+        private static VFixedPoint calculateCombinedFriction(CollisionObject body0, CollisionObject body1)
+        {
+            VFixedPoint friction = body0.getFriction() * body1.getFriction();
+
+            VFixedPoint MAX_FRICTION = VFixedPoint.Create(10);
+            if (friction < -MAX_FRICTION)
+            {
+                friction = -MAX_FRICTION;
+            }
+            if (friction > MAX_FRICTION)
+            {
+                friction = MAX_FRICTION;
+            }
+            return friction;
+        }
+
+        private static VFixedPoint calculateCombinedRestitution(CollisionObject body0, CollisionObject body1)
+        {
+            return body0.getRestitution() * body1.getRestitution();
+        }
+
+        public void refreshContactPoints()
+        {
+            if (manifoldPtr.getNumContacts() == 0)
+            {
+                return;
+            }
+
+            bool isSwapped = manifoldPtr.getBody0() != body0;
+
+            if (isSwapped)
+            {
+                manifoldPtr.refreshContactPoints(rootTransB, rootTransA);
+            }
+            else {
+                manifoldPtr.refreshContactPoints(rootTransA, rootTransB);
+            }
+        }
     }
 }

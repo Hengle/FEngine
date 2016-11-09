@@ -1,4 +1,6 @@
-﻿namespace MobaGame.Collision
+﻿using System.Collections.Generic;
+
+namespace MobaGame.Collision
 {
     public abstract class CollisionAlgorithm 
     {
@@ -21,7 +23,7 @@
 
         public abstract float calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
 
-        public abstract void getAllContactManifolds(ObjectArrayList<PersistentManifold> manifoldArray);
+        public abstract void getAllContactManifolds(List<PersistentManifold> manifoldArray);
 
         public void internalSetCreateFunc(CollisionAlgorithmCreateFunc func)
         {
