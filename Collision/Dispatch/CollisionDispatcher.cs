@@ -81,11 +81,8 @@ namespace MobaGame.Collision
             algo.destroy();
         }
 
-        public override PersistentManifold getNewManifold(Object b0, Object b1)
+        public override PersistentManifold getNewManifold(CollisionObject body0, CollisionObject body1)
         {
-            CollisionObject body0 = (CollisionObject)b0;
-            CollisionObject body1 = (CollisionObject)b1;
-
             PersistentManifold manifold = manifoldsPool.Get();
             manifold.init(body0, body1, 0);
 

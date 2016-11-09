@@ -7,8 +7,8 @@ namespace MobaGame.Collision
         public static readonly int MANIFOLD_CACHE_SIZE = 4;
         private readonly ManifoldPoint[] pointCache = new ManifoldPoint[MANIFOLD_CACHE_SIZE];
 
-        private Object body0;
-        private Object body1;
+        private CollisionObject body0;
+        private CollisionObject body1;
         private int cachedPoints;
 
         public int index1a;
@@ -21,12 +21,12 @@ namespace MobaGame.Collision
             }
         }
 
-        public PersistentManifold(Object body0, Object body1, int bla):this()
+        public PersistentManifold(CollisionObject body0, CollisionObject body1, int bla):this()
         {
             init(body0, body1, bla);
         }
 
-        public void init(Object body0, Object body1, int bla)
+        public void init(CollisionObject body0, CollisionObject body1, int bla)
         {
             this.body0 = body0;
             this.body1 = body1;
@@ -109,17 +109,17 @@ namespace MobaGame.Collision
             return maxNum;
 	    }
 
-        public Object getBody0()
+        public CollisionObject getBody0()
         {
             return body0;
         }
 
-        public Object getBody1()
+        public CollisionObject getBody1()
         {
             return body1;
         }
 
-        public void setBodies(Object body0, Object body1)
+        public void setBodies(CollisionObject body0, CollisionObject body1)
         {
             this.body0 = body0;
             this.body1 = body1;

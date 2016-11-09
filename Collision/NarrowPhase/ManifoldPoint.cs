@@ -7,7 +7,6 @@ namespace MobaGame.Collision
         public VInt3 localPointA;
         public VInt3 localPointB;
         public VInt3 positionWorldOnB;
-        ///m_positionWorldOnA is redundant information, see getPositionWorldOnA(), but for clarity
         public VInt3 positionWorldOnA;
         public VInt3 normalWorldOnB;
 

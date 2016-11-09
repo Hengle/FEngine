@@ -11,7 +11,7 @@ namespace MobaGame.Collision
 
         public abstract CollisionAlgorithm findAlgorithm(CollisionObject body0, CollisionObject body1, PersistentManifold sharedManifold);
 
-        public abstract PersistentManifold getNewManifold(Object body0, Object body1);
+        public abstract PersistentManifold getNewManifold(CollisionObject body0, CollisionObject body1);
 
         public abstract void releaseManifold(PersistentManifold manifold);
 
