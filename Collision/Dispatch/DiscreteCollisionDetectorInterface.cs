@@ -12,20 +12,7 @@ namespace MobaGame.Collision
             public abstract void addContactPoint(VInt3 normalOnBInWorld, VInt3 pointInWorld, VFixedPoint depth);
         }
 
-        /**
-         * Give either closest points (distance > 0) or penetration (distance)
-         * the normal always points from B towards A.
-         */
-        public void getClosestPoints(ClosestPointInput input, Result output)
-        {
-            getClosestPoints(input, output, false);
-        }
-
-        /**
-         * Give either closest points (distance > 0) or penetration (distance)
-         * the normal always points from B towards A.
-         */
-        public abstract void getClosestPoints(ClosestPointInput input, Result output, bool swapResults);
+        public abstract void getClosestPoints(ClosestPointInput input, Result output)
     }
 
     public class ClosestPointInput

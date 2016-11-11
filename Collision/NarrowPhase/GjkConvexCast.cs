@@ -1,5 +1,4 @@
-﻿using System;
-using MobaGame.FixedMath;
+﻿using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
@@ -10,6 +9,7 @@ namespace MobaGame.Collision
         private SimplexSolverInterface simplexSolver;
         private ConvexShape convexA;
         private ConvexShape convexB;
+        private GjkPairDetector gjk = new GjkPairDetector();
 
         private static readonly int MAX_ITERATIONS = 32;
 
