@@ -240,7 +240,7 @@ namespace MobaGame.Collision
                             simplexSolver,
                             minkowskiA, minkowskiB,
                             localTransA, localTransB,
-                            cachedSeparatingAxis, tmpPointOnA, tmpPointOnB);
+                            ref tmpPointOnA, ref tmpPointOnB);
 
                     if (isValid2)
                     {
