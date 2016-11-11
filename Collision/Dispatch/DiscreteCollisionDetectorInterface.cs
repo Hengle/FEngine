@@ -12,24 +12,6 @@ namespace MobaGame.Collision
             public abstract void addContactPoint(VInt3 normalOnBInWorld, VInt3 pointInWorld, VFixedPoint depth);
         }
 
-        public class ClosestPointInput
-        {
-            public VIntTransform transformA = VIntTransform.Identity;
-            public VIntTransform transformB = VIntTransform.Identity;
-            public VFixedPoint maximumDistanceSquared;
-            //btStackAlloc* m_stackAlloc;
-
-            public ClosestPointInput()
-            {
-                init();
-            }
-
-            public void init()
-            {
-                maximumDistanceSquared = VFixedPoint.MaxValue;
-            }
-        }
-
         /**
          * Give either closest points (distance > 0) or penetration (distance)
          * the normal always points from B towards A.
@@ -44,5 +26,23 @@ namespace MobaGame.Collision
          * the normal always points from B towards A.
          */
         public abstract void getClosestPoints(ClosestPointInput input, Result output, bool swapResults);
+    }
+
+    public class ClosestPointInput
+    {
+        public VIntTransform transformA = VIntTransform.Identity;
+        public VIntTransform transformB = VIntTransform.Identity;
+        public VFixedPoint maximumDistanceSquared;
+        //btStackAlloc* m_stackAlloc;
+
+        public ClosestPointInput()
+        {
+            init();
+        }
+
+        public void init()
+        {
+            maximumDistanceSquared = VFixedPoint.MaxValue;
+        }
     }
 }
