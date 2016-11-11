@@ -8,7 +8,7 @@ namespace MobaGame.Collision
 
         public abstract void addVertex(VInt3 w, VInt3 p, VInt3 q);
 
-        public abstract bool closest(VInt3 v);
+        public abstract bool closest(ref VInt3 v);
 
         public abstract VFixedPoint maxVertex();
 
@@ -22,7 +22,7 @@ namespace MobaGame.Collision
 
         public abstract bool emptySimplex();
 
-        public abstract void compute_points(VInt3 p1, VInt3 p2);
+        public abstract void compute_points(ref VInt3 p1, ref VInt3 p2);
 
         public abstract int numVertices();
     }
