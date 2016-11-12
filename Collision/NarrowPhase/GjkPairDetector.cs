@@ -262,10 +262,6 @@ namespace MobaGame.Collision
                                 isValid = true;
                                 lastUsedMethod = 3;
                             }
-                            else
-                            {
-
-                            }
                         }
                         else
                         {

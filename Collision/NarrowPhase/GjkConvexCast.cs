@@ -6,10 +6,10 @@ namespace MobaGame.Collision
     {
         protected readonly ObjectPool<ClosestPointInput> pointInputsPool = new ObjectPool<ClosestPointInput>();
 
-        private SimplexSolverInterface simplexSolver;
+        private readonly SimplexSolverInterface simplexSolver;
         private ConvexShape convexA;
         private ConvexShape convexB;
-        private GjkPairDetector gjk = new GjkPairDetector();
+        private readonly GjkPairDetector gjk = new GjkPairDetector();
 
         private static readonly int MAX_ITERATIONS = 32;
 
@@ -67,9 +67,8 @@ namespace MobaGame.Collision
                             return false;
                         }
 
-                        VFixedPoint dLambda = VFixedPoint.Zero;
                         VFixedPoint projectedLinearVelocity = VInt3.Dot(r, n);
-                        dLambda = dist / projectedLinearVelocity;
+                        VFixedPoint dLambda = dist / projectedLinearVelocity;
                         lambda = lambda - dLambda;
 
                         if (lambda > VFixedPoint.One)
@@ -91,7 +90,7 @@ namespace MobaGame.Collision
                         input.transformA.position = fromA.position * (VFixedPoint.One - lambda) + toA.position * lambda;
                         input.transformB.position = fromB.position * (VFixedPoint.One - lambda) + toB.position * lambda;
 
-                        gjk.getClosestPoints(input, pointCollector, null);
+                        gjk.getClosestPoints(input, pointCollector);
                         if (pointCollector.hasResult)
                         {
                             if (pointCollector.distance < VFixedPoint.Zero)
