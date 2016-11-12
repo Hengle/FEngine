@@ -198,15 +198,10 @@ namespace MobaGame.Collision
             if(checkSimplex)
             {
                 simplexSolver.compute_points(ref pointOnA, ref pointOnB);
-                normalInB = pointOnA - pointOnB;
+                normalInB = cachedSeparatingAxis;
                 VFixedPoint lenSqr = cachedSeparatingAxis.sqrMagnitude;
 
-                if(lenSqr < REL_ERROR2)
-                {
-                    degenerateSimplex = 5;
-                }
-
-                if(lenSqr > VFixedPoint.Zero)
+                if(lenSqr > REL_ERROR2)
                 {
                     VFixedPoint rlen = VFixedPoint.One / FMath.Sqrt(lenSqr);
                     normalInB /= rlen;
@@ -225,6 +220,7 @@ namespace MobaGame.Collision
                 }
                 else
                 {
+                    degenerateSimplex = 5;
                     lastUsedMethod = 2;
                 }
             }

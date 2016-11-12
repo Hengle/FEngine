@@ -173,7 +173,7 @@ namespace MobaGame.Collision
 					        if (hasSeperation)
 					        {
                                 cachedP1 = simplexPointsP[0] * cachedBC.barycentricCoords[0] + simplexPointsP[1] * cachedBC.barycentricCoords[1] + simplexPointsP[2] * cachedBC.barycentricCoords[2] + simplexPointsP[3] * cachedBC.barycentricCoords[3];
-                                cachedP1 = simplexPointsQ[0] * cachedBC.barycentricCoords[0] + simplexPointsQ[1] * cachedBC.barycentricCoords[1] + simplexPointsQ[2] * cachedBC.barycentricCoords[2] + simplexPointsQ[3] * cachedBC.barycentricCoords[3];
+                                cachedP2 = simplexPointsQ[0] * cachedBC.barycentricCoords[0] + simplexPointsQ[1] * cachedBC.barycentricCoords[1] + simplexPointsQ[2] * cachedBC.barycentricCoords[2] + simplexPointsQ[3] * cachedBC.barycentricCoords[3];
                                 cachedV = cachedP1 - cachedP2;
                                 reduceVertices(cachedBC.usedVertices);
 					        }
@@ -182,7 +182,8 @@ namespace MobaGame.Collision
 						        if (cachedBC.degenerate)
 						        {
 							        cachedValidClosest = false;
-						        } else
+						        }
+						        else
 						        {
 							        cachedValidClosest = true;
 							        cachedV = VInt3.zero;

@@ -162,14 +162,30 @@ namespace MobaGame.Collision
         }
 
         //performs a flood fill over the boundary of the current polytope.
-        public void silhouette(VInt3 w, VInt3 aBuf, VInt3 bBuf, EdgeBuffer edgeBuffer, EPAFacetManager manager)
+        public void silhouette(VInt3 w, VInt3[] aBuf, VInt3[] bBuf, EdgeBuffer edgeBuffer, EPAFacetManager manager)
         {
-
+            m_obsolete = true;
+            for(int a = 0; a < 3; ++a)
+            {
+                m_adjFacets[a].silhouette(m_adjEdges[a], w, aBuf, bBuf, edgeBuffer, manager);
+            }
         }
 
-        public void silhouette(int index, VInt3 w, VInt3 aBuf, VInt3 bBuf, EdgeBuffer& edgeBuffer, EPAFacetManager& manager)
+        public void silhouette(int index, VInt3 w, VInt3[] aBuf, VInt3[] bBuf, EdgeBuffer edgeBuffer, EPAFacetManager manager)
         {
+            Edge[] stack = new Edge[64];
+            stack[0] = Edge(this, index);
+            int size = 1;
+            while (size-- > 0)
+            {
+                Facet f = stack[size].m_facet;
+                index = stack[size].m_index;
 
+                if (!f.m_obsolete)
+                {
+
+                }
+            }
         }
 
         public int CompareTo(Facet other)
