@@ -5,21 +5,7 @@ namespace MobaGame.Collision
 {
     public class GjkEpaSolver
     {
-        public PenetrationDepth(const ConvexV& a, const ConvexV& b, EPASupportMapPair* pair, const Ps::aos::Vec3V* PX_RESTRICT Q, const Ps::aos::Vec3V* PX_RESTRICT A, const Ps::aos::Vec3V* PX_RESTRICT B, const PxI32 size, Ps::aos::Vec3V& pa, Ps::aos::Vec3V& pb, Ps::aos::Vec3V& normal, Ps::aos::FloatV& penDepth, const bool takeCoreShape = false);
-        public bool expandPoint(EPASupportMapPair* pair, PxI32& numVerts, const FloatVArg lowerBound, const FloatVArg upperBound);
-        public bool expandSegment(EPASupportMapPair* pair, PxI32& numVerts, const FloatVArg lowerBound, const FloatVArg upperBound);
-        public bool expandTriangle(PxI32& numVerts, const FloatVArg lowerBound, const FloatVArg upperBound);
-
-        public Facet* addFacet(const PxU32 i0, const PxU32 i1, const PxU32 i2, const Ps::aos::FloatVArg lower2, const Ps::aos::FloatVArg upper2);
-
-        public bool originInTetrahedron(const Ps::aos::Vec3VArg p1, const Ps::aos::Vec3VArg p2, const Ps::aos::Vec3VArg p3, const Ps::aos::Vec3VArg p4);
-
-        public PriorityQueue<Facet*, MaxFacets, FacetDistanceComparator> heap;
-        public Ps::aos::Vec3V aBuf[MaxSupportPoints];
-        public Ps::aos::Vec3V bBuf[MaxSupportPoints];
-        public Facet facetBuf[MaxFacets];
-        public EdgeBuffer edgeBuffer;
-        public int facetManager;
+        
     }
 
     class Facet: IComparable<Facet>
@@ -107,14 +93,14 @@ namespace MobaGame.Collision
             VInt3 v2 = p2 - p0;
             VInt3 v3 = p2 - p1;
 
-            VFixedPoint v1v1 = V3Dot(v1, v1);
-            VFixedPoint v2v2 = V3Dot(v2, v2);
+            VFixedPoint v1v1 = VInt3.Dot(v1, v1);
+            VFixedPoint v2v2 = VInt3.Dot(v2, v2);
 
-            VInt3 v = V3Sel(FIsGrtr(v1v1, v2v2), v2, v1);
-            VInt3 denormalizedNormal = V3Cross(v, v3);
-            VFixedPoint norValue = V3Dot(denormalizedNormal, denormalizedNormal);
-            bool con = norValue > VFixedPoint.One / VFixedPoint.Create(10000);
-            norValue = con : norValue ? VFixedPoint.One;
+            VInt3 v =v1v1 > v2v2 ? v2 : v1;
+            VInt3 denormalizedNormal = VInt3.Cross(v, v3);
+            VFixedPoint norValue = VInt3.Dot(denormalizedNormal, denormalizedNormal);
+            bool con = norValue > (VFixedPoint.One / VFixedPoint.Create(10000));
+            norValue = con ? norValue : VFixedPoint.One;
 
             VInt3 planeNormal = denormalizedNormal * FMath.Sqrt(norValue);
             VFixedPoint planeDist =  VInt3.Dot(planeNormal, p0);
@@ -131,13 +117,13 @@ namespace MobaGame.Collision
         }
 
         //return the plane normal
-        public VFixedPoint getPlaneNormal()
+        public VInt3 getPlaneNormal()
         {
             return m_planeNormal;
         }
 
         //calculate the closest points for a shape pair
-        public void getClosestPoint(VInt3 aBuf, VInt3 bBuf, ref VInt3 closestA, ref VInt3 closestB)
+        public void getClosestPoint(VInt3[] aBuf, VInt3[] bBuf, ref VInt3 closestA, ref VInt3 closestB)
         {
             VInt3 pa0 = aBuf[m_indices[0]];
             VInt3 pa1 = aBuf[m_indices[1]];
@@ -188,7 +174,7 @@ namespace MobaGame.Collision
         public void silhouette(int index, VInt3 w, VInt3[] aBuf, VInt3[] bBuf, EdgeBuffer edgeBuffer)
         {
             Edge[] stack = new Edge[64];
-            stack[0] = Edge(this, index);
+            stack[0] = new Edge(this, index);
             int size = 1;
             while (size-- > 0)
             {
@@ -204,11 +190,11 @@ namespace MobaGame.Collision
                     }
                     else
                     {
-                        f->m_obsolete = true; // Facet is visible from w
-                        int next((index + 1) % 3);
-                        int next2((next + 1) % 3);
-                        stack[size++] = Edge(f.m_adjFacets[next2], f.m_adjEdges[next2]);
-                        stack[size++] = Edge(f.m_adjFacets[next], f.m_adjEdges[next]);
+                        f.m_obsolete = true; // Facet is visible from w
+                        int next = (index + 1) % 3;
+                        int next2 = (next + 1) % 3;
+                        stack[size++] = new Edge(f.m_adjFacets[next2], f.m_adjEdges[next2]);
+                        stack[size++] = new Edge(f.m_adjFacets[next], f.m_adjEdges[next]);
 
                     }
                 }
@@ -230,12 +216,20 @@ namespace MobaGame.Collision
                 return 1;
             }
         }
+
+        public int this[int index]
+        {
+            get
+            {
+                return m_indices[index];
+            }
+        }
     }
 
     class Edge
     {
-        private Facet m_facet;
-        private int m_index;
+        public Facet m_facet;
+        public int m_index;
 
         public Edge() {}
         public Edge(Facet facet, int index)
@@ -266,7 +260,7 @@ namespace MobaGame.Collision
         }
 
         //get out the associated end vertex index in this edge from the facet
-        public int getTarget() const
+        public int getTarget()
         {
             return m_facet[(m_index + 1) % 3];
         }
@@ -279,7 +273,7 @@ namespace MobaGame.Collision
     {
         private const int MaxEdges = 32;
         private int m_Size;
-        private Edge m_pEdges[];
+        private Edge[] m_pEdges;
 
         public EdgeBuffer()
         {
@@ -287,7 +281,7 @@ namespace MobaGame.Collision
             m_pEdges = new Edge[MaxEdges];
         }
 
-        public Edge Insert(const Edge& edge)
+        public Edge Insert(Edge edge)
         {
             Edge pEdge = m_pEdges[m_Size++];
             pEdge = edge;
