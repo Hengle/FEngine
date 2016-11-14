@@ -29,6 +29,7 @@ namespace MobaGame.Collision
 
             switch (size)
             {
+                //case 1, 2, 3 are almost impossible, just make the algorithm complete
                 case 1:
                     if (!expandPoint(a, b, transformA, transformB, ref numVertsLocal, lower_bound, upper_bound))
                         return 4;
