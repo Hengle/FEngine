@@ -105,7 +105,7 @@ namespace MobaGame.Collision
                     if(con0)
                     {
                         calculateContactInformation(aBuf, bBuf, facet, a, b, ref pa, ref pb, ref normal, ref penDepth);
-                        return 1;
+                        return 6;
                     }
 
                     VFixedPoint dif = dist - planeDist;
@@ -218,7 +218,7 @@ namespace MobaGame.Collision
             VInt3 x = VInt3.right;
 
             VInt3 q0 = new VInt3();
-            doSupport(a, b, transformA, transformB, ref aBuf[1], ref bBuf[1], ref q0);
+            doSupport(a, b, transformA, transformB, x, ref aBuf[1], ref bBuf[1], ref q0);
 		    return expandSegment(a, b, transformA, transformB, ref numVerts, lowerBound, upperBound);
         }
 

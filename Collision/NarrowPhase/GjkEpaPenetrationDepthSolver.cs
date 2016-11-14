@@ -18,7 +18,7 @@ namespace MobaGame.Collision
             GjkEpaSolver Epa = new GjkEpaSolver();
             VInt3 normal = new VInt3();
             VFixedPoint dist = VFixedPoint.Zero;
-            return Epa.PenetrationDepth(pConvexA, pConvexB, transformA, transformB, Q, A, B, size, ref wWitnessOnA, ref wWitnessOnB, ref normal, ref dist) == 1;
+            return Epa.PenetrationDepth(pConvexA, pConvexB, transformA, transformB, Q, A, B, size, ref wWitnessOnA, ref wWitnessOnB, ref normal, ref dist) == 6;
 
         }
 
