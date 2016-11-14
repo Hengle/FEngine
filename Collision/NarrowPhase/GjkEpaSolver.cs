@@ -95,7 +95,7 @@ namespace MobaGame.Collision
                     VInt3 planeNormal = facet.getPlaneNormal();
                     VFixedPoint planeDist = facet.getPlaneDist();
 
-                    doSupport(a, b, transformA, transformB, -planeNormal, tempa, tempb, q);
+                    doSupport(a, b, transformA, transformB, -planeNormal, ref tempa, ref tempb, ref q);
 
                     VFixedPoint dist = VInt3.Dot(q, planeNormal);
                     upper_bound = dist >= VFixedPoint.Zero ? FMath.Min(upper_bound, dist) : upper_bound;
