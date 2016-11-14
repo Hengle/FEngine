@@ -9,24 +9,17 @@ namespace MobaGame.Collision
                                                   VIntTransform transformA, VIntTransform transformB,
                                                   ref VInt3 wWitnessOnA, ref VInt3 wWitnessOnB)
         {
-            VInt3[] P = null;
-            VInt3[] Q = null;
-            VInt3[] W = null;
-            simplexSolver.getSimplex(P, Q, W);
+            VInt3[] Q = new VInt3[4];
+            VInt3[] A = new VInt3[4];
+            VInt3[] B = new VInt3[4];
+            simplexSolver.getSimplex(A, B, Q);
 
-            VFixedPoint radialmargin = VFixedPoint.Zero;
+            int size = simplexSolver.numVertices();
+            GjkEpaSolver Epa = new GjkEpaSolver();
+            VInt3 normal = new VInt3();
+            VFixedPoint dist = VFixedPoint.Zero;
+            return Epa.PenetrationDepth(pConvexA, pConvexB, transformA, transformB, Q, A, B, size, ref wWitnessOnA, ref wWitnessOnB, ref normal, ref dist) == 1;
 
-            Results results = new GjkEpaSolver.Results();
-            if (gjkEpaSolver.collide(pConvexA, transformA,
-                    pConvexB, transformB,
-                    radialmargin, results))
-            {
-                wWitnessOnA = results.witnesses[0];
-                wWitnessOnB = results.witnesses[1];
-                return true;
-            }
-
-            return false;
         }
 
         public enum ResultsStatus
