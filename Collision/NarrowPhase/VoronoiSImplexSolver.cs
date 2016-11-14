@@ -315,6 +315,18 @@ namespace MobaGame.Collision
 		    return (signp * signd < VFixedPoint.Zero)? 1 : 0;
         }
 
+        /*public override bool originInTetrahedron()
+        {
+            if (!fullSimplex())
+                return false;
+            int a = pointOutsideOfPlane(VInt3.zero, simplexPointsQ[0], simplexPointsQ[1], simplexPointsQ[2], simplexPointsQ[3]);
+            int b = pointOutsideOfPlane(VInt3.zero, simplexPointsQ[0], simplexPointsQ[2], simplexPointsQ[3], simplexPointsQ[1]);
+            int c = pointOutsideOfPlane(VInt3.zero, simplexPointsQ[0], simplexPointsQ[3], simplexPointsQ[1], simplexPointsQ[2]);
+            int d = pointOutsideOfPlane(VInt3.zero, simplexPointsQ[1], simplexPointsQ[3], simplexPointsQ[2], simplexPointsQ[0]);
+            return a == 0 && b == 0 && c == 0 && d == 0;
+        }*/
+
+
         public bool closestPtPointTetrahedron(VInt3 p, VInt3 a, VInt3 b, VInt3 c, VInt3 d, SubSimplexClosestResult finalResult)
         {
             SubSimplexClosestResult tempResult = subsimplexResultsPool.Get();
