@@ -171,7 +171,7 @@ namespace MobaGame.Collision
             return 5;
         }
 
-        void calculateContactInformation(VInt3[] aBuf, VInt3[] bBuf, Facet facet, CollisionShape a, CollisionShape b, ref VInt3 pa, ref VInt3 pb, ref VInt3 normal, ref VFixedPoint penDepth)
+        void calculateContactInformation(VInt3[] aBuf, VInt3[] bBuf, Facet facet, ConvexShape a, ConvexShape b, ref VInt3 pa, ref VInt3 pb, ref VInt3 normal, ref VFixedPoint penDepth)
         {
             VInt3 _pa = new VInt3();
             VInt3 _pb = new VInt3();

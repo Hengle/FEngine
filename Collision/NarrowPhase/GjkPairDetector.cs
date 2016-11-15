@@ -12,20 +12,16 @@ namespace MobaGame.Collision
         private SimplexSolverInterface simplexSolver;
         private ConvexShape minkowskiA;
         private ConvexShape minkowskiB;
-        private bool ignoreMargin;
 
         // some debugging to fix degeneracy problems
         public int lastUsedMethod;
         public int curIter;
         public int degenerateSimplex;
-        public int catchDegeneracies;
 
         public void init(ConvexShape objectA, ConvexShape objectB, SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver penetrationDepthSolver)
         {
             this.cachedSeparatingAxis = VInt3.zero;
-            this.ignoreMargin = false;
             this.lastUsedMethod = -1;
-            this.catchDegeneracies = 1;
 
             this.penetrationDepthSolver = penetrationDepthSolver;
             this.simplexSolver = simplexSolver;
@@ -53,11 +49,6 @@ namespace MobaGame.Collision
             this.penetrationDepthSolver = penetrationDepthSolver;
         }
 
-        public void setIgnoreMargin(bool ignoreMargin)
-        {
-            this.ignoreMargin = ignoreMargin;
-        }
-
         public override void getClosestPoints(ClosestPointInput input, Result output)
         {
             VInt3 tmp = new VInt3();
@@ -72,15 +63,6 @@ namespace MobaGame.Collision
             localTransA.position -= positionOffset;
             localTransB.position -= positionOffset;
 
-            VFixedPoint marginA = minkowskiA.getMargin();
-            VFixedPoint marginB = minkowskiB.getMargin();
-
-            if (ignoreMargin)
-            {
-                marginA = VFixedPoint.Zero;
-                marginB = VFixedPoint.Zero;
-            }
-
             curIter = 0;
             int gGjkMaxIter = 1000; // this is to catch invalid input, perhaps check for #NaN?
             cachedSeparatingAxis = VInt3.up;
@@ -94,8 +76,6 @@ namespace MobaGame.Collision
 
             VFixedPoint squaredDistance = VFixedPoint.MaxValue;
             VFixedPoint delta = VFixedPoint.Zero;
-
-            VFixedPoint margin = marginA + marginB;
 
             simplexSolver.reset();
 
@@ -206,16 +186,8 @@ namespace MobaGame.Collision
                     VFixedPoint rlen = VFixedPoint.One / FMath.Sqrt(lenSqr);
                     normalInB /= rlen;
                     VFixedPoint s = FMath.Sqrt(squaredDistance);
-
-                    tmp = cachedSeparatingAxis * marginA / s;
-                    pointOnA -= tmp;
-
-                    tmp = cachedSeparatingAxis * marginB / s;
-                    pointOnB += tmp;
-
-                    distance = VFixedPoint.One / rlen - margin;
+                    distance = VFixedPoint.One / rlen;
                     isValid = true;
-
                     lastUsedMethod = 1;
                 }
                 else
@@ -225,10 +197,7 @@ namespace MobaGame.Collision
                 }
             }
 
-            bool catchDegeneratePenetrationCase =
-                    (catchDegeneracies != 0 && penetrationDepthSolver != null && degenerateSimplex != 0 && ((distance + margin) < VFixedPoint.One / VFixedPoint.Create(100)));
-
-            if (checkPenetration && (!isValid || catchDegeneratePenetrationCase))
+            if (checkPenetration && !isValid)
             {
                 if (penetrationDepthSolver != null)
                 {
