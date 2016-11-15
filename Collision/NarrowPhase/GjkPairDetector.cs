@@ -5,7 +5,7 @@ namespace MobaGame.Collision
     public class GjkPairDetector : DiscreteCollisionDetectorInterface
     {
         // must be above the machine epsilon
-        private static readonly VFixedPoint ERROR = VFixedPoint.One / VFixedPoint.Create(1000);
+        private static readonly VFixedPoint REL_ERROR2 = VFixedPoint.One / VFixedPoint.Create(1000);
 
         private VInt3 cachedSeparatingAxis;
         private ConvexPenetrationDepthSolver penetrationDepthSolver;
@@ -46,9 +46,9 @@ namespace MobaGame.Collision
         {
             VIntTransform localTransA = input.transformA;
             VIntTransform localTransB = input.transformB;
-            //VInt3 positionOffset = (localTransA.position + localTransB.position) / VFixedPoint.Two;
-            //localTransA.position -= positionOffset;
-            //localTransB.position -= positionOffset;
+            VInt3 positionOffset = (localTransA.position + localTransB.position) / VFixedPoint.Two;
+            localTransA.position -= positionOffset;
+            localTransB.position -= positionOffset;
 
             int curIter;
             int gGjkMaxIter = 100; // this is to catch invalid input, perhaps check for #NaN?
@@ -114,7 +114,7 @@ namespace MobaGame.Collision
                             tmpNormalInB /= depth;
                             output.addContactPoint(
                                 tmpNormalInB,
-                                tmpPointOnB,
+                                tmpPointOnB + positionOffset,
                                 -depth);
                         }
                         else
@@ -123,12 +123,12 @@ namespace MobaGame.Collision
                         }
                         break;
                     }
-                    else if (sDist - cachedSeparatingAxis.sqrMagnitude < ERROR)
+                    else if (sDist - cachedSeparatingAxis.sqrMagnitude < VFixedPoint.One / VFixedPoint.Create(1000))
                     {
                         VInt3 pointOnA = new VInt3();
                         VInt3 pointOnB = new VInt3();
                         simplexSolver.compute_points(ref pointOnA, ref pointOnB);
-                        if (cachedSeparatingAxis.sqrMagnitude < ERROR)
+                        if (cachedSeparatingAxis.sqrMagnitude < VFixedPoint.One / VFixedPoint.Create(10000))
                         {
                             //degenerated case
                         }
@@ -137,7 +137,7 @@ namespace MobaGame.Collision
                             VFixedPoint distance = cachedSeparatingAxis.magnitude;
                             output.addContactPoint(
                                 cachedSeparatingAxis / distance,
-                                pointOnB,
+                                pointOnB + positionOffset,
                                 distance);
                         }
 
