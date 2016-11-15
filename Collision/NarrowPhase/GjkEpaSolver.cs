@@ -290,6 +290,14 @@ namespace MobaGame.Collision
             return facet;
         }
 
+        bool originInTetrahedron(VInt3 p1, VInt3 p2, VInt3 p3, VInt3 p4)
+        {
+            int a = VoronoiSimplexSolver.pointOutsideOfPlane(VInt3.zero, p1, p2, p3, p4);
+            int b = VoronoiSimplexSolver.pointOutsideOfPlane(VInt3.zero, p1, p3, p4, p2);
+            int c = VoronoiSimplexSolver.pointOutsideOfPlane(VInt3.zero, p1, p4, p2, p3);
+            int d = VoronoiSimplexSolver.pointOutsideOfPlane(VInt3.zero, p2, p4, p3, p1);
+            return a == 0 && b == 0 && c == 0 && d == 0;
+        }
 
         static void doSupport(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, VInt3 dir, ref VInt3 supportA, ref VInt3 supportB, ref VInt3 support)
 	    {
