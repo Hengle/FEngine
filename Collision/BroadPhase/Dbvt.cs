@@ -1,4 +1,5 @@
-﻿using MobaGame.FixedMath;
+﻿using System;
+using MobaGame.FixedMath;
 using System.Collections.Generic;
 
 namespace MobaGame.Collision
@@ -48,14 +49,14 @@ namespace MobaGame.Collision
                     int bit = 0;
                     while (node.isinternal())
                     {
-                        node = sort(node, root).childs[(opath >> bit) & 1];
+                        node = sort(node, ref root).childs[(opath >> bit) & 1];
 
                         bit = (bit + 1) & (/*sizeof(unsigned)*/4 * 8 - 1);
                     }
                     update(node);
                     ++opath;
                 }
-                while ((--passes) != 0);
+                while (--passes != 0);
             }
         }
 
@@ -351,11 +352,10 @@ namespace MobaGame.Collision
             }
         }
 
-        private static Node sort(Node n, Node r)
+        private static Node sort(Node n, ref Node r)
         {
             Node p = n.parent;
-            // JAVA TODO: fix this
-            if (p != null && p > n)
+            if (p != null && p.id > n.id)
             {
                 int i = indexof(n);
                 int j = 1 - i;
@@ -387,10 +387,17 @@ namespace MobaGame.Collision
 
     public class Node
     {
+        private static int NextID;
         public DbvtAabbMm volume = new DbvtAabbMm();
         public Node parent;
         public Node[] childs = new Node[2];
 		public object data;
+
+        private int _id = NextID++;
+        public int id
+        {
+            get { return _id; }
+        }
 
         public bool isleaf()
         {
