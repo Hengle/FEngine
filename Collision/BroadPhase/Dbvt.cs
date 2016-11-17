@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MobaGame.Collision
 {
-    class Dbvt
+    public class Dbvt
     {
         public static readonly int SIMPLE_STACKSIZE = 64;
         public static readonly int DOUBLE_STACKSIZE = SIMPLE_STACKSIZE * 2;
@@ -383,118 +383,118 @@ namespace MobaGame.Collision
             }
             return n;
         }
-    }
 
-    public class Node
-    {
-        private static int NextID;
-        public DbvtAabbMm volume = new DbvtAabbMm();
-        public Node parent;
-        public Node[] childs = new Node[2];
-		public object data;
-
-        private int _id = NextID++;
-        public int id
+        public class Node
         {
-            get { return _id; }
+            private static int NextID;
+            public DbvtAabbMm volume = new DbvtAabbMm();
+            public Node parent;
+            public Node[] childs = new Node[2];
+            public object data;
+
+            private int _id = NextID++;
+            public int id
+            {
+                get { return _id; }
+            }
+
+            public bool isleaf()
+            {
+                return childs[1] == null;
+            }
+
+            public bool isinternal()
+            {
+                return !isleaf();
+            }
         }
 
-        public bool isleaf()
+        /** Stack element */
+        public class sStkNN
         {
-            return childs[1] == null;
+            public Node a;
+            public Node b;
+
+            public sStkNN(Node na, Node nb)
+            {
+                a = na;
+                b = nb;
+            }
         }
 
-        public bool isinternal()
+        public class sStkNP
         {
-            return !isleaf();
-        }
-    }
+            public Node node;
+            public int mask;
 
-    /** Stack element */
-    public class sStkNN
-    {
-        public Node a;
-        public Node b;
-
-        public sStkNN(Node na, Node nb)
-        {
-            a = na;
-            b = nb;
-        }
-    }
-
-    public class sStkNP
-    {
-        public Node node;
-        public int mask;
-
-        public sStkNP(Node n, int m)
-        {
-            node = n;
-            mask = m;
-        }
-    }
-
-    public class sStkNPS
-    {
-        public Node node;
-        public int mask;
-        public float value;
-
-        public sStkNPS()
-        {
+            public sStkNP(Node n, int m)
+            {
+                node = n;
+                mask = m;
+            }
         }
 
-        public sStkNPS(Node n, int m, float v)
+        public class sStkNPS
         {
-            node = n;
-            mask = m;
-            value = v;
+            public Node node;
+            public int mask;
+            public float value;
+
+            public sStkNPS()
+            {
+            }
+
+            public sStkNPS(Node n, int m, float v)
+            {
+                node = n;
+                mask = m;
+                value = v;
+            }
+
+            public void set(sStkNPS o)
+            {
+                node = o.node;
+                mask = o.mask;
+                value = o.value;
+            }
         }
 
-        public void set(sStkNPS o)
+        public class sStkCLN
         {
-            node = o.node;
-            mask = o.mask;
-            value = o.value;
-        }
-    }
+            public Node node;
+            public Node parent;
 
-    public class sStkCLN
-    {
-        public Node node;
-        public Node parent;
-
-        public sStkCLN(Node n, Node p)
-        {
-            node = n;
-            parent = p;
-        }
-    }
-
-    public class ICollide
-    {
-        public void Process(Node n1, Node n2)
-        {
+            public sStkCLN(Node n, Node p)
+            {
+                node = n;
+                parent = p;
+            }
         }
 
-        public void Process(Node n)
+        public class ICollide
         {
-        }
+            public void Process(Node n1, Node n2)
+            {
+            }
 
-        public void Process(Node n, float f)
-        {
-            Process(n);
-        }
+            public void Process(Node n)
+            {
+            }
 
-        public bool Descent(Node n)
-        {
-            return true;
-        }
+            public void Process(Node n, float f)
+            {
+                Process(n);
+            }
 
-        public bool AllLeaves(Node n)
-        {
-            return true;
+            public bool Descent(Node n)
+            {
+                return true;
+            }
+
+            public bool AllLeaves(Node n)
+            {
+                return true;
+            }
         }
     }
 }
