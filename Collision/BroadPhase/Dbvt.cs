@@ -60,7 +60,7 @@ namespace MobaGame.Collision
             }
         }
 
-        public Node insert(DbvtAabbMm box, object data)
+        public Node insert(DbvtAabbMm box, DbvtProxy data)
         {
             Node leaf = createnode(this, null, box, data);
             insertleaf(this, root, leaf);
@@ -240,7 +240,7 @@ namespace MobaGame.Collision
             deletenode(pdbvt, node);
         }
 
-        private static Node createnode(Dbvt pdbvt, Node parent, DbvtAabbMm volume, object data)
+        private static Node createnode(Dbvt pdbvt, Node parent, DbvtAabbMm volume, DbvtProxy data)
         {
             Node node;
             if (pdbvt.free != null)
@@ -390,7 +390,7 @@ namespace MobaGame.Collision
             public DbvtAabbMm volume = new DbvtAabbMm();
             public Node parent;
             public Node[] childs = new Node[2];
-            public object data;
+            public DbvtProxy data;
 
             private int _id = NextID++;
             public int id
@@ -473,25 +473,25 @@ namespace MobaGame.Collision
 
         public class ICollide
         {
-            public void Process(Node n1, Node n2)
+            public virtual void Process(Node n1, Node n2)
             {
             }
 
-            public void Process(Node n)
+            public virtual void Process(Node n)
             {
             }
 
-            public void Process(Node n, float f)
+            public void Process(Node n, VFixedPoint f)
             {
                 Process(n);
             }
 
-            public bool Descent(Node n)
+            public virtual bool Descent(Node n)
             {
                 return true;
             }
 
-            public bool AllLeaves(Node n)
+            public virtual bool AllLeaves(Node n)
             {
                 return true;
             }
