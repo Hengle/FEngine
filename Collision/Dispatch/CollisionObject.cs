@@ -178,7 +178,7 @@ namespace MobaGame.Collision
             return internalType;
         }
 
-        public VIntTransform getWorldTransform(out VIntTransform returnParam)
+        public VIntTransform getWorldTransform()
         {
             returnParam = worldTransform;
             return returnParam;
