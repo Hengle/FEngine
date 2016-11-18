@@ -12,11 +12,12 @@ namespace MobaGame.Collision
 
         public UUID uniqueId; // uniqueId is introduced for paircache. could get rid of this, by calculating the address offset etc.
 
-        public BroadphaseProxy(short collisionFilterGroup, short collisionFilterMask)
+        public BroadphaseProxy(CollisionObject collisionObject, short collisionFilterGroup, short collisionFilterMask)
         {
             uniqueId = UUID.GetNextUUID();
             this.collisionFilterGroup = collisionFilterGroup;
             this.collisionFilterMask = collisionFilterMask;
+            clientObject = collisionObject;
         }
 
         public UUID getUid()

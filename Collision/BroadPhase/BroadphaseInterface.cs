@@ -5,7 +5,7 @@ namespace MobaGame.Collision
 {
     public abstract class BroadphaseInterface
     {
-        public abstract BroadphaseProxy createProxy(VInt3 aabbMin, VInt3 aabbMax, BroadphaseNativeType shapeType, short collisionFilterGroup, short collisionFilterMask, Dispatcher dispatcher);
+        public abstract BroadphaseProxy createProxy(VInt3 aabbMin, VInt3 aabbMax, BroadphaseNativeType shapeType, CollisionObject collisionObject, short collisionFilterGroup, short collisionFilterMask, Dispatcher dispatcher);
 
         public abstract void destroyProxy(BroadphaseProxy proxy, Dispatcher dispatcher);
 

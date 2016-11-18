@@ -7,8 +7,8 @@
         public readonly DbvtProxy[] links = new DbvtProxy[2];
         public int stage;
 
-        public DbvtProxy(short collisionFilterGroup, short collisionFilterMask)
-            :base(collisionFilterGroup, collisionFilterMask)
+        public DbvtProxy(CollisionObject collisionObject, short collisionFilterGroup, short collisionFilterMask)
+            :base(collisionObject, collisionFilterGroup, collisionFilterMask)
         {
 
         }
