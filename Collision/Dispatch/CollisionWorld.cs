@@ -111,6 +111,40 @@ namespace MobaGame.Collision
             return dispatchInfo;
         }
 
-        private static bool updateAabbs_reportMe = true;
+        public void updateSingleAabb(CollisionObject colObj)
+        {
+            VInt3 minAabb, maxAabb;
+
+		    colObj.getCollisionShape().getAabb(colObj.getWorldTransform(), out minAabb, out maxAabb);
+		    // need to increase the aabb for contact thresholds
+		    VInt3 contactThreshold = new VInt3(BulletGlobals.getContactBreakingThreshold(), BulletGlobals.getContactBreakingThreshold(), BulletGlobals.getContactBreakingThreshold());
+		    minAabb -= contactThreshold;
+		    maxAabb += contactThreshold;
+
+		    BroadphaseInterface bp = broadphasePairCache;
+
+            // moving objects should be moderately sized, probably something wrong if not
+            VInt3 tmp = maxAabb - minAabb; // TODO: optimize
+		    if (colObj.isStaticObject() || (tmp.sqrMagnitude < 1e12f))
+            {
+			    bp.setAabb(colObj.getBroadphaseHandle(), minAabb, maxAabb, dispatcher1);
+		    }
+	    }
+
+        public void updateAabbs()
+        {
+            for (int i = 0; i < collisionObjects.Count; i++)
+            {
+                CollisionObject colObj = collisionObjects[i];
+
+                // only update aabb of active objects
+                if (colObj.isActive())
+                {
+                    updateSingleAabb(colObj);
+                }
+            }
+        }
+
+
     }
 }

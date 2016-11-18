@@ -133,7 +133,7 @@ namespace MobaGame.Collision
         }
 
         public override BroadphaseProxy createProxy(VInt3 aabbMin, VInt3 aabbMax, BroadphaseNativeType shapeType, CollisionObject collisionObject, short collisionFilterGroup, short collisionFilterMask, Dispatcher dispatcher) {
-            DbvtProxy proxy = new DbvtProxy(collisionFilterGroup, collisionFilterMask);
+            DbvtProxy proxy = new DbvtProxy(collisionObject, collisionFilterGroup, collisionFilterMask);
             DbvtAabbMm.FromMM(aabbMin, aabbMax, proxy.aabb);
             proxy.leaf = sets[0].insert(proxy.aabb, proxy);
             proxy.stage = stageCurrent;

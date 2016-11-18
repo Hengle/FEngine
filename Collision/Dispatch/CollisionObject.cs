@@ -180,8 +180,7 @@ namespace MobaGame.Collision
 
         public VIntTransform getWorldTransform()
         {
-            returnParam = worldTransform;
-            return returnParam;
+            return worldTransform;
         }
 
         public void setWorldTransform(VIntTransform worldTransform)
