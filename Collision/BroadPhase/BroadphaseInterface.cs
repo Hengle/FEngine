@@ -19,5 +19,24 @@ namespace MobaGame.Collision
         ///getAabb returns the axis aligned bounding box in the 'global' coordinate frame
         ///will add some transform later
         public abstract void getBroadphaseAabb(out VInt3 aabbMin, out VInt3 aabbMax);
+
+        public abstract void rayTest(VInt3 rayFrom, VInt3 rayTo, BroadphaseRayCallback rayCallback, VInt3 aabbMin, VInt3 aabbMax);
+
+	    public abstract void aabbTest(VInt3 aabbMin, VInt3 aabbMax, BroadphaseAabbCallback callback);
     }
+
+    public abstract class BroadphaseAabbCallback
+    {
+        public abstract bool process(BroadphaseProxy proxy);
+    }
+
+    public abstract class BroadphaseRayCallback: BroadphaseAabbCallback
+    {
+        public VInt3 rayDirectionInverse;
+        public uint[] signs = new uint[3];
+        public VFixedPoint lambdaMax;
+    }
+
+
+
 }

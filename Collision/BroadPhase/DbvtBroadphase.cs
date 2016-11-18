@@ -1,5 +1,6 @@
 ﻿using MobaGame.FixedMath;
 using System.Collections.Generic;
+using System;
 
 namespace MobaGame.Collision
 {
@@ -211,6 +212,51 @@ namespace MobaGame.Collision
             }
             aabbMin = bounds.Mins();
             aabbMax = bounds.Maxs();
+        }
+
+        class BroadphaseRayTester: Dbvt.ICollide
+        {
+            BroadphaseRayCallback rayCallback;
+            public BroadphaseRayTester(BroadphaseRayCallback callback)
+            {
+                rayCallback = callback;
+            }
+
+            public override void Process(Dbvt.Node n)
+            {
+                DbvtProxy proxy = n.data;
+                rayCallback.process(proxy);
+            }
+        }
+
+        public override void rayTest(VInt3 rayFrom, VInt3 rayTo, BroadphaseRayCallback rayCallback, VInt3 aabbMin, VInt3 aabbMax)
+        {
+            BroadphaseRayTester callback = new BroadphaseRayTester(rayCallback);
+
+            sets[0].rayTestInternal(sets[0].root,
+                rayFrom,
+                rayTo,
+                rayCallback.rayDirectionInverse,
+                rayCallback.signs,
+                rayCallback.lambdaMax,
+                aabbMin,
+                aabbMax,
+                callback);
+
+            sets[1].rayTestInternal(sets[1].root,
+                rayFrom,
+                rayTo,
+                rayCallback.rayDirectionInverse,
+                rayCallback.signs,
+                rayCallback.lambdaMax,
+                aabbMin,
+                aabbMax,
+                callback);
+        }
+
+        public override void aabbTest(VInt3 aabbMin, VInt3 aabbMax, BroadphaseAabbCallback callback)
+        {
+            
         }
     }
 }

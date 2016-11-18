@@ -114,6 +114,39 @@ namespace MobaGame
                 return new VInt3(x, y, value);
             }
 
+            public VFixedPoint this[int index]
+            {
+                get
+                {
+                    switch(index)
+                    {
+                        case 0:
+                            return x;
+                        case 1:
+                            return y;
+                        case 2:
+                            return z;
+                    }
+                    throw new Exception("Access violation");
+                }
+
+                set
+                {
+                    switch (index)
+                    {
+                        case 0:
+                            x = value;
+                            break;
+                        case 1:
+                            y = value;
+                            break;
+                        case 2:
+                            z = value;
+                            break;
+                    }
+                }
+            }
+
             public override string ToString()
             {
                 object[] objArray1 = new object[] { "( ", this.x, ", ", this.y, ", ", this.z, ")" };

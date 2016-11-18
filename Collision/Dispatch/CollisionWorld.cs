@@ -151,7 +151,7 @@ namespace MobaGame.Collision
             }
         }
 
-        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans,
+        public void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans,
             CollisionObject collisionObject,
             CollisionShape collisionShape,
             VIntTransform colObjWorldTransform,
@@ -195,37 +195,8 @@ namespace MobaGame.Collision
 
         public void rayTest(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
         {
-            VIntTransform rayFromTrans = VIntTransform.Identity, rayToTrans = VIntTransform.Identity;
-            rayFromTrans.position = rayFromWorld;
-            rayToTrans.position = rayToWorld;
-
-            // go over all objects, and if the ray intersects their aabb, do a ray-shape query using convexCaster (CCD)
-            VInt3 collisionObjectAabbMin, collisionObjectAabbMax;
-            VFixedPoint hitLambda;
-
-            for (int i = 0; i < collisionObjects.Count; i++)
-            {
-                if (resultCallback.closestHitFraction == VFixedPoint.Zero)
-                {
-                    break;
-                }
-
-                CollisionObject collisionObject = collisionObjects[i];
-                if (resultCallback.needsCollision(collisionObject.getBroadphaseHandle()))
-                {
-                    collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(), out collisionObjectAabbMin, out collisionObjectAabbMax);
-                    hitLambda = resultCallback.closestHitFraction;
-                    VInt3 hitNormal;
-                    if (AabbUtil2.rayAabb(rayFromWorld, rayToWorld, collisionObjectAabbMin, collisionObjectAabbMax, hitLambda, out hitNormal))
-                    {
-                        rayTestSingle(rayFromTrans, rayToTrans,
-                                collisionObject,
-                                collisionObject.getCollisionShape(),
-                                collisionObject.getWorldTransform(),
-                                resultCallback);
-                    }
-                }
-            }
+            SingleRayCallback rayCB = new SingleRayCallback(rayFromWorld, rayToWorld,this, resultCallback);
+            broadphasePairCache.rayTest(rayFromWorld, rayToWorld, rayCB, VInt3.zero, VInt3.zero);
         }
     }
 
@@ -307,4 +278,60 @@ namespace MobaGame.Collision
 			    return rayResult.hitFraction;
 		}
 	}
+
+    public class SingleRayCallback : BroadphaseRayCallback
+    {
+        VInt3 m_rayFromWorld;
+        VInt3 m_rayToWorld;
+        VIntTransform m_rayFromTrans;
+        VIntTransform m_rayToTrans;
+        VInt3 m_hitNormal;
+
+        CollisionWorld m_world;
+        RayResultCallback	m_resultCallback;
+
+        public SingleRayCallback(VInt3 rayFromWorld, VInt3 rayToWorld, CollisionWorld world, RayResultCallback resultCallback)
+        {
+            m_rayFromWorld = rayFromWorld;
+            m_rayToWorld = rayToWorld;
+
+            m_rayFromTrans = VIntTransform.Identity;
+            m_rayFromTrans.position = m_rayFromWorld;
+            m_rayToTrans = VIntTransform.Identity;
+            m_rayToTrans.position = m_rayToWorld;
+
+            VInt3 rayDir = (rayToWorld - rayFromWorld).Normalize();
+
+            ///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
+            rayDirectionInverse.x = rayDir[0] == VFixedPoint.Zero ? btScalar(BT_LARGE_FLOAT) : VFixedPoint.One / rayDir[0];
+            rayDirectionInverse.y = rayDir[1] == VFixedPoint.Zero ? btScalar(BT_LARGE_FLOAT) : VFixedPoint.One / rayDir[1];
+            rayDirectionInverse.z = rayDir[2] == VFixedPoint.Zero ? btScalar(BT_LARGE_FLOAT) : VFixedPoint.One / rayDir[2];
+            signs[0] = rayDirectionInverse.x < VFixedPoint.Zero ? 1u : 0 ;
+            signs[1] = rayDirectionInverse.y < VFixedPoint.Zero ? 1u : 0;
+            signs[2] = rayDirectionInverse.z < VFixedPoint.Zero ? 1u : 0;
+
+            lambdaMax = VInt3.Dot(rayDir, (m_rayToWorld - m_rayFromWorld));
+        }
+
+        public override bool process(BroadphaseProxy proxy)
+	    {
+		    ///terminate further ray tests, once the closestHitFraction reached zero
+		    if (m_resultCallback.closestHitFraction == VFixedPoint.Zero)
+			    return false;
+
+		    CollisionObject collisionObject = proxy.clientObject;
+
+		    //only perform raycast if filterMask matches
+		    if(m_resultCallback.needsCollision(collisionObject.getBroadphaseHandle())) 
+		    {
+
+				    m_world.rayTestSingle(m_rayFromTrans, m_rayToTrans,
+                        collisionObject,
+                        collisionObject.getCollisionShape(),
+					    collisionObject.getWorldTransform(),
+					    m_resultCallback);
+			}
+		    return true;
+	    }
+    }
 }

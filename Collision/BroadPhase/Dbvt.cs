@@ -209,6 +209,38 @@ namespace MobaGame.Collision
             }
         }
 
+        public void rayTestInternal(Node root, VInt3 rayFrom, VInt3 rayTo, VInt3 rayDirectionInverse, uint[] signs, VFixedPoint lambdaMax, VInt3 aabbMin, VInt3 aabbMax, ICollide policy)
+        {
+            if (root != null)
+            {
+
+                List<Node> stack = new List<Node>(DOUBLE_STACKSIZE);
+                stack[0] = root;
+                VInt3[] bounds = new VInt3[2];
+                do
+                {
+                    Node node = stack[stack.Count - 1];
+                    stack.RemoveAt(stack.Count - 1);
+                    bounds[0] = node.volume.Mins() - aabbMax;
+                    bounds[1] = node.volume.Maxs() - aabbMin;
+                    VFixedPoint tmin = VFixedPoint.One, lambdaMin = VFixedPoint.Zero;
+                    bool result1 = AabbUtils.RayAabb2(rayFrom, rayDirectionInverse, signs, bounds, ref tmin, lambdaMin, lambdaMax);
+                    if (result1)
+                    {
+                        if (node.isinternal())
+                        {
+                            stack.Add(node.childs[0]);
+                            stack.Add(node.childs[1]);
+                        }
+                        else
+                        {
+                            policy.Process(node);
+                        }
+                    }
+                } while (stack.Count > 0);
+            }
+        }
+
         private static int indexof(Node node)
         {
             return (node.parent.childs[1] == node) ? 1 : 0;
