@@ -10,7 +10,7 @@ namespace MobaGame.Collision
         protected DispatcherInfo dispatchInfo = new DispatcherInfo();
         protected BroadphaseInterface broadphasePairCache;
 
-        public CollisionWorld(Dispatcher dispatcher,BroadphaseInterface broadphasePairCache)
+        public CollisionWorld(Dispatcher dispatcher, BroadphaseInterface broadphasePairCache)
         {
             this.dispatcher1 = dispatcher;
             this.broadphasePairCache = broadphasePairCache;
@@ -78,7 +78,8 @@ namespace MobaGame.Collision
         public void removeCollisionObject(CollisionObject collisionObject)
         {
             BroadphaseProxy bp = collisionObject.getBroadphaseHandle();
-            if (bp != null) {
+            if (bp != null)
+            {
                 //
                 // only clear the cached algorithms
                 //
@@ -91,23 +92,28 @@ namespace MobaGame.Collision
             collisionObjects.Remove(collisionObject);
         }
 
-        public void setBroadphase(BroadphaseInterface pairCache) {
+        public void setBroadphase(BroadphaseInterface pairCache)
+        {
             broadphasePairCache = pairCache;
         }
 
-        public BroadphaseInterface getBroadphase() {
+        public BroadphaseInterface getBroadphase()
+        {
             return broadphasePairCache;
         }
 
-        public OverlappingPairCache getPairCache() {
+        public OverlappingPairCache getPairCache()
+        {
             return broadphasePairCache.getOverlappingPairCache();
         }
 
-        public Dispatcher getDispatcher() {
+        public Dispatcher getDispatcher()
+        {
             return dispatcher1;
         }
 
-        public DispatcherInfo getDispatchInfo() {
+        public DispatcherInfo getDispatchInfo()
+        {
             return dispatchInfo;
         }
 
@@ -115,21 +121,21 @@ namespace MobaGame.Collision
         {
             VInt3 minAabb, maxAabb;
 
-		    colObj.getCollisionShape().getAabb(colObj.getWorldTransform(), out minAabb, out maxAabb);
-		    // need to increase the aabb for contact thresholds
-		    VInt3 contactThreshold = new VInt3(BulletGlobals.getContactBreakingThreshold(), BulletGlobals.getContactBreakingThreshold(), BulletGlobals.getContactBreakingThreshold());
-		    minAabb -= contactThreshold;
-		    maxAabb += contactThreshold;
+            colObj.getCollisionShape().getAabb(colObj.getWorldTransform(), out minAabb, out maxAabb);
+            // need to increase the aabb for contact thresholds
+            VInt3 contactThreshold = new VInt3(BulletGlobals.getContactBreakingThreshold(), BulletGlobals.getContactBreakingThreshold(), BulletGlobals.getContactBreakingThreshold());
+            minAabb -= contactThreshold;
+            maxAabb += contactThreshold;
 
-		    BroadphaseInterface bp = broadphasePairCache;
+            BroadphaseInterface bp = broadphasePairCache;
 
             // moving objects should be moderately sized, probably something wrong if not
             VInt3 tmp = maxAabb - minAabb; // TODO: optimize
-		    if (colObj.isStaticObject() || (tmp.sqrMagnitude < 1e12f))
+            if (colObj.isStaticObject() || (tmp.sqrMagnitude < 1e12f))
             {
-			    bp.setAabb(colObj.getBroadphaseHandle(), minAabb, maxAabb, dispatcher1);
-		    }
-	    }
+                bp.setAabb(colObj.getBroadphaseHandle(), minAabb, maxAabb, dispatcher1);
+            }
+        }
 
         public void updateAabbs()
         {
@@ -145,10 +151,10 @@ namespace MobaGame.Collision
             }
         }
 
-        public static void rayTestSingle(Transform rayFromTrans, Transform rayToTrans,
+        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans,
             CollisionObject collisionObject,
             CollisionShape collisionShape,
-            Transform colObjWorldTransform,
+            VIntTransform colObjWorldTransform,
             RayResultCallback resultCallback)
         {
             SphereShape pointShape = new SphereShape(0f);
@@ -162,38 +168,143 @@ namespace MobaGame.Collision
             ConvexShape convexShape = (ConvexShape)collisionShape;
             VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
 
-            //#define USE_SUBSIMPLEX_CONVEX_CAST 1
-            //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
             SubsimplexConvexCast convexCaster = new SubsimplexConvexCast(castShape, convexShape, simplexSolver);
-            //#else
-            //btGjkConvexCast	convexCaster(castShape,convexShape,&simplexSolver);
-            //btContinuousConvexCollision convexCaster(castShape,convexShape,&simplexSolver,0);
-            //#endif //#USE_SUBSIMPLEX_CONVEX_CAST
-
             if (convexCaster.calcTimeOfImpact(rayFromTrans, rayToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
             {
                 //add hit
-                if (castResult.normal.lengthSquared() > 0.0001f)
+                if (castResult.normal.sqrMagnitude > VFixedPoint.Zero)
                 {
                     if (castResult.fraction < resultCallback.closestHitFraction)
                     {
-                        //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
                         //rotate normal into worldspace
-                        rayFromTrans.basis.transform(castResult.normal);
-                        //#endif //USE_SUBSIMPLEX_CONVEX_CAST
+                        rayFromTrans.TransformVector(castResult.normal);
 
-                        castResult.normal.normalize();
+                        castResult.normal = castResult.normal.Normalize();
                         LocalRayResult localRayResult = new LocalRayResult(
                                 collisionObject,
                                 null,
                                 castResult.normal,
                                 castResult.fraction);
 
-                        boolean normalInWorldSpace = true;
+                        bool normalInWorldSpace = true;
                         resultCallback.addSingleResult(localRayResult, normalInWorldSpace);
                     }
                 }
             }
         }
+
+        public void rayTest(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
+        {
+            VIntTransform rayFromTrans = VIntTransform.Identity, rayToTrans = VIntTransform.Identity;
+            rayFromTrans.position = rayFromWorld;
+            rayToTrans.position = rayToWorld;
+
+            // go over all objects, and if the ray intersects their aabb, do a ray-shape query using convexCaster (CCD)
+            VInt3 collisionObjectAabbMin, collisionObjectAabbMax;
+            VFixedPoint hitLambda;
+
+            for (int i = 0; i < collisionObjects.Count; i++)
+            {
+                if (resultCallback.closestHitFraction == VFixedPoint.Zero)
+                {
+                    break;
+                }
+
+                CollisionObject collisionObject = collisionObjects[i];
+                if (resultCallback.needsCollision(collisionObject.getBroadphaseHandle()))
+                {
+                    collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(), out collisionObjectAabbMin, out collisionObjectAabbMax);
+                    hitLambda = resultCallback.closestHitFraction;
+                    VInt3 hitNormal;
+                    if (AabbUtil2.rayAabb(rayFromWorld, rayToWorld, collisionObjectAabbMin, collisionObjectAabbMax, hitLambda, out hitNormal))
+                    {
+                        rayTestSingle(rayFromTrans, rayToTrans,
+                                collisionObject,
+                                collisionObject.getCollisionShape(),
+                                collisionObject.getWorldTransform(),
+                                resultCallback);
+                    }
+                }
+            }
+        }
     }
+
+    public abstract class RayResultCallback
+    {
+        public VFixedPoint closestHitFraction = VFixedPoint.One;
+        public CollisionObject collisionObject;
+        public short collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER;
+        public short collisionFilterMask = CollisionFilterGroups.ALL_FILTER;
+
+        public bool hasHit()
+        {
+            return (collisionObject != null);
+        }
+
+        public bool needsCollision(BroadphaseProxy proxy0)
+        {
+            bool collides = ((proxy0.collisionFilterGroup & collisionFilterMask) & 0xFFFF) != 0;
+            collides = collides && ((collisionFilterGroup & proxy0.collisionFilterMask) & 0xFFFF) != 0;
+            return collides;
+        }
+
+        public abstract VFixedPoint addSingleResult(LocalRayResult rayResult, bool normalInWorldSpace);
+    }
+
+    public class LocalShapeInfo
+    {
+        public int shapePart;
+        public int triangleIndex;
+    }
+
+    public class LocalRayResult
+    {
+        public CollisionObject collisionObject;
+        public LocalShapeInfo localShapeInfo;
+        public VInt3 hitNormalLocal;
+        public VFixedPoint hitFraction;
+
+        public LocalRayResult(CollisionObject collisionObject, LocalShapeInfo localShapeInfo, VInt3 hitNormalLocal, VFixedPoint hitFraction)
+        {
+            this.collisionObject = collisionObject;
+            this.localShapeInfo = localShapeInfo;
+            this.hitNormalLocal = hitNormalLocal;
+            this.hitFraction = hitFraction;
+        }
+    }
+
+    public class ClosestRayResultCallback: RayResultCallback
+    {
+
+        public VInt3 rayFromWorld; //used to calculate hitPointWorld from hitFraction
+        public VInt3 rayToWorld;
+
+        public VInt3 hitNormalWorld;
+        public VInt3 hitPointWorld;
+
+        public ClosestRayResultCallback(VInt3 rayFromWorld, VInt3 rayToWorld)
+        {
+            this.rayFromWorld = rayFromWorld;
+            this.rayToWorld = rayToWorld;
+        }
+
+        public override VFixedPoint addSingleResult(LocalRayResult rayResult, bool normalInWorldSpace)
+        {
+            closestHitFraction = rayResult.hitFraction;
+            collisionObject = rayResult.collisionObject;
+            if (normalInWorldSpace)
+            {
+                hitNormalWorld = rayResult.hitNormalLocal;
+            }
+            else
+            {
+                // need to transform normal into worldspace
+                hitNormalWorld = rayResult.hitNormalLocal;
+                collisionObject.getWorldTransform().TransformVector(hitNormalWorld);
+			}
+
+                hitPointWorld = rayFromWorld * (VFixedPoint.One - rayResult.hitFraction) + rayToWorld * rayResult.hitFraction;
+			    return rayResult.hitFraction;
+		}
+	}
 }
