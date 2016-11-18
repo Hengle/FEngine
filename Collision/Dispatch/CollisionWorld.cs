@@ -198,6 +198,23 @@ namespace MobaGame.Collision
             SingleRayCallback rayCB = new SingleRayCallback(rayFromWorld, rayToWorld,this, resultCallback);
             broadphasePairCache.rayTest(rayFromWorld, rayToWorld, rayCB, VInt3.zero, VInt3.zero);
         }
+
+        ///contactTest performs a discrete collision test against all objects in the btCollisionWorld, and calls the resultCallback.
+        ///it reports one or more contact points for every overlapping object (including the one with deepest penetration)
+        void contactTest(CollisionObject colObj, ContactResultCallback resultCallback)
+        {
+            
+        }
+
+
+        ///contactTest performs a discrete collision test between two collision objects and calls the resultCallback if overlap if detected.
+        ///it reports one or more contact points (including the one with deepest penetration)
+        void contactPairTest(CollisionObject colObjA, CollisionObject colObjB, ContactResultCallback resultCallback)
+        {
+            
+
+        }
+
     }
 
     public abstract class RayResultCallback

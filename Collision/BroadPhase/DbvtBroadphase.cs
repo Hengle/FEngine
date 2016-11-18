@@ -77,12 +77,8 @@ namespace MobaGame.Collision
             // collide dynamics:
             {
                 DbvtTreeCollider collider = new DbvtTreeCollider(this);
-                {
-                    Dbvt.collideTT(sets[0].root, sets[1].root, collider);
-                }
-                {
-                    Dbvt.collideTT(sets[0].root, sets[0].root, collider);
-                }
+                Dbvt.collideTT(sets[0].root, sets[1].root, collider);
+                Dbvt.collideTT(sets[0].root, sets[0].root, collider);
             }
 
             // clean up:
@@ -254,9 +250,30 @@ namespace MobaGame.Collision
                 callback);
         }
 
-        public override void aabbTest(VInt3 aabbMin, VInt3 aabbMax, BroadphaseAabbCallback callback)
+        class BroadphaseAabbTester : Dbvt.ICollide
         {
-            
+            BroadphaseAabbCallback m_aabbCallback;
+            public BroadphaseAabbTester(BroadphaseAabbCallback orgCallback)
+            {
+                m_aabbCallback = orgCallback;
+            }
+
+            public override void Process(Dbvt.Node leaf)
+            {
+                m_aabbCallback.process(leaf.data);
+            }
+        }
+        
+
+        public override void aabbTest(VInt3 aabbMin, VInt3 aabbMax, BroadphaseAabbCallback aabbCallback)
+        {
+            BroadphaseAabbTester callback = new BroadphaseAabbTester(aabbCallback);
+
+            DbvtAabbMm bounds = new DbvtAabbMm();
+            DbvtAabbMm.FromMM(aabbMin, aabbMax, bounds);
+            //process all children, that overlap with  the given AABB bounds
+            sets[0].collideTV(sets[0].root, bounds, callback);
+            sets[1].collideTV(sets[1].root, bounds, callback);
         }
     }
 }

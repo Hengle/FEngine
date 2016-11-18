@@ -209,6 +209,32 @@ namespace MobaGame.Collision
             }
         }
 
+        public void collideTV(Node root, DbvtAabbMm volume, ICollide policy)
+        {
+            if (root != null)
+            {
+                List <Node> stack = new List<Node>(SIMPLE_STACKSIZE);
+                stack.Add(root);
+                do
+                {
+                    Node n = stack[stack.Count - 1];
+                    stack.RemoveAt(stack.Count - 1);
+                    if (DbvtAabbMm.Intersect(n.volume, volume))
+                    {
+                        if (n.isinternal())
+                        {
+                            stack.Add(n.childs[0]);
+                            stack.Add(n.childs[1]);
+                        }
+                        else
+                        {
+                            policy.Process(n);
+                        }
+                    }
+                } while (stack.Count > 0);
+            }
+        }
+
         public void rayTestInternal(Node root, VInt3 rayFrom, VInt3 rayTo, VInt3 rayDirectionInverse, uint[] signs, VFixedPoint lambdaMax, VInt3 aabbMin, VInt3 aabbMax, ICollide policy)
         {
             if (root != null)
