@@ -145,6 +145,55 @@ namespace MobaGame.Collision
             }
         }
 
+        public static void rayTestSingle(Transform rayFromTrans, Transform rayToTrans,
+            CollisionObject collisionObject,
+            CollisionShape collisionShape,
+            Transform colObjWorldTransform,
+            RayResultCallback resultCallback)
+        {
+            SphereShape pointShape = new SphereShape(0f);
+            pointShape.setMargin(0f);
+            ConvexShape castShape = pointShape;
 
+
+            CastResult castResult = new CastResult();
+            castResult.fraction = resultCallback.closestHitFraction;
+
+            ConvexShape convexShape = (ConvexShape)collisionShape;
+            VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
+
+            //#define USE_SUBSIMPLEX_CONVEX_CAST 1
+            //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
+            SubsimplexConvexCast convexCaster = new SubsimplexConvexCast(castShape, convexShape, simplexSolver);
+            //#else
+            //btGjkConvexCast	convexCaster(castShape,convexShape,&simplexSolver);
+            //btContinuousConvexCollision convexCaster(castShape,convexShape,&simplexSolver,0);
+            //#endif //#USE_SUBSIMPLEX_CONVEX_CAST
+
+            if (convexCaster.calcTimeOfImpact(rayFromTrans, rayToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
+            {
+                //add hit
+                if (castResult.normal.lengthSquared() > 0.0001f)
+                {
+                    if (castResult.fraction < resultCallback.closestHitFraction)
+                    {
+                        //#ifdef USE_SUBSIMPLEX_CONVEX_CAST
+                        //rotate normal into worldspace
+                        rayFromTrans.basis.transform(castResult.normal);
+                        //#endif //USE_SUBSIMPLEX_CONVEX_CAST
+
+                        castResult.normal.normalize();
+                        LocalRayResult localRayResult = new LocalRayResult(
+                                collisionObject,
+                                null,
+                                castResult.normal,
+                                castResult.fraction);
+
+                        boolean normalInWorldSpace = true;
+                        resultCallback.addSingleResult(localRayResult, normalInWorldSpace);
+                    }
+                }
+            }
+        }
     }
 }
