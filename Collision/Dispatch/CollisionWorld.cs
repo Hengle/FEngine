@@ -1,5 +1,6 @@
 ﻿using MobaGame.FixedMath;
 using System.Collections.Generic;
+using System;
 
 namespace MobaGame.Collision
 {
@@ -32,6 +33,11 @@ namespace MobaGame.Collision
                     getBroadphase().destroyProxy(bp, dispatcher1);
                 }
             }
+        }
+
+        public List<CollisionObject> getCollisionObjectArray()
+        {
+            return collisionObjects;
         }
 
         public void addCollisionObject(CollisionObject collisionObject)
@@ -151,7 +157,7 @@ namespace MobaGame.Collision
             }
         }
 
-        public void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans,
+        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans,
             CollisionObject collisionObject,
             CollisionShape collisionShape,
             VIntTransform colObjWorldTransform,
@@ -195,26 +201,66 @@ namespace MobaGame.Collision
 
         public void rayTest(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
         {
-            SingleRayCallback rayCB = new SingleRayCallback(rayFromWorld, rayToWorld,this, resultCallback);
+            SingleRayCallback rayCB = new SingleRayCallback(rayFromWorld, rayToWorld, resultCallback);
             broadphasePairCache.rayTest(rayFromWorld, rayToWorld, rayCB, VInt3.zero, VInt3.zero);
         }
 
-        ///contactTest performs a discrete collision test against all objects in the btCollisionWorld, and calls the resultCallback.
-        ///it reports one or more contact points for every overlapping object (including the one with deepest penetration)
-        void contactTest(CollisionObject colObj, ContactResultCallback resultCallback)
+
+        public static void objectQuerySingle(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans,
+					  CollisionObject collisionObject,
+                      ConvexShape convexShape,
+                      VIntTransform colObjWorldTransform,
+					  ConvexResultCallback resultCallback, VFixedPoint allowedPenetration)
         {
-            
+            //BT_PROFILE("convexSweepConvex");
+            CastResult castResult = new CastResult();
+            castResult.allowedPenetration = allowedPenetration;
+            castResult.fraction = resultCallback.m_closestHitFraction;//btScalar(1.);//??
+
+            VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
+            ConvexCast castPtr = new GjkConvexCast(castShape, convexShape,simplexSolver);
+
+            if (castPtr.calcTimeOfImpact(convexFromTrans, convexToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
+            {
+                //add hit
+                if (castResult.normal.sqrMagnitude > btScalar(0.0001))
+                {
+                    if (castResult.fraction < resultCallback.m_closestHitFraction)
+                    {
+                        castResult.normal = castResult.normal.Normalize();
+                        LocalConvexResult localConvexResult = new LocalConvexResult
+                            (
+                            collisionObject,
+                            null,
+                            castResult.normal,
+                            castResult.hitPoint,
+                            castResult.fraction
+        					);
+
+                        bool normalInWorldSpace = true;
+                        resultCallback.addSingleResult(localConvexResult, normalInWorldSpace);
+
+                    }
+                }
+            }
         }
 
-
-        ///contactTest performs a discrete collision test between two collision objects and calls the resultCallback if overlap if detected.
-        ///it reports one or more contact points (including the one with deepest penetration)
-        void contactPairTest(CollisionObject colObjA, CollisionObject colObjB, ContactResultCallback resultCallback)
+        public void convexSweepTest(ConvexShape castShape, VIntTransform convexFromWorld, VIntTransform convexToWorld, ConvexResultCallback resultCallback, VFixedPoint allowedCcdPenetration)
         {
-            
+            VInt3 castShapeAabbMin, castShapeAabbMax;
 
+            // Compute AABB that encompasses angular movement
+            VInt3 linVel = new VInt3();
+            VInt3 angVel = new VInt3();
+			TransformUtil.calculateVelocity(convexFromWorld, convexToWorld, VFixedPoint.One, ref linVel, ref angVel);
+			VIntTransform R = VIntTransform.Identity;
+            R.rotation = convexFromWorld.rotation;
+            castShape.calculateTemporalAabb(R, linVel, angVel, 1f, out castShapeAabbMin, out castShapeAabbMax);
+
+            SingleSweepCallback convexCB = new SingleSweepCallback(castShape, convexFromWorld, convexToWorld,this, resultCallback, allowedCcdPenetration);
+
+            broadphasePairCache.rayTest(convexFromWorld.position, convexToWorld.position, convexCB, castShapeAabbMin, castShapeAabbMax);
         }
-
     }
 
     public abstract class RayResultCallback
@@ -304,10 +350,9 @@ namespace MobaGame.Collision
         VIntTransform m_rayToTrans;
         VInt3 m_hitNormal;
 
-        CollisionWorld m_world;
-        RayResultCallback	m_resultCallback;
+        RayResultCallback m_resultCallback;
 
-        public SingleRayCallback(VInt3 rayFromWorld, VInt3 rayToWorld, CollisionWorld world, RayResultCallback resultCallback)
+        public SingleRayCallback(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
         {
             m_rayFromWorld = rayFromWorld;
             m_rayToWorld = rayToWorld;
@@ -320,9 +365,9 @@ namespace MobaGame.Collision
             VInt3 rayDir = (rayToWorld - rayFromWorld).Normalize();
 
             ///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
-            rayDirectionInverse.x = rayDir[0] == VFixedPoint.Zero ? btScalar(BT_LARGE_FLOAT) : VFixedPoint.One / rayDir[0];
-            rayDirectionInverse.y = rayDir[1] == VFixedPoint.Zero ? btScalar(BT_LARGE_FLOAT) : VFixedPoint.One / rayDir[1];
-            rayDirectionInverse.z = rayDir[2] == VFixedPoint.Zero ? btScalar(BT_LARGE_FLOAT) : VFixedPoint.One / rayDir[2];
+            rayDirectionInverse.x = rayDir[0] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[0];
+            rayDirectionInverse.y = rayDir[1] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[1];
+            rayDirectionInverse.z = rayDir[2] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[2];
             signs[0] = rayDirectionInverse.x < VFixedPoint.Zero ? 1u : 0 ;
             signs[1] = rayDirectionInverse.y < VFixedPoint.Zero ? 1u : 0;
             signs[2] = rayDirectionInverse.z < VFixedPoint.Zero ? 1u : 0;
@@ -342,7 +387,7 @@ namespace MobaGame.Collision
 		    if(m_resultCallback.needsCollision(collisionObject.getBroadphaseHandle())) 
 		    {
 
-				    m_world.rayTestSingle(m_rayFromTrans, m_rayToTrans,
+				    CollisionWorld.rayTestSingle(m_rayFromTrans, m_rayToTrans,
                         collisionObject,
                         collisionObject.getCollisionShape(),
 					    collisionObject.getWorldTransform(),
@@ -350,5 +395,97 @@ namespace MobaGame.Collision
 			}
 		    return true;
 	    }
+    }
+
+    public class SingleSweepCallback: BroadphaseRayCallback
+    {
+        public VIntTransform m_convexFromTrans;
+        public VIntTransform m_convexToTrans;
+        public VInt3 m_hitNormal;
+        public ConvexResultCallback m_resultCallback;
+        public VFixedPoint m_allowedCcdPenetration;
+        public ConvexShape m_castShape;
+
+        public SingleSweepCallback(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans, ConvexResultCallback resultCallback, VFixedPoint allowedPenetration)
+        {
+            m_castShape = castShape;
+            m_convexFromTrans = convexFromTrans;
+            m_convexToTrans = convexToTrans;
+            m_resultCallback = resultCallback;
+            m_allowedCcdPenetration = allowedPenetration;
+
+            VInt3 unnormalizedRayDir = m_convexToTrans.position - m_convexFromTrans.position;
+            VInt3 rayDir = unnormalizedRayDir.Normalize();
+
+            rayDirectionInverse.x = rayDir.x == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir.x;
+            rayDirectionInverse.y = rayDir.y == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir.y;
+            rayDirectionInverse.z = rayDir.z == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir.z;
+            signs[0] = rayDirectionInverse.x < VFixedPoint.Zero ? 1u : 0;
+            signs[1] = rayDirectionInverse.y < VFixedPoint.Zero ? 1u : 0;
+            signs[2] = rayDirectionInverse.z < VFixedPoint.Zero ? 1u : 0;
+            lambdaMax = VInt3.Dot(rayDir, unnormalizedRayDir);
+        }
+
+        public override bool process(BroadphaseProxy proxy)
+        {
+            if (m_resultCallback.m_closestHitFraction == VFixedPoint.Zero)
+                return false;
+            CollisionObject collisionObject = proxy.clientObject;
+
+            if(m_resultCallback.needsCollision(collisionObject.getBroadphaseHandle()))
+            {
+                CollisionWorld.objectQuerySingle(m_castShape, m_convexFromTrans, m_convexToTrans,
+                collisionObject,
+                collisionObject.getCollisionShape(),
+                collisionObject.getWorldTransform(),
+                m_resultCallback,
+                m_allowedCcdPenetration);
+            }
+            return true;
+        }
+    }
+
+    public abstract class ConvexResultCallback
+    {
+        public VFixedPoint m_closestHitFraction = VFixedPoint.One;
+        public short m_collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER;
+        public short m_collisionFilterMask = CollisionFilterGroups.ALL_FILTER;
+
+        public bool hasHit()
+		{
+			return m_closestHitFraction < VFixedPoint.One;
+		}
+
+        public virtual bool needsCollision(BroadphaseProxy proxy0)
+		{
+			bool collides = (proxy0.collisionFilterGroup & m_collisionFilterMask) != 0;
+            collides = collides && (m_collisionFilterGroup & proxy0.collisionFilterMask) != 0;
+			return collides;
+		}
+
+        public abstract VFixedPoint addSingleResult(LocalConvexResult convexResult, bool normalInWorldSpace);
+    };
+
+    public class LocalConvexResult
+    {
+        public LocalConvexResult(CollisionObject hitCollisionObject,
+            LocalShapeInfo	localShapeInfo,
+			VInt3		hitNormalLocal,
+            VInt3 hitPointLocal,
+			VFixedPoint hitFraction
+			)
+        {
+            m_hitCollisionObject = hitCollisionObject;
+            m_localShapeInfo = localShapeInfo;
+            m_hitNormalLocal = hitNormalLocal;
+            m_hitPointLocal = hitPointLocal;
+            m_hitFraction = hitFraction;
+        }
+
+        CollisionObject m_hitCollisionObject;
+        LocalShapeInfo m_localShapeInfo;
+        VInt3 m_hitNormalLocal;
+        VInt3 m_hitPointLocal;
+        VFixedPoint m_hitFraction;
     }
 }

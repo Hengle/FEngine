@@ -43,7 +43,7 @@ namespace MobaGame.Collision
             }
         }
 
-        public void convexSweepTest(ConvexShape castShape, VIntTransform convexFromWorld, VIntTransform convexToWorld, CollisionWorld.ConvexResultCallback resultCallback, VFixedPoint allowedCcdPenetration)
+        public void convexSweepTest(ConvexShape castShape, VIntTransform convexFromWorld, VIntTransform convexToWorld, ConvexResultCallback resultCallback, VFixedPoint allowedCcdPenetration)
         {
 		    VInt3 castShapeAabbMin = VInt3.zero;
 		    VInt3 castShapeAabbMax = VInt3.zero;
@@ -57,9 +57,6 @@ namespace MobaGame.Collision
             R.rotation = convexFromWorld.rotation;
             castShape.calculateTemporalAabb(R, linVel, angVel, 1f, castShapeAabbMin, castShapeAabbMax);
 
-
-            VIntTransform tmpTrans = VIntTransform.Identity;
-
 		    // go over all objects, and if the ray intersects their aabb + cast shape aabb,
 		    // do a ray-shape query using convexCaster (CCD)
 		    for (int i = 0; i<overlappingObjects.Count; i++)
@@ -72,16 +69,15 @@ namespace MobaGame.Collision
 				    //RigidcollisionObject* collisionObject = ctrl->GetRigidcollisionObject();
 				    VInt3 collisionObjectAabbMin = VInt3.zero;
 				    VInt3 collisionObjectAabbMax = VInt3.zero;
-				    collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(out tmpTrans), collisionObjectAabbMin, collisionObjectAabbMax);
-				    AabbUtil2.aabbExpand(collisionObjectAabbMin, collisionObjectAabbMax, castShapeAabbMin, castShapeAabbMax);
-				    VFixedPoint[] hitLambda = new VFixedPoint[] { VFixedPoint.One }; // could use resultCallback.closestHitFraction, but needs testing
+				    collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(), collisionObjectAabbMin, collisionObjectAabbMax);
+				    VFixedPoint hitLambda = VFixedPoint.One; // could use resultCallback.closestHitFraction, but needs testing
                     VInt3 hitNormal = VInt3.forward;
-				    if (AabbUtil2.rayAabb(convexFromWorld.position, convexToWorld.position, collisionObjectAabbMin, collisionObjectAabbMax, hitLambda, hitNormal))
+				    if (AabbUtils.RayAabb(convexFromWorld.position, convexToWorld.position, collisionObjectAabbMin, collisionObjectAabbMax, ref hitLambda, ref hitNormal))
                     {
 					    CollisionWorld.objectQuerySingle(castShape, convexFromWorld, convexToWorld,
 					                                     collisionObject,
 					                                     collisionObject.getCollisionShape(),
-					                                     collisionObject.getWorldTransform(out tmpTrans),
+					                                     collisionObject.getWorldTransform(),
 					                                     resultCallback,
 					                                     allowedCcdPenetration);
 				    }
@@ -89,14 +85,12 @@ namespace MobaGame.Collision
 		    }
 	    }
 
-        public void rayTest(VInt3 rayFromWorld, VInt3 rayToWorld, CollisionWorld.RayResultCallback resultCallback)
+        public void rayTest(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
         {
             VIntTransform rayFromTrans = VIntTransform.Identity;
 		    rayFromTrans.position = rayFromWorld;
             VIntTransform rayToTrans = VIntTransform.Identity;
 		    rayToTrans.position = rayToWorld;
-
-            VIntTransform tmpTrans = VIntTransform.Identity;
 
 		    for (int i = 0; i<overlappingObjects.Count; i++)
             {
@@ -108,7 +102,7 @@ namespace MobaGame.Collision
 				    CollisionWorld.rayTestSingle(rayFromTrans, rayToTrans,
 				                                 collisionObject,
 				                                 collisionObject.getCollisionShape(),
-				                                 collisionObject.getWorldTransform(out tmpTrans),
+				                                 collisionObject.getWorldTransform(),
 				                                 resultCallback);
 			    }
             }

@@ -40,15 +40,15 @@ namespace MobaGame.Collision
 
         public void updateActivationState(CollisionWorld colWorld, Dispatcher dispatcher)
         {
-            initUnionFind(colWorld.getCollisionObjectArray().size());
+            initUnionFind(colWorld.getCollisionObjectArray().Count);
 
             // put the index into m_controllers into m_tag	
             {
                 int index = 0;
                 int i;
-                for (i = 0; i < colWorld.getCollisionObjectArray().size(); i++)
+                for (i = 0; i < colWorld.getCollisionObjectArray().Count; i++)
                 {
-                    CollisionObject collisionObject = colWorld.getCollisionObjectArray().getQuick(i);
+                    CollisionObject collisionObject = colWorld.getCollisionObjectArray()[i];
                     collisionObject.setIslandTag(index);
                     collisionObject.setCompanionId(-1);
                     collisionObject.setHitFraction(VFixedPoint.One);
@@ -66,9 +66,9 @@ namespace MobaGame.Collision
             {
                 int index = 0;
                 int i;
-                for (i = 0; i < colWorld.getCollisionObjectArray().size(); i++)
+                for (i = 0; i < colWorld.getCollisionObjectArray().Count; i++)
                 {
-                    CollisionObject collisionObject = colWorld.getCollisionObjectArray().getQuick(i);
+                    CollisionObject collisionObject = colWorld.getCollisionObjectArray()[i];
                     if (!collisionObject.isStaticOrKinematicObject())
                     {
                         collisionObject.setIslandTag(unionFind.find(index));
