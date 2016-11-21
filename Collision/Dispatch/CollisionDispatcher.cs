@@ -66,7 +66,7 @@ namespace MobaGame.Collision
             CollisionAlgorithmConstructionInfo ci = tmpCI;
             ci.dispatcher1 = this;
             ci.manifold = sharedManifold;
-            CollisionAlgorithmCreateFunc createFunc = doubleDispatch[body0.getCollisionShape().getShapeType().ordinal()][body1.getCollisionShape().getShapeType().ordinal()];
+            CollisionAlgorithmCreateFunc createFunc = doubleDispatch[(int)body0.getCollisionShape().getShapeType(), (int)body1.getCollisionShape().getShapeType()];
             CollisionAlgorithm algo = createFunc.createCollisionAlgorithm(ci, body0, body1);
             algo.internalSetCreateFunc(createFunc);
 
