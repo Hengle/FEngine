@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
@@ -8,11 +9,11 @@ namespace MobaGame.Collision
 
         protected Dispatcher dispatcher;
 
-        public void init()
+        public virtual void init()
         {
         }
 
-        public void init(CollisionAlgorithmConstructionInfo ci)
+        public virtual void init(CollisionAlgorithmConstructionInfo ci)
         {
             dispatcher = ci.dispatcher1;
         }
@@ -21,7 +22,7 @@ namespace MobaGame.Collision
 
         public abstract void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
 
-        public abstract float calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
+        public abstract VFixedPoint calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
 
         public abstract void getAllContactManifolds(List<PersistentManifold> manifoldArray);
 

@@ -2,7 +2,7 @@
 
 namespace MobaGame.Collision
 {
-    class VoronoiSimplexSolver: SimplexSolverInterface
+    public class VoronoiSimplexSolver: SimplexSolverInterface
     {
         //protected  BulletStack stack = BulletStack.get();
         protected ObjectPool<SubSimplexClosestResult> subsimplexResultsPool = new ObjectPool<SubSimplexClosestResult>();
@@ -588,7 +588,7 @@ namespace MobaGame.Collision
         }
     }
 
-    class UsageBitfield
+    public class UsageBitfield
     {
         public bool usedVertexA;
         public bool usedVertexB;
@@ -604,7 +604,7 @@ namespace MobaGame.Collision
         }
     }
 
-    class SubSimplexClosestResult
+    public class SubSimplexClosestResult
     {
         public VInt3 closestPointOnSimplex = new VInt3();
         //MASK for m_usedVertices
