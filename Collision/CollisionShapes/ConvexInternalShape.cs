@@ -65,13 +65,5 @@ namespace MobaGame.Collision
         public override void setMargin(VFixedPoint margin) {
             this.collisionMargin = margin;
         }
-
-        public override int getNumPreferredPenetrationDirections() {
-            return 0;
-        }
-        public override void getPreferredPenetrationDirection(int index, out VInt3 penetrationVector) {
-            throw new NotImplementedException();
-        }
-
     }
 }
