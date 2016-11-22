@@ -15,10 +15,6 @@ namespace MobaGame.Collision
         public int leaves = 0;
         public int opath = 0;
 
-        public Dbvt()
-        {
-        }
-
         public void clear()
         {
             if (root != null)

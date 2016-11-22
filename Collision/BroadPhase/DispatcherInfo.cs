@@ -1,23 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
     public class DispatcherInfo
     {
-        public float timeStep;
+        public VFixedPoint timeStep;
         public int stepCount;
         public DispatchFunc dispatchFunc;
-        public float timeOfImpact;
+        public VFixedPoint timeOfImpact;
         public bool useContinuous;
         //public IDebugDraw debugDraw;
         public bool useEpa = true;
-        public float allowedCcdPenetration = 0.04f;
+        public VFixedPoint allowedCcdPenetration = VFixedPoint.Create(4) / VFixedPoint.Create(100);
         //btStackAlloc*	m_stackAllocator;
 
         public DispatcherInfo()
         {
             dispatchFunc = DispatchFunc.DISPATCH_DISCRETE;
-            timeOfImpact = 1f;
+            timeOfImpact = VFixedPoint.One;
         }
     }
 }

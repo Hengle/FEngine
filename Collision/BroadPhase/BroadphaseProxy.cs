@@ -6,7 +6,6 @@ namespace MobaGame.Collision
     {
         public CollisionObject clientObject;
 
-        // TODO: mask
         public short collisionFilterGroup;
         public short collisionFilterMask;
 

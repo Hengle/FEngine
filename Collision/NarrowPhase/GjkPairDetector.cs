@@ -59,6 +59,8 @@ namespace MobaGame.Collision
             VInt3 pointOnB = new VInt3();
             VIntTransform localTransA = input.transformA;
             VIntTransform localTransB = input.transformB;
+            VFixedPoint marginA = minkowskiA.getMargin();
+            VFixedPoint marginB = minkowskiB.getMargin();
             VInt3 positionOffset = (localTransA.position + localTransB.position) / VFixedPoint.Two;
             localTransA.position -= positionOffset;
             localTransB.position -= positionOffset;
@@ -76,6 +78,8 @@ namespace MobaGame.Collision
 
             VFixedPoint squaredDistance = VFixedPoint.MaxValue;
             VFixedPoint delta = VFixedPoint.Zero;
+
+            VFixedPoint margin = marginA + marginB;
 
             simplexSolver.reset();
 
@@ -186,7 +190,9 @@ namespace MobaGame.Collision
                     VFixedPoint rlen = VFixedPoint.One / FMath.Sqrt(lenSqr);
                     normalInB /= rlen;
                     VFixedPoint s = FMath.Sqrt(squaredDistance);
-                    distance = VFixedPoint.One / rlen;
+                    pointOnA -= cachedSeparatingAxis * marginA / s;
+                    pointOnB += cachedSeparatingAxis * marginB / s;
+                    distance = VFixedPoint.One / rlen - margin;
                     isValid = true;
                     lastUsedMethod = 1;
                 }
@@ -197,7 +203,7 @@ namespace MobaGame.Collision
                 }
             }
 
-            if (checkPenetration && !isValid)
+            if (checkPenetration && (!isValid || distance + margin < Globals.EPS))
             {
                 if (penetrationDepthSolver != null)
                 {

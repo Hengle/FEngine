@@ -27,18 +27,16 @@ namespace MobaGame.Collision
 
             VFixedPoint radius = Globals.EPS;
             VFixedPoint lambda = VFixedPoint.Zero;
-            VInt3 v = VInt3.zero;
 
             int maxIter = MAX_ITERATIONS;
 
             VInt3 n = VInt3.zero;
-		    bool hasResult = false;
+		    bool hasResult;
             VInt3 c = new VInt3();
 		    VInt3 r = linvelB - linvelA;
 
             VFixedPoint lastLambda = lambda;
             int numIter = 0;
-            VIntTransform identityTransform = VIntTransform.Identity;
 
             PointCollector pointCollector = new PointCollector();
 
