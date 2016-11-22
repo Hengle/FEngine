@@ -143,16 +143,6 @@ namespace MobaGame.Collision
 
         public abstract int getNumVertices();
 
-        public abstract int getNumEdges();
-
-        public abstract void getEdge(int i, out VInt3 pa, out VInt3 pb);
-
         public abstract VInt3 getVertex(int i);
-
-        public abstract int getNumPlanes();
-
-        public abstract void getPlane(out VInt3 planeNormal, out VInt3 planeSupport, int i);
-
-        public abstract bool isInside(VInt3 pt, VFixedPoint tolerance);
     }
 }

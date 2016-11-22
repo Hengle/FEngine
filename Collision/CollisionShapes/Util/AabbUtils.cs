@@ -107,6 +107,25 @@ namespace MobaGame.Collision
 	        return false;
         }
 
+        public static void transformAabb(VInt3 halfExtents, VFixedPoint margin, VIntTransform trans, out VInt3 aabbMinOut, out VInt3 aabbMaxOut)
+        {
+
+            VInt3 halfExtentsWithMargin = halfExtents;
+		    halfExtentsWithMargin.x += margin;
+		    halfExtentsWithMargin.y += margin;
+		    halfExtentsWithMargin.z += margin;
+
+            VInt3 center = trans.position;
+            VInt3 extent = new VInt3();
+
+            extent.x = VInt3.Dot(halfExtentsWithMargin, new VInt3(trans.right.x.Abs(), trans.right.y.Abs(), trans.right.z.Abs()));
+            extent.y = VInt3.Dot(halfExtentsWithMargin, new VInt3(trans.up.x.Abs(), trans.up.y.Abs(), trans.up.z.Abs()));
+            extent.z = VInt3.Dot(halfExtentsWithMargin, new VInt3(trans.forward.x.Abs(), trans.forward.y.Abs(), trans.forward.z.Abs()));
+
+            aabbMinOut = center - extent;
+            aabbMaxOut = center + extent;
+        }
+
         public static void transformAabb(VInt3 localAabbMin, VInt3 localAabbMax, VFixedPoint margin, VIntTransform trans, out VInt3 aabbMinOut, out VInt3 aabbMaxOut)
         {
 

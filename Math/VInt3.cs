@@ -256,6 +256,14 @@ namespace MobaGame
                 return lhs;
             }
 
+            public static VInt3 operator /(VInt3 lhs, VInt3 rhs)
+            {
+                lhs.x /= rhs.x;
+                lhs.y /= rhs.y;
+                lhs.z /= rhs.z;
+                return lhs;
+            }
+
             public static implicit operator string(VInt3 ob)
             {
                 return ob.ToString();

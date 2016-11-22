@@ -15,10 +15,5 @@ namespace MobaGame.Collision
             out VInt3[] supportVerticesOut);
 
         public abstract void getAabbSlow(VIntTransform t, out VInt3 aabbMin, out VInt3 aabbMax);
-
-        public abstract int getNumPreferredPenetrationDirections();
-
-        public abstract void getPreferredPenetrationDirection(int index, out VInt3 penetrationVector);
-
     }
 }
