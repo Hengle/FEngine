@@ -48,7 +48,7 @@ namespace MobaGame.Collision
 
             VInt3 vec = vec0;
             VFixedPoint lenSqr = vec.sqrMagnitude;
-            if (lenSqr < 0.0001f)
+            if (lenSqr < Globals.EPS)
             {
                 vec = new VInt3(VFixedPoint.One, VFixedPoint.Zero, VFixedPoint.Zero);
             }
@@ -85,7 +85,7 @@ namespace MobaGame.Collision
             if (getMargin() != VFixedPoint.Zero)
             {
                 VInt3 vecnorm = vec;
-                if (vecnorm.sqrMagnitude < (BulletGlobals.FLT_EPSILON * BulletGlobals.FLT_EPSILON))
+                if (vecnorm.sqrMagnitude < Globals.EPS2)
                 {
                     vecnorm = -VInt3.one;
                 }

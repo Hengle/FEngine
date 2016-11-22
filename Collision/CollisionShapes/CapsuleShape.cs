@@ -20,7 +20,7 @@ namespace MobaGame.Collision
 
             VInt3 vec = vec0;
             VFixedPoint lenSqr = vec.sqrMagnitude;
-            if (lenSqr < VFixedPoint.One / VFixedPoint.Create(10000)) {
+            if (lenSqr < Globals.EPS) {
                 vec = VInt3.right;
             }
             else {
@@ -69,7 +69,7 @@ namespace MobaGame.Collision
             VInt3 halfExtents = new VInt3(radius, radius, radius);
             halfExtents[getUpAxis()] = radius + getHalfHeight();
 
-            VFixedPoint margin = BulletGlobals.CONVEX_DISTANCE_MARGIN;
+            VFixedPoint margin = Globals.CONVEX_DISTANCE_MARGIN;
 
             VFixedPoint lx = VFixedPoint.Two * (halfExtents.x + margin);
             VFixedPoint ly = VFixedPoint.Two * (halfExtents.y + margin);

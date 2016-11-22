@@ -5,7 +5,7 @@ namespace MobaGame.Collision
     public class GjkPairDetector : DiscreteCollisionDetectorInterface
     {
         // must be above the machine epsilon
-        private static readonly VFixedPoint REL_ERROR2 = VFixedPoint.One / VFixedPoint.Create(1000);
+        private static readonly VFixedPoint REL_ERROR2 = Globals.EPS2;
 
         private VInt3 cachedSeparatingAxis;
         private ConvexPenetrationDepthSolver penetrationDepthSolver;

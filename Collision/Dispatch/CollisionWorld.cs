@@ -129,7 +129,7 @@ namespace MobaGame.Collision
 
             colObj.getCollisionShape().getAabb(colObj.getWorldTransform(), out minAabb, out maxAabb);
             // need to increase the aabb for contact thresholds
-            VInt3 contactThreshold = new VInt3(BulletGlobals.getContactBreakingThreshold(), BulletGlobals.getContactBreakingThreshold(), BulletGlobals.getContactBreakingThreshold());
+            VInt3 contactThreshold = new VInt3(Globals.getContactBreakingThreshold(), Globals.getContactBreakingThreshold(), Globals.getContactBreakingThreshold());
             minAabb -= contactThreshold;
             maxAabb += contactThreshold;
 
@@ -223,7 +223,7 @@ namespace MobaGame.Collision
             if (castPtr.calcTimeOfImpact(convexFromTrans, convexToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
             {
                 //add hit
-                if (castResult.normal.sqrMagnitude > VFixedPoint.One / VFixedPoint.Create(1000))
+                if (castResult.normal.sqrMagnitude > Globals.EPS)
                 {
                     if (castResult.fraction < resultCallback.m_closestHitFraction)
                     {

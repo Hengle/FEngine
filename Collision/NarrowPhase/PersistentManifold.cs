@@ -137,7 +137,7 @@ namespace MobaGame.Collision
 
         public VFixedPoint getContactBreakingThreshold()
         {
-            return BulletGlobals.getContactBreakingThreshold();
+            return Globals.getContactBreakingThreshold();
         }
 
         public int getCacheEntry(ManifoldPoint newPoint)
@@ -274,12 +274,6 @@ namespace MobaGame.Collision
 				    distance2d = VInt3.Dot(projectedDifference, projectedDifference);
 				    if (distance2d > getContactBreakingThreshold() * getContactBreakingThreshold()) {
                         removeContactPoint(i);
-				    }
-				    else {
-					    // contact point processed callback
-					    if (BulletGlobals.getContactProcessedCallback() != null) {
-						    BulletGlobals.getContactProcessedCallback().contactProcessed(manifoldPoint, body0, body1);
-					    }
 				    }
 			    }
 		    }

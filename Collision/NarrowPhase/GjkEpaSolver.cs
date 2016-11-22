@@ -101,7 +101,7 @@ namespace MobaGame.Collision
                     upper_bound = dist >= VFixedPoint.Zero ? FMath.Min(upper_bound, dist) : upper_bound;
                     lower_bound = planeDist;
 
-                    bool con0 = (upper_bound - lower_bound) <= eps2;
+                    bool con0 = (upper_bound - lower_bound) <= Globals.EPS2;
                     if(con0)
                     {
                         calculateContactInformation(aBuf, bBuf, facet, a, b, ref pa, ref pb, ref normal, ref penDepth);
@@ -109,7 +109,7 @@ namespace MobaGame.Collision
                     }
 
                     VFixedPoint dif = dist - planeDist;
-                    bool degeneratedCondition = dif < eps;
+                    bool degeneratedCondition = dif < Globals.EPS;
 
                     if(degeneratedCondition)
                     {
@@ -412,7 +412,7 @@ namespace MobaGame.Collision
             VInt3 v =v1v1 > v2v2 ? v2 : v1;
             VInt3 denormalizedNormal = VInt3.Cross(v, v3);
             VFixedPoint norValue = VInt3.Dot(denormalizedNormal, denormalizedNormal);
-            bool con = norValue > (VFixedPoint.One / VFixedPoint.Create(10000));
+            bool con = norValue > Globals.EPS;
             norValue = con ? norValue : VFixedPoint.One;
 
             VInt3 planeNormal = denormalizedNormal * FMath.Sqrt(norValue);

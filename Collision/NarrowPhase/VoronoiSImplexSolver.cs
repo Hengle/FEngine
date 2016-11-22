@@ -308,7 +308,7 @@ namespace MobaGame.Collision
 		    VInt3 normal = VInt3.Cross(b - a, c - a);
 		    VFixedPoint signp = VInt3.Dot(p - a, normal); // [AP AB AC]
             VFixedPoint signd = VInt3.Dot(d - a, normal); // [AD AB AC]
-		    if (signd * signd < VFixedPoint.One / VFixedPoint.Create(10000))
+		    if (signd * signd < Globals.EPS)
 		    {
 			    return -1;
 		    }

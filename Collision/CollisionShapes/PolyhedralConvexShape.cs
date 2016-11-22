@@ -36,7 +36,7 @@ namespace MobaGame.Collision
 
             VInt3 vec = vec0;
             VFixedPoint lenSqr = vec.sqrMagnitude;
-            if (lenSqr < VFixedPoint.One / VFixedPoint.Create(10000))
+            if (lenSqr < Globals.EPS)
             {
                 vec = VInt3.right;
             }

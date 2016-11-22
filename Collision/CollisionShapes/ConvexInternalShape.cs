@@ -7,7 +7,7 @@ namespace MobaGame.Collision
     {
         protected VInt3 localScaling = new VInt3(VFixedPoint.One, VFixedPoint.One, VFixedPoint.One);
         protected VInt3 implicitShapeDimensions = new VInt3();
-        protected VFixedPoint collisionMargin = BulletGlobals.CONVEX_DISTANCE_MARGIN;
+        protected VFixedPoint collisionMargin = Globals.CONVEX_DISTANCE_MARGIN;
 
         public override void getAabb(VIntTransform t, out VInt3 aabbMin, out VInt3 aabbMax)
         {
@@ -41,7 +41,7 @@ namespace MobaGame.Collision
             VInt3 supVertex = localGetSupportingVertexWithoutMargin(vec);
 
             if (getMargin() != VFixedPoint.Zero) {
-                if (vec.sqrMagnitude < (BulletGlobals.FLT_EPSILON * BulletGlobals.FLT_EPSILON)) {
+                if (vec.sqrMagnitude < (Globals.EPS2)) {
                     vec = -VInt3.one;
                 }
                 vec = vec.Normalize();

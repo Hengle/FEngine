@@ -25,7 +25,7 @@ namespace MobaGame.Collision
             VInt3 linvelA = toA.position - fromA.position;
             VInt3 linvelB = toB.position - fromB.position;
 
-            VFixedPoint radius = VFixedPoint.One / VFixedPoint.Create(1000);
+            VFixedPoint radius = Globals.EPS;
             VFixedPoint lambda = VFixedPoint.Zero;
             VInt3 v = VInt3.zero;
 

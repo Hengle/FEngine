@@ -14,6 +14,7 @@ namespace MobaGame
             public static readonly VFixedPoint Half = new VFixedPoint(One.ValueBar/2);
             public static readonly VFixedPoint MaxValue = new VFixedPoint(long.MaxValue);
             public static readonly VFixedPoint MinValue = new VFixedPoint(long.MinValue);
+            public static readonly VFixedPoint LARGE_NUMBER = VFixedPoint.FromBinary(65536);
 
             internal long ValueBar;
 

@@ -48,7 +48,7 @@ namespace MobaGame.Collision
 		    VFixedPoint lastLambda = lambda;
 
             VFixedPoint dist2 = v.sqrMagnitude;
-            VFixedPoint epsilon = VFixedPoint.One / VFixedPoint.Create(10000);
+            VFixedPoint epsilon = Globals.EPS;
 
             VInt3 w;
             VFixedPoint VdotR;
