@@ -31,8 +31,8 @@ namespace MobaGame.Collision
         {
             this.body0 = body0;
             this.body1 = body1;
-            body0.getWorldTransform(out this.rootTransA);
-            body1.getWorldTransform(out this.rootTransB);
+            this.rootTransA = body0.getWorldTransform();
+            this.rootTransB = body1.getWorldTransform();
         }
 
         public PersistentManifold getPersistentManifold()

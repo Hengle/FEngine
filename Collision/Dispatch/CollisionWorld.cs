@@ -137,7 +137,7 @@ namespace MobaGame.Collision
 
             // moving objects should be moderately sized, probably something wrong if not
             VInt3 tmp = maxAabb - minAabb; // TODO: optimize
-            if (colObj.isStaticObject() || (tmp.sqrMagnitude < 1e12f))
+            if (colObj.isStaticObject() || (tmp.sqrMagnitude < VFixedPoint.LARGE_NUMBER))
             {
                 bp.setAabb(colObj.getBroadphaseHandle(), minAabb, maxAabb, dispatcher1);
             }
