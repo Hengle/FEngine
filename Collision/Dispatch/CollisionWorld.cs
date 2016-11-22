@@ -163,8 +163,8 @@ namespace MobaGame.Collision
             VIntTransform colObjWorldTransform,
             RayResultCallback resultCallback)
         {
-            SphereShape pointShape = new SphereShape(0f);
-            pointShape.setMargin(0f);
+            SphereShape pointShape = new SphereShape(VFixedPoint.Zero);
+            pointShape.setMargin(VFixedPoint.Zero);
             ConvexShape castShape = pointShape;
 
 
@@ -208,7 +208,7 @@ namespace MobaGame.Collision
 
         public static void objectQuerySingle(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans,
 					  CollisionObject collisionObject,
-                      ConvexShape convexShape,
+                      CollisionShape collisionShape,
                       VIntTransform colObjWorldTransform,
 					  ConvexResultCallback resultCallback, VFixedPoint allowedPenetration)
         {
@@ -218,12 +218,12 @@ namespace MobaGame.Collision
             castResult.fraction = resultCallback.m_closestHitFraction;//btScalar(1.);//??
 
             VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
-            ConvexCast castPtr = new GjkConvexCast(castShape, convexShape,simplexSolver);
+            ConvexCast castPtr = new GjkConvexCast(castShape, (ConvexShape)collisionShape,simplexSolver);
 
             if (castPtr.calcTimeOfImpact(convexFromTrans, convexToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
             {
                 //add hit
-                if (castResult.normal.sqrMagnitude > btScalar(0.0001))
+                if (castResult.normal.sqrMagnitude > VFixedPoint.One / VFixedPoint.Create(1000))
                 {
                     if (castResult.fraction < resultCallback.m_closestHitFraction)
                     {
@@ -255,9 +255,9 @@ namespace MobaGame.Collision
 			TransformUtil.calculateVelocity(convexFromWorld, convexToWorld, VFixedPoint.One, ref linVel, ref angVel);
 			VIntTransform R = VIntTransform.Identity;
             R.rotation = convexFromWorld.rotation;
-            castShape.calculateTemporalAabb(R, linVel, angVel, 1f, out castShapeAabbMin, out castShapeAabbMax);
+            castShape.calculateTemporalAabb(R, linVel, angVel, VFixedPoint.One, out castShapeAabbMin, out castShapeAabbMax);
 
-            SingleSweepCallback convexCB = new SingleSweepCallback(castShape, convexFromWorld, convexToWorld,this, resultCallback, allowedCcdPenetration);
+            SingleSweepCallback convexCB = new SingleSweepCallback(castShape, convexFromWorld, convexToWorld, resultCallback, allowedCcdPenetration);
 
             broadphasePairCache.rayTest(convexFromWorld.position, convexToWorld.position, convexCB, castShapeAabbMin, castShapeAabbMax);
         }

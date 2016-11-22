@@ -45,8 +45,8 @@ namespace MobaGame.Collision
 
         public void convexSweepTest(ConvexShape castShape, VIntTransform convexFromWorld, VIntTransform convexToWorld, ConvexResultCallback resultCallback, VFixedPoint allowedCcdPenetration)
         {
-		    VInt3 castShapeAabbMin = VInt3.zero;
-		    VInt3 castShapeAabbMax = VInt3.zero;
+		    VInt3 castShapeAabbMin;
+		    VInt3 castShapeAabbMax;
 
             // compute AABB that encompasses angular movement
 
@@ -55,7 +55,7 @@ namespace MobaGame.Collision
 			TransformUtil.calculateVelocity(convexFromWorld, convexToWorld, VFixedPoint.One, ref linVel, ref angVel);
 			VIntTransform R = VIntTransform.Identity;
             R.rotation = convexFromWorld.rotation;
-            castShape.calculateTemporalAabb(R, linVel, angVel, 1f, castShapeAabbMin, castShapeAabbMax);
+            castShape.calculateTemporalAabb(R, linVel, angVel, VFixedPoint.One, out castShapeAabbMin, out castShapeAabbMax);
 
 		    // go over all objects, and if the ray intersects their aabb + cast shape aabb,
 		    // do a ray-shape query using convexCaster (CCD)
@@ -69,7 +69,7 @@ namespace MobaGame.Collision
 				    //RigidcollisionObject* collisionObject = ctrl->GetRigidcollisionObject();
 				    VInt3 collisionObjectAabbMin = VInt3.zero;
 				    VInt3 collisionObjectAabbMax = VInt3.zero;
-				    collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(), collisionObjectAabbMin, collisionObjectAabbMax);
+				    collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(), out collisionObjectAabbMin, out collisionObjectAabbMax);
 				    VFixedPoint hitLambda = VFixedPoint.One; // could use resultCallback.closestHitFraction, but needs testing
                     VInt3 hitNormal = VInt3.forward;
 				    if (AabbUtils.RayAabb(convexFromWorld.position, convexToWorld.position, collisionObjectAabbMin, collisionObjectAabbMax, ref hitLambda, ref hitNormal))

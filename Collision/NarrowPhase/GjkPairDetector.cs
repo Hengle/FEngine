@@ -101,8 +101,8 @@ namespace MobaGame.Collision
                 seperatingAxisInB = cachedSeparatingAxis;
                 seperatingAxisInB = input.transformB.InverseTransformVector(seperatingAxisInB);
 
-                minkowskiA.localGetSupportingVertexWithoutMargin(seperatingAxisInA, ref pInA);
-                minkowskiB.localGetSupportingVertexWithoutMargin(seperatingAxisInB, ref qInB);
+                pInA = minkowskiA.localGetSupportingVertexWithoutMargin(seperatingAxisInA);
+                qInB =  minkowskiB.localGetSupportingVertexWithoutMargin(seperatingAxisInB);
 
                 pWorld = localTransA.TransformPoint(pInA);
                 qWorld = localTransB.TransformPoint(qInB);

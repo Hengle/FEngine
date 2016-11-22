@@ -310,8 +310,8 @@ namespace MobaGame.Collision
             VInt3 pInA = new VInt3();
             VInt3 qInB = new VInt3();
 
-            a.localGetSupportingVertexWithoutMargin(dirInA, ref pInA);
-            b.localGetSupportingVertexWithoutMargin(dirInAInB, ref qInB);
+            pInA = a.localGetSupportingVertexWithoutMargin(dirInA);
+            qInB = b.localGetSupportingVertexWithoutMargin(dirInAInB);
 
             supportA = transformA.TransformPoint(pInA);
             supportB = transformB.TransformPoint(qInB);
