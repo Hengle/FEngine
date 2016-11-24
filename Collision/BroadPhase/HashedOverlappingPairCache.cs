@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace MobaGame.Collision
 {
-    public class HashedOverlappingPairCache<T>: OverlappingPairCache where T: BroadphasePair, new()
+    public class HashedOverlappingPairCache: OverlappingPairCache
     {
-        private ObjectPool<T> pairsPool = new ObjectPool<T>();
+        private ObjectPool<BroadphasePair> pairsPool = new ObjectPool<BroadphasePair>();
 	
 	    private static readonly int NULL_PAIR = -1;
 

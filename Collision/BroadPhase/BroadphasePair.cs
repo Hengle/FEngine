@@ -8,6 +8,10 @@ namespace MobaGame.Collision
         public BroadphaseProxy pProxy1;
         public CollisionAlgorithm algorithm;
 
+        public BroadphasePair()
+        {
+
+        }
 
         public BroadphasePair(BroadphaseProxy pProxy0, BroadphaseProxy pProxy1)
         {
