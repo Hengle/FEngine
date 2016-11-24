@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MobaGame.FixedMath;
+
 namespace MobaGame.Collision
 {
     public class DefaultNearCallback: NearCallback
@@ -31,7 +31,7 @@ namespace MobaGame.Collision
                     }
                     else {
                         // continuous collision detection query, time of impact (toi)
-                        float toi = collisionPair.algorithm.calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, contactPointResult);
+                        VFixedPoint toi = collisionPair.algorithm.calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, contactPointResult);
                         if (dispatchInfo.timeOfImpact > toi)
                         {
                             dispatchInfo.timeOfImpact = toi;
