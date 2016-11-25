@@ -162,7 +162,7 @@ namespace MobaGame.Collision
             else {
                 // dynamic set:
                 if (DbvtAabbMm.Intersect(proxy.leaf.volume, aabb)) {/* Moving				*/
-                    VInt3 delta = (aabbMin + aabbMax) / VFixedPoint.Two;
+                    VInt3 delta = (aabbMin + aabbMax) * VFixedPoint.Half;
                     delta -= proxy.aabb.Center();
                     delta *= predictedframes;
                     sets[0].update(proxy.leaf, aabb, delta, DBVT_BP_MARGIN);

@@ -12,8 +12,8 @@ namespace MobaGame.Collision
 
             getAabb(tr, out aabbMin, out aabbMax);
 
-            radius = (aabbMax - aabbMin).magnitude / VFixedPoint.Two;
-            center = (aabbMax + aabbMin) / VFixedPoint.Two;
+            radius = (aabbMax - aabbMin).magnitude * VFixedPoint.Half;
+            center = (aabbMax + aabbMin) * VFixedPoint.Half;
         }
 
         ///getAngularMotionDisc returns the maximus radius needed for Conservative Advancement to handle time-of-impact with rotations.

@@ -57,8 +57,8 @@ namespace MobaGame.Collision
                                  VInt3 aabbMax,
 					             ref VFixedPoint param, ref VInt3 normal) 
         {
-	        VInt3 aabbHalfExtent = (aabbMax - aabbMin) / VFixedPoint.Two;
-            VInt3 aabbCenter = (aabbMax + aabbMin) / VFixedPoint.Two;
+	        VInt3 aabbHalfExtent = (aabbMax - aabbMin) * VFixedPoint.Half;
+            VInt3 aabbCenter = (aabbMax + aabbMin) * VFixedPoint.Half;
             VInt3 source = rayFrom - aabbCenter;
             VInt3 target = rayTo - aabbCenter;
             int sourceOutcode = btOutcode(source, aabbHalfExtent);
@@ -129,12 +129,12 @@ namespace MobaGame.Collision
         public static void transformAabb(VInt3 localAabbMin, VInt3 localAabbMax, VFixedPoint margin, VIntTransform trans, out VInt3 aabbMinOut, out VInt3 aabbMaxOut)
         {
 
-            VInt3 localHalfExtents = (localAabbMax - localAabbMin) / VFixedPoint.Two;
+            VInt3 localHalfExtents = (localAabbMax - localAabbMin) * VFixedPoint.Half;
             localHalfExtents.x += margin;
             localHalfExtents.y += margin;
             localHalfExtents.z += margin;
 
-            VInt3 localCenter = (localAabbMax + localAabbMin) / VFixedPoint.Two;
+            VInt3 localCenter = (localAabbMax + localAabbMin) * VFixedPoint.Half;
             VInt3 center = trans.TransformPoint(localCenter);
             VInt3 extent = new VInt3();
 

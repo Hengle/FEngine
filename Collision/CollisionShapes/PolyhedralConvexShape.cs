@@ -102,7 +102,7 @@ namespace MobaGame.Collision
             VInt3 aabbMin, aabbMax;
             getAabb(ident, out aabbMin, out aabbMax);
 
-            VInt3 halfExtents = (aabbMax - aabbMin) / VFixedPoint.Two;
+            VInt3 halfExtents = (aabbMax - aabbMin) * VFixedPoint.Half;
 
             VFixedPoint lx = VFixedPoint.Two * (halfExtents.x + margin);
             VFixedPoint ly = VFixedPoint.Two * (halfExtents.y + margin);

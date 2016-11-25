@@ -10,7 +10,7 @@ namespace MobaGame.Collision
         public CapsuleShape(VFixedPoint radius, VFixedPoint height)
         {
             upAxis = 1;
-            implicitShapeDimensions = new VInt3(radius, height / VFixedPoint.Two, radius);
+            implicitShapeDimensions = new VInt3(radius, height * VFixedPoint.Half, radius);
         }
 
         public override VInt3 localGetSupportingVertexWithoutMargin(VInt3 vec0)

@@ -35,7 +35,7 @@ namespace MobaGame.Collision
 
         public VInt3 Center()
         {
-            VInt3 output = (mi + mx) / VFixedPoint.Two;
+            VInt3 output = (mi + mx) * VFixedPoint.Half;
             return output;
         }
 
@@ -47,7 +47,7 @@ namespace MobaGame.Collision
 
         public VInt3 Extents()
         {
-            VInt3 output = (mx - mi) / VFixedPoint.Two;
+            VInt3 output = (mx - mi) * VFixedPoint.Half;
             return output;
         }
 

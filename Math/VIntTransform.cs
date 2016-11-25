@@ -123,6 +123,11 @@ namespace MobaGame
             {
                 return new VInt3(VInt3.Dot(global, right) / _localScale.x, VInt3.Dot(global, up) / _localScale.y, VInt3.Dot(global, forward) / _localScale.z);
             }
+
+            public VInt3[] getBasis()
+            {
+                return new VInt3[] { right, up, forward };
+            }
         }
     }
 }

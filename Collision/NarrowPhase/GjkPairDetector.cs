@@ -61,7 +61,7 @@ namespace MobaGame.Collision
             VIntTransform localTransB = input.transformB;
             VFixedPoint marginA = minkowskiA.getMargin();
             VFixedPoint marginB = minkowskiB.getMargin();
-            VInt3 positionOffset = (localTransA.position + localTransB.position) / VFixedPoint.Two;
+            VInt3 positionOffset = (localTransA.position + localTransB.position) * VFixedPoint.Half;
             localTransA.position -= positionOffset;
             localTransB.position -= positionOffset;
 
