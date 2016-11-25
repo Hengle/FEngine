@@ -128,6 +128,16 @@ namespace MobaGame
             {
                 return new VInt3[] { right, up, forward };
             }
+
+            public VInt3[] getTransposeBasis()
+            {
+                return new VInt3[]
+                {
+                    new VInt3(right.x, up.x, forward.x),
+                    new VInt3(right.y, up.y, forward.y),
+                    new VInt3(right.z, up.z, forward.z)
+                };
+            }
         }
     }
 }

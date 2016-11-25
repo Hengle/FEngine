@@ -49,7 +49,7 @@ namespace MobaGame.Collision
             m_triangleSphereCF = new (mem)btSphereTriangleCollisionAlgorithm::CreateFunc;
             m_triangleSphereCF->m_swapped = true;
             */
-            boxBoxCF = new BoxBoxCollisionAlgorithm.CreateFunc();
+            //boxBoxCF = new BoxBoxCollisionAlgorithm.CreateFunc();
 
             // convex versus plane
             //convexPlaneCF = new ConvexPlaneCollisionAlgorithm.CreateFunc();
@@ -83,7 +83,7 @@ namespace MobaGame.Collision
             if ((proxyType0 == TRIANGLE_SHAPE_PROXYTYPE  ) && (proxyType1==SPHERE_SHAPE_PROXYTYPE))
             {
                 return	m_triangleSphereCF;
-            }*/
+            }
 
             if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE)) {
                 return boxBoxCF;
@@ -98,7 +98,7 @@ namespace MobaGame.Collision
             if (proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && (proxyType0 == BroadphaseNativeType.STATIC_PLANE_PROXYTYPE))
             {
                 return planeConvexCF;
-            }
+            }*/
 
             if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
             {
