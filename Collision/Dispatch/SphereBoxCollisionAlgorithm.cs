@@ -160,7 +160,7 @@ namespace MobaGame.Collision
                 minDist = faceDist;
                 closestPoint = sphereRelPos;
                 closestPoint.x = -boxHalfExtent.x;
-                normal. = -VInt3.right;
+                normal = -VInt3.right;
             }
 
             faceDist = boxHalfExtent.y - sphereRelPos.y;
