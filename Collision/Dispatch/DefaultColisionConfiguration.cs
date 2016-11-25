@@ -8,20 +8,14 @@ namespace MobaGame.Collision
         protected ConvexPenetrationDepthSolver pdSolver;
 
         //default CreationFunctions, filling the m_doubleDispatch table
-        protected CollisionAlgorithmCreateFunc convexConvexCreateFunc;
-        protected CollisionAlgorithmCreateFunc convexConcaveCreateFunc;
-        protected CollisionAlgorithmCreateFunc swappedConvexConcaveCreateFunc;
-        protected CollisionAlgorithmCreateFunc compoundCreateFunc;
-        protected CollisionAlgorithmCreateFunc swappedCompoundCreateFunc;
         protected CollisionAlgorithmCreateFunc emptyCreateFunc;
+        protected CollisionAlgorithmCreateFunc convexConvexCreateFunc;
         protected CollisionAlgorithmCreateFunc sphereSphereCF;
         protected CollisionAlgorithmCreateFunc sphereBoxCF;
         protected CollisionAlgorithmCreateFunc boxSphereCF;
-        protected CollisionAlgorithmCreateFunc boxBoxCF;
-        protected CollisionAlgorithmCreateFunc sphereTriangleCF;
-        protected CollisionAlgorithmCreateFunc triangleSphereCF;
-        protected CollisionAlgorithmCreateFunc planeConvexCF;
-        protected CollisionAlgorithmCreateFunc convexPlaneCF;
+        //protected CollisionAlgorithmCreateFunc boxBoxCF;
+        //protected CollisionAlgorithmCreateFunc planeConvexCF;
+        //protected CollisionAlgorithmCreateFunc convexPlaneCF;
 
         public DefaultCollisionConfiguration()
         {
