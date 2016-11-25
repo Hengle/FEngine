@@ -50,8 +50,6 @@ namespace MobaGame.Collision
 
             cleanOverlappingPair(pair, dispatcher);
 
-            object userData = pair;
-
             // JAVA TODO: optimize
             //int pairIndex = int(pair - &m_overlappingPairArray[0]);
             int pairIndex = overlappingPairArray.IndexOf(pair);

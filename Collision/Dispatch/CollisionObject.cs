@@ -198,10 +198,9 @@ namespace MobaGame.Collision
             this.broadphaseHandle = broadphaseHandle;
         }
 
-        public VIntTransform getInterpolationWorldTransform(VIntTransform returnParam)
+        public VIntTransform getInterpolationWorldTransform()
         {
-            returnParam = interpolationWorldTransform;
-            return returnParam;
+            return interpolationWorldTransform;
         }
 
         public void setInterpolationWorldTransform(VIntTransform interpolationWorldTransform)
