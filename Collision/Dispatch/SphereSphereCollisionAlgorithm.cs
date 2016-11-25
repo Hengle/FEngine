@@ -13,7 +13,7 @@ namespace MobaGame.Collision
             base.init(ci);
             manifoldPtr = mf;
 
-            if (manifoldPtr == null)
+            if (manifoldPtr == null && dispatcher.needsCollision(col0, col1))
             {
                 manifoldPtr = dispatcher.getNewManifold(col0, col1);
                 ownManifold = true;

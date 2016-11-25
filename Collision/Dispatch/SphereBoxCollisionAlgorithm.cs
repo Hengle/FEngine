@@ -19,7 +19,7 @@ namespace MobaGame.Collision
             CollisionObject sphereObj = isSwapped ? body1 : body0;
             CollisionObject boxObj = isSwapped ? body0 : body1;
 
-            if(manifoldPtr != null && dispatcher.needsCollision(sphereObj, boxObj))
+            if(manifoldPtr == null && dispatcher.needsCollision(sphereObj, boxObj))
             {
                 manifoldPtr = dispatcher.getNewManifold(sphereObj, boxObj);
                 ownManifold = true;

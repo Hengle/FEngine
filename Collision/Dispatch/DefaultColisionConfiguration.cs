@@ -52,9 +52,9 @@ namespace MobaGame.Collision
             boxBoxCF = new BoxBoxCollisionAlgorithm.CreateFunc();
 
             // convex versus plane
-            convexPlaneCF = new ConvexPlaneCollisionAlgorithm.CreateFunc();
-            planeConvexCF = new ConvexPlaneCollisionAlgorithm.CreateFunc();
-            planeConvexCF.swapped = true;
+            //convexPlaneCF = new ConvexPlaneCollisionAlgorithm.CreateFunc();
+            //planeConvexCF = new ConvexPlaneCollisionAlgorithm.CreateFunc();
+            //planeConvexCF.swapped = true;
         }
 
         public override CollisionAlgorithmCreateFunc getCollisionAlgorithmCreateFunc(BroadphaseNativeType proxyType0, BroadphaseNativeType proxyType1)
