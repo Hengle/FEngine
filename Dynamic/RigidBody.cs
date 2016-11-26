@@ -254,8 +254,7 @@ namespace MobaGame.Collision
             }
 
             linearVelocity = totalForce * inverseMass * step + linearVelocity;
-            VInt3 tmp = invInertiaTensorWorld;
-            invInertiaTensorWorld.transform(tmp);
+            VInt3 tmp = invInertiaTensorWorld.Transform(totalTorque);
             angularVelocity = tmp * step + angularVelocity;
 
             // clamp angular velocity. collision calculations will fail on higher angular velocities
@@ -313,7 +312,7 @@ namespace MobaGame.Collision
         }
 
         public void applyTorqueImpulse(VInt3 torque) {
-            VInt3 tmp = invInertiaTensorWorld.transform(torque);
+            VInt3 tmp = invInertiaTensorWorld.Transform(torque);
             angularVelocity += tmp;
         }
 
@@ -346,12 +345,10 @@ namespace MobaGame.Collision
         }
 
         public void updateInertiaTensor() {
-            MatrixUtil.scale(mat1, worldTransform.basis, invInertiaLocal);
-
-            Matrix3f mat2 = Stack.alloc(worldTransform.basis);
-            mat2.transpose();
-
-            invInertiaTensorWorld.mul(mat1, mat2);
+            invInertiaTensorWorld = new FMatrix3(invInertiaLocal.x / (worldTransform.scale.x * worldTransform.scale.x), VFixedPoint.Zero, VFixedPoint.Zero,
+                VFixedPoint.Zero, invInertiaLocal.y /(worldTransform.scale.y * worldTransform.scale.y), VFixedPoint.Zero,
+                VFixedPoint.Zero, VFixedPoint.Zero, invInertiaLocal.z / (worldTransform.scale.z * worldTransform.scale.z)
+            );
         }
 
         public VInt3 getCenterOfMassPosition() {
@@ -406,11 +403,14 @@ namespace MobaGame.Collision
         {
             VInt3 r0 = pos - getCenterOfMassPosition();
             VInt3 c0 = VInt3.Cross(r0, normal);
+            VInt3 tmp = getInvInertiaTensorWorld().Transpose().Transform(c0);
             VInt3 vec = VInt3.Cross(tmp, r0);
             return inverseMass + VInt3.Dot(normal, vec);
         }
 
         public VFixedPoint computeAngularImpulseDenominator(VInt3 axis) {
+            VInt3 vec = getInvInertiaTensorWorld().Transpose().Transform(axis);
+            return VInt3.Dot(axis, vec);
         }
 
         public void updateDeactivation(VFixedPoint timeStep) {
