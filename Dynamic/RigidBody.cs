@@ -7,7 +7,7 @@ namespace MobaGame.Collision
     {
         private static VFixedPoint MAX_ANGVEL = FMath.Pi * VFixedPoint.Half;
 
-        private Matrix3f invInertiaTensorWorld;
+        private FMatrix3 invInertiaTensorWorld;
         private VInt3 linearVelocity;
         private VInt3 angularVelocity;
         private VFixedPoint inverseMass;
@@ -244,7 +244,7 @@ namespace MobaGame.Collision
             return inverseMass;
         }
 
-        public Matrix3f getInvInertiaTensorWorld() {
+        public FMatrix3 getInvInertiaTensorWorld() {
             return invInertiaTensorWorld;
         }
 
@@ -259,9 +259,9 @@ namespace MobaGame.Collision
             angularVelocity = tmp * step + angularVelocity;
 
             // clamp angular velocity. collision calculations will fail on higher angular velocities
-            float angvel = angularVelocity.length();
+            VFixedPoint angvel = angularVelocity.magnitude;
             if (angvel * step > MAX_ANGVEL) {
-                angularVelocity.scale((MAX_ANGVEL / step) / angvel);
+                angularVelocity *= MAX_ANGVEL / step / angvel;
             }
         }
 
@@ -407,14 +407,14 @@ namespace MobaGame.Collision
         {
             VInt3 r0 = pos - getCenterOfMassPosition();
             VInt3 c0 = VInt3.Cross(r0, normal);
-            VInt3 tmp = MatrixUtil.transposeTransform(tmp, c0, getInvInertiaTensorWorld(Stack.alloc(Matrix3f.class)));
+            VInt3 tmp = MatrixUtil.transposeTransform(tmp, c0, getInvInertiaTensorWorld());
             VInt3 vec = VInt3.Cross(tmp, r0);
             return inverseMass + VInt3.Dot(normal, vec);
         }
 
         public VFixedPoint computeAngularImpulseDenominator(VInt3 axis) {
             VInt3 vec = Stack.alloc(Vector3f.class);
-            MatrixUtil.transposeTransform(vec, axis, getInvInertiaTensorWorld(Stack.alloc(Matrix3f.class)));
+            MatrixUtil.transposeTransform(vec, axis, getInvInertiaTensorWorld());
             return axis += vec;
         }
 
