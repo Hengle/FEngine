@@ -125,8 +125,8 @@ namespace MobaGame.Collision
         /**
          * Continuous collision detection needs prediction.
          */
-        public void predictIntegratedTransform(VFixedPoint timeStep, VIntTransform predictedTransform) {
-            TransformUtil.integrateTransform(worldTransform, linearVelocity, angularVelocity, timeStep, predictedTransform);
+        public VIntTransform predictIntegratedTransform(VFixedPoint timeStep) {
+            return TransformUtil.integrateTransform(worldTransform, linearVelocity, angularVelocity, timeStep);
         }
 
         public void saveKinematicState(VFixedPoint timeStep) {
@@ -433,18 +433,10 @@ namespace MobaGame.Collision
                 return false;
             }
 
-            // disable deactivation
-            if (BulletGlobals.isDeactivationDisabled() || (BulletGlobals.getDeactivationTime() == 0f)) {
-                return false;
-            }
-
             if ((getActivationState() == ISLAND_SLEEPING) || (getActivationState() == WANTS_DEACTIVATION)) {
                 return true;
             }
 
-            if (deactivationTime > BulletGlobals.getDeactivationTime()) {
-                return true;
-            }
             return false;
         }
 
