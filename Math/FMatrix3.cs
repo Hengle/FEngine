@@ -66,6 +66,14 @@
             return new VInt3(x, y, z);
         }
 
+        public FMatrix3 Scale(VInt3 scale)
+        {
+            return new FMatrix3(matrix[0, 0] * scale.x, matrix[0, 1] * scale.y, matrix[0, 2] * scale.z,
+                matrix[1, 0] * scale.x, matrix[1, 1] * scale.y, matrix[1, 2] * scale.z,
+                matrix[2, 0] * scale.x, matrix[2, 1] * scale.y, matrix[2, 2] * scale.z
+            );
+        }
+
         public VFixedPoint this[int i, int j]
         {
             get { return matrix[i,j]; }

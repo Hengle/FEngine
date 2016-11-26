@@ -346,7 +346,6 @@ namespace MobaGame.Collision
         }
 
         public void updateInertiaTensor() {
-            Matrix3f mat1 = Stack.alloc(Matrix3f.class);
             MatrixUtil.scale(mat1, worldTransform.basis, invInertiaLocal);
 
             Matrix3f mat2 = Stack.alloc(worldTransform.basis);
@@ -407,15 +406,11 @@ namespace MobaGame.Collision
         {
             VInt3 r0 = pos - getCenterOfMassPosition();
             VInt3 c0 = VInt3.Cross(r0, normal);
-            VInt3 tmp = MatrixUtil.transposeTransform(tmp, c0, getInvInertiaTensorWorld());
             VInt3 vec = VInt3.Cross(tmp, r0);
             return inverseMass + VInt3.Dot(normal, vec);
         }
 
         public VFixedPoint computeAngularImpulseDenominator(VInt3 axis) {
-            VInt3 vec = Stack.alloc(Vector3f.class);
-            MatrixUtil.transposeTransform(vec, axis, getInvInertiaTensorWorld());
-            return axis += vec;
         }
 
         public void updateDeactivation(VFixedPoint timeStep) {
