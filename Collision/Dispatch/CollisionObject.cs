@@ -49,7 +49,7 @@ namespace MobaGame.Collision
             this.hitFraction = VFixedPoint.One;
         }
 
-        public bool checkCollideWithOverride(CollisionObject co)
+        public virtual bool checkCollideWithOverride(CollisionObject co)
         {
             return true;
         }

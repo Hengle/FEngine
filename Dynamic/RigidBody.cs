@@ -272,8 +272,8 @@ namespace MobaGame.Collision
             else {
                 interpolationWorldTransform = xform;
             }
-            getLinearVelocity(interpolationLinearVelocity);
-            getAngularVelocity(interpolationAngularVelocity);
+            interpolationLinearVelocity = getLinearVelocity();
+            interpolationAngularVelocity = getAngularVelocity();
             worldTransform = xform;
             updateInertiaTensor();
         }
@@ -285,5 +285,246 @@ namespace MobaGame.Collision
         public VInt3 getInvInertiaDiagLocal() {
             return invInertiaLocal;
         }
+
+        public void setInvInertiaDiagLocal(VInt3 diagInvInertia) {
+            invInertiaLocal = diagInvInertia;
+        }
+
+        public void setSleepingThresholds(VFixedPoint linear, VFixedPoint angular) {
+            linearSleepingThreshold = linear;
+            angularSleepingThreshold = angular;
+        }
+
+        public void applyTorque(VInt3 torque) {
+            totalTorque += torque;
+        }
+
+        public void applyForce(VInt3 force, VInt3 rel_pos)
+        {
+            applyCentralForce(force);
+
+            VInt3 tmp = VInt3.Cross(rel_pos, force) * angularFactor;
+            applyTorque(tmp);
+        }
+
+        public void applyCentralImpulse(VInt3 impulse)
+        {
+            linearVelocity = impulse * inverseMass + linearVelocity;
+        }
+
+        public void applyTorqueImpulse(VInt3 torque) {
+            VInt3 tmp = invInertiaTensorWorld.transform(torque);
+            angularVelocity += tmp;
+        }
+
+        public void applyImpulse(VInt3 impulse, VInt3 rel_pos) {
+            if (inverseMass != VFixedPoint.Zero) {
+                applyCentralImpulse(impulse);
+                if (angularFactor != VFixedPoint.Zero)
+                {
+                    VInt3 tmp = VInt3.Cross(rel_pos, impulse) * angularFactor;
+                    applyTorqueImpulse(tmp);
+                }
+            }
+        }
+
+        /**
+         * Optimization for the iterative solver: avoid calculating constant terms involving inertia, normal, relative position.
+         */
+        public void internalApplyImpulse(VInt3 linearComponent, VInt3 angularComponent, VFixedPoint impulseMagnitude) {
+            if (inverseMass != VFixedPoint.Zero) {
+                linearVelocity = linearComponent * impulseMagnitude + linearVelocity;
+                if (angularFactor != VFixedPoint.Zero) {
+                    angularVelocity = angularComponent * impulseMagnitude * angularFactor + angularVelocity;
+                }
+            }
+        }
+
+        public void clearForces() {
+            totalForce = VInt3.zero;
+            totalTorque = VInt3.zero;
+        }
+
+        public void updateInertiaTensor() {
+            Matrix3f mat1 = Stack.alloc(Matrix3f.class);
+            MatrixUtil.scale(mat1, worldTransform.basis, invInertiaLocal);
+
+            Matrix3f mat2 = Stack.alloc(worldTransform.basis);
+            mat2.transpose();
+
+            invInertiaTensorWorld.mul(mat1, mat2);
+        }
+
+        public VInt3 getCenterOfMassPosition() {
+            return worldTransform.position;
+        }
+
+        public VIntQuaternion getOrientation() {
+            return worldTransform.rotation;
+        }
+
+        public VIntTransform getCenterOfMassTransform() {
+            return worldTransform;
+        }
+
+        public VInt3 getLinearVelocity() {
+            return linearVelocity;
+        }
+
+        public VInt3 getAngularVelocity() {
+            return angularVelocity;
+        }
+
+        public void setLinearVelocity(VInt3 lin_vel)
+        {
+            if (collisionFlags != CollisionFlags.STATIC_OBJECT)
+                return;
+            linearVelocity = lin_vel;
+        }
+
+        public void setAngularVelocity(VInt3 ang_vel)
+        {
+            if (collisionFlags != CollisionFlags.STATIC_OBJECT)
+                return;
+            angularVelocity = ang_vel;
+        }
+
+        public VInt3 getVelocityInLocalPoint(VInt3 rel_pos) {
+            // we also calculate lin/ang velocity for kinematic objects
+            VInt3 vec = VInt3.Cross(angularVelocity, rel_pos) + linearVelocity;
+            return vec;
+        }
+
+        public void translate(VInt3 v) {
+            worldTransform.position += v;
+        }
+
+        public void getAabb(out VInt3 aabbMin, out VInt3 aabbMax) {
+            getCollisionShape().getAabb(worldTransform, out aabbMin, out aabbMax);
+        }
+
+        public VFixedPoint computeImpulseDenominator(VInt3 pos, VInt3 normal)
+        {
+            VInt3 r0 = pos - getCenterOfMassPosition();
+            VInt3 c0 = VInt3.Cross(r0, normal);
+            VInt3 tmp = MatrixUtil.transposeTransform(tmp, c0, getInvInertiaTensorWorld(Stack.alloc(Matrix3f.class)));
+            VInt3 vec = VInt3.Cross(tmp, r0);
+            return inverseMass + VInt3.Dot(normal, vec);
+        }
+
+        public VFixedPoint computeAngularImpulseDenominator(VInt3 axis) {
+            VInt3 vec = Stack.alloc(Vector3f.class);
+            MatrixUtil.transposeTransform(vec, axis, getInvInertiaTensorWorld(Stack.alloc(Matrix3f.class)));
+            return axis += vec;
+        }
+
+        public void updateDeactivation(VFixedPoint timeStep) {
+            if ((getActivationState() == ISLAND_SLEEPING) || (getActivationState() == DISABLE_DEACTIVATION)) {
+                return;
+            }
+
+            if ((getLinearVelocity().sqrMagnitude < linearSleepingThreshold * linearSleepingThreshold) &&
+            (getAngularVelocity().sqrMagnitude < angularSleepingThreshold * angularSleepingThreshold)) {
+                deactivationTime += timeStep;
+            }
+            else {
+                deactivationTime = VFixedPoint.Zero;
+                setActivationState(0);
+            }
+        }
+
+        public bool wantsSleeping() {
+            if (getActivationState() == DISABLE_DEACTIVATION) {
+                return false;
+            }
+
+            // disable deactivation
+            if (BulletGlobals.isDeactivationDisabled() || (BulletGlobals.getDeactivationTime() == 0f)) {
+                return false;
+            }
+
+            if ((getActivationState() == ISLAND_SLEEPING) || (getActivationState() == WANTS_DEACTIVATION)) {
+                return true;
+            }
+
+            if (deactivationTime > BulletGlobals.getDeactivationTime()) {
+                return true;
+            }
+            return false;
+        }
+
+        public BroadphaseProxy getBroadphaseProxy() {
+            return broadphaseHandle;
+        }
+
+        public void setNewBroadphaseProxy(BroadphaseProxy broadphaseProxy) {
+            this.broadphaseHandle = broadphaseProxy;
+        }
+
+        public MotionState getMotionState() {
+            return optionalMotionState;
+        }
+
+        public void setMotionState(MotionState motionState) {
+            this.optionalMotionState = motionState;
+            if (optionalMotionState != null) {
+                motionState.getWorldTransform(worldTransform);
+            }
+        }
+
+        public void setAngularFactor(VFixedPoint angFac) {
+            angularFactor = angFac;
+        }
+
+        public VFixedPoint getAngularFactor() {
+            return angularFactor;
+        }
+
+        /**
+         * Is this rigidbody added to a CollisionWorld/DynamicsWorld/Broadphase?
+         */
+        public bool isInWorld() {
+            return (getBroadphaseProxy() != null);
+        }
+
+        public override bool checkCollideWithOverride(CollisionObject co) {
+            // TODO: change to cast
+            RigidBody otherRb = RigidBody.upcast(co);
+            if (otherRb == null) {
+                return true;
+            }
+
+            for (int i = 0; i < constraints.Count; ++i) {
+                TypedConstraint c = constraints[i];
+                if (c.getRigidBodyA() == otherRb || c.getRigidBodyB() == otherRb) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public void addConstraintRef(TypedConstraint c) {
+            int index = constraints.IndexOf(c);
+            if (index == -1) {
+                constraints.Add(c);
+            }
+
+            checkCollideWith = true;
+        }
+
+        public void removeConstraintRef(TypedConstraint c) {
+            constraints.Remove(c);
+            checkCollideWith = (constraints.Count > 0);
+        }
+
+        public TypedConstraint getConstraintRef(int index) {
+            return constraints[index];
+        }
+
+        public int getNumConstraintRefs() {
+            return constraints.Count;
+        }
+
     }
 }
