@@ -4,7 +4,6 @@ namespace MobaGame.Collision
 {
     public abstract class DynamicWorld: CollisionWorld
     {
-        protected InternalTickCallback internalTickCallback;
         protected object worldUserInfo;
 
         protected ContactSolverInfo solverInfo = new ContactSolverInfo();
@@ -46,15 +45,6 @@ namespace MobaGame.Collision
         public abstract DynamicsWorldType getWorldType();
 
         public abstract void clearForces();
-
-        /**
-         * Set the callback for when an internal tick (simulation substep) happens, optional user info.
-         */
-        public void setInternalTickCallback(InternalTickCallback cb, object worldUserInfo)
-        {
-            this.internalTickCallback = cb;
-            this.worldUserInfo = worldUserInfo;
-        }
 
         public void setWorldUserInfo(object worldUserInfo)
         {

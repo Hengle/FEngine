@@ -30,9 +30,6 @@ namespace MobaGame.Collision
         private VFixedPoint linearSleepingThreshold;
         private VFixedPoint angularSleepingThreshold;
 
-        // optionalMotionState allows to automatic synchronize the world transform for active objects
-        private MotionState optionalMotionState;
-
         // keep track of typed constraints referencing this rigid body
         private List<TypedConstraint> constraints = new List<TypedConstraint>();
 
@@ -44,15 +41,15 @@ namespace MobaGame.Collision
             setupRigidBody(constructionInfo);
         }
 
-        public RigidBody(VFixedPoint mass, MotionState motionState, CollisionShape collisionShape):
-            this(mass, motionState, collisionShape, VInt3.zero)
+        public RigidBody(VFixedPoint mass, CollisionShape collisionShape):
+            this(mass, collisionShape, VInt3.zero)
         {
 
         }
 
-        public RigidBody(VFixedPoint mass, MotionState motionState, CollisionShape collisionShape, VInt3 localInertia)
+        public RigidBody(VFixedPoint mass, CollisionShape collisionShape, VInt3 localInertia)
         {
-            RigidBodyConstructionInfo cinfo = new RigidBodyConstructionInfo(mass, motionState, collisionShape, localInertia);
+            RigidBodyConstructionInfo cinfo = new RigidBodyConstructionInfo(mass, collisionShape, localInertia);
             setupRigidBody(cinfo);
         }
 
@@ -69,7 +66,6 @@ namespace MobaGame.Collision
             angularDamping = VFixedPoint.Half;
             linearSleepingThreshold = constructionInfo.linearSleepingThreshold;
             angularSleepingThreshold = constructionInfo.angularSleepingThreshold;
-            optionalMotionState = constructionInfo.motionState;
             contactSolverType = 0;
             frictionSolverType = 0;
             additionalDamping = constructionInfo.additionalDamping;
@@ -77,14 +73,7 @@ namespace MobaGame.Collision
             additionalLinearDampingThresholdSqr = constructionInfo.additionalLinearDampingThresholdSqr;
             additionalAngularDampingThresholdSqr = constructionInfo.additionalAngularDampingThresholdSqr;
             additionalAngularDampingFactor = constructionInfo.additionalAngularDampingFactor;
-
-            if (optionalMotionState != null)
-            {
-                worldTransform = optionalMotionState.getWorldTransform();
-            } else
-            {
-                worldTransform = constructionInfo.startWorldTransform;
-            }
+            worldTransform = constructionInfo.startWorldTransform;
 
             interpolationWorldTransform = worldTransform;
             interpolationLinearVelocity = VInt3.zero;
@@ -132,12 +121,6 @@ namespace MobaGame.Collision
         public void saveKinematicState(VFixedPoint timeStep) {
             //todo: clamp to some (user definable) safe minimum timestep, to limit maximum angular/linear velocities
             if (timeStep != VFixedPoint.Zero) {
-                //if we use motionstate to synchronize world transforms, get the new kinematic/animated world transform
-                if (getMotionState() != null) {
-                    worldTransform = getMotionState().getWorldTransform();
-                }
-                //Vector3f linVel = new Vector3f(), angVel = new Vector3f();
-
                 TransformUtil.calculateVelocity(interpolationWorldTransform, worldTransform, timeStep, ref linearVelocity, ref angularVelocity);
                 interpolationLinearVelocity = linearVelocity;
                 interpolationAngularVelocity = angularVelocity;
@@ -446,17 +429,6 @@ namespace MobaGame.Collision
 
         public void setNewBroadphaseProxy(BroadphaseProxy broadphaseProxy) {
             this.broadphaseHandle = broadphaseProxy;
-        }
-
-        public MotionState getMotionState() {
-            return optionalMotionState;
-        }
-
-        public void setMotionState(MotionState motionState) {
-            this.optionalMotionState = motionState;
-            if (optionalMotionState != null) {
-                motionState.getWorldTransform(worldTransform);
-            }
         }
 
         public void setAngularFactor(VFixedPoint angFac) {

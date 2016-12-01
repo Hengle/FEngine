@@ -6,11 +6,6 @@ namespace MobaGame.Collision
     {
         public VFixedPoint mass;
 
-        /**
-         * When a motionState is provided, the rigid body will initialize its world transform
-         * from the motion state. In this case, startWorldTransform is ignored.
-         */
-        public MotionState motionState;
         public VIntTransform startWorldTransform = VIntTransform.Identity;
 
         public CollisionShape collisionShape;
@@ -37,15 +32,14 @@ namespace MobaGame.Collision
         public VFixedPoint additionalAngularDampingThresholdSqr = VFixedPoint.Create(0.01f);
         public VFixedPoint additionalAngularDampingFactor = VFixedPoint.Create(0.01f);
 
-        public RigidBodyConstructionInfo(VFixedPoint mass, MotionState motionState, CollisionShape collisionShape):
-            this(mass, motionState, collisionShape, VInt3.zero)
+        public RigidBodyConstructionInfo(VFixedPoint mass, CollisionShape collisionShape):
+            this(mass, collisionShape, VInt3.zero)
         {
 
         }
 
-        public RigidBodyConstructionInfo(VFixedPoint mass, MotionState motionState, CollisionShape collisionShape, VInt3 localInertia) {
+        public RigidBodyConstructionInfo(VFixedPoint mass, CollisionShape collisionShape, VInt3 localInertia) {
             this.mass = mass;
-            this.motionState = motionState;
             this.collisionShape = collisionShape;
             this.localInertia = localInertia;
         }
