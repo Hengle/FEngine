@@ -2,6 +2,13 @@
 
 namespace MobaGame.Collision
 {
+    public enum ConstraintSolverType
+    {
+        BT_SEQUENTIAL_IMPULSE_SOLVER = 1,
+        BT_MLCP_SOLVER = 2,
+        BT_NNCG_SOLVER = 4
+    };
+
     public abstract class ConstraintSolver {
 
         //protected final BulletStack stack = BulletStack.get();
