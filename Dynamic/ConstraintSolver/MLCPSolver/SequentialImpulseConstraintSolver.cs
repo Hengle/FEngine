@@ -12,14 +12,6 @@ namespace MobaGame.Collision
 
         private int totalCpd = 0;
 
-        {
-            for (int i=0; i<gOrder.length; i++) {
-                gOrder[i] = new OrderIndex();
-            }
-        }
-
-        ////////////////////////////////////////////////////////////////////////////
-
         private readonly ObjectPool<SolverBody> bodiesPool = new ObjectPool<SolverBody>();
         private readonly ObjectPool<SolverConstraint> constraintsPool = new ObjectPool<SolverConstraint>();
         private readonly ObjectPool<JacobianEntry> jacobiansPool = new ObjectPool<JacobianEntry>();
@@ -35,5 +27,38 @@ namespace MobaGame.Collision
 
         // btSeed2 is used for re-arranging the constraint rows. improves convergence/quality of friction
         protected long btSeed2 = 0L;
+
+        public SequentialImpulseConstraintSolver()
+        {
+            for (int i = 0; i < gOrder.Length; i++)
+            {
+                gOrder[i] = new OrderIndex();
+            }
+
+            for (int i = 0; i < MAX_CONTACT_SOLVER_TYPES; i++)
+            {
+                for (int j = 0; j < MAX_CONTACT_SOLVER_TYPES; j++)
+                {
+                    contactDispatch[i, j] = ContactConstraint.resolveSingleCollision;
+                    frictionDispatch[i, j] = ContactConstraint.resolveSingleFriction;
+                }
+            }
+        }
+
+        public override float solveGroup(List<CollisionObject> bodies, int numBodies, List<PersistentManifold> manifold, int manifold_offset, int numManifolds, List<TypedConstraint> constraints, int constraints_offset, int numConstraints, ContactSolverInfo info, Dispatcher dispatcher)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void reset()
+        {
+            throw new NotImplementedException();
+        }
+
+        private class OrderIndex
+        {
+            public int manifoldIndex;
+            public int pointIndex;
+        }
     }
 }

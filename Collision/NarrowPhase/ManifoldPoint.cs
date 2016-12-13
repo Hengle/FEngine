@@ -20,6 +20,7 @@ namespace MobaGame.Collision
         public int index0;
         public int index1;
 
+        public ConstraintPersistentData userPersistentData;
         public VFixedPoint appliedImpulse;
 
         public bool lateralFrictionInitialized;
@@ -81,6 +82,7 @@ namespace MobaGame.Collision
             partId1 = p.partId1;
             index0 = p.index0;
             index1 = p.index1;
+            userPersistentData = p.userPersistentData;
             appliedImpulse = p.appliedImpulse;
             lateralFrictionInitialized = p.lateralFrictionInitialized;
             appliedImpulseLateral1 = p.appliedImpulseLateral1;
@@ -90,17 +92,15 @@ namespace MobaGame.Collision
             lateralFrictionDir2 = p.lateralFrictionDir2;
         }
 
-        public VInt3 getPositionWorldOnA(VInt3 output)
+        public VInt3 getPositionWorldOnA()
         {
-            output = positionWorldOnA;
-            return output;
+            return positionWorldOnA;
             //return m_positionWorldOnB + m_normalWorldOnB * m_distance1;
         }
 
-        public VInt3 getPositionWorldOnB(VInt3 output)
+        public VInt3 getPositionWorldOnB()
         {
-            output = positionWorldOnB;
-            return output;
+            return positionWorldOnB;
         }
 
         public void setDistance(VFixedPoint dist)

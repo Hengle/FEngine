@@ -125,6 +125,11 @@ namespace MobaGame.Collision
             this.body1 = body1;
         }
 
+        public void clearUserCache(ManifoldPoint pt)
+        {
+            pt.userPersistentData = null;
+        }
+
         public int getNumContacts()
         {
             return cachedPoints;
@@ -165,18 +170,16 @@ namespace MobaGame.Collision
             int insertIndex = getNumContacts();
             if (insertIndex == MANIFOLD_CACHE_SIZE)
             {
-                //#if MANIFOLD_CACHE_SIZE >= 4
                 if (MANIFOLD_CACHE_SIZE >= 4)
                 {
                     //sort cache so best points come first, based on area
                     insertIndex = sortCachedPoints(newPoint);
                 }
-                else {
-                    //#else
+                else
+                {
                     insertIndex = 0;
                 }
-                //#endif
-;
+                clearUserCache(pointCache[insertIndex]);
             }
             else {
                 cachedPoints++;
@@ -188,6 +191,7 @@ namespace MobaGame.Collision
 
         public void removeContactPoint(int index)
         {
+            clearUserCache(pointCache[index]);
 
             int lastUsedIndex = getNumContacts() - 1;
             //		m_pointCache[index] = m_pointCache[lastUsedIndex];
@@ -196,6 +200,7 @@ namespace MobaGame.Collision
                 // TODO: possible bug
                 pointCache[index].set(pointCache[lastUsedIndex]);
                 //get rid of duplicated userPersistentData pointer
+                pointCache[lastUsedIndex].userPersistentData = null;
                 pointCache[lastUsedIndex].appliedImpulse = VFixedPoint.Zero;
                 pointCache[lastUsedIndex].lateralFrictionInitialized = false;
                 pointCache[lastUsedIndex].appliedImpulseLateral1 = VFixedPoint.Zero;
@@ -208,24 +213,21 @@ namespace MobaGame.Collision
 
         public void replaceContactPoint(ManifoldPoint newPoint, int insertIndex)
         {
-
-            //#define MAINTAIN_PERSISTENCY 1
-            //#ifdef MAINTAIN_PERSISTENCY
             int lifeTime = pointCache[insertIndex].getLifeTime();
             VFixedPoint appliedImpulse = pointCache[insertIndex].appliedImpulse;
             VFixedPoint appliedLateralImpulse1 = pointCache[insertIndex].appliedImpulseLateral1;
             VFixedPoint appliedLateralImpulse2 = pointCache[insertIndex].appliedImpulseLateral2;
 
+            ConstraintPersistentData cache = pointCache[insertIndex].userPersistentData;
+
             pointCache[insertIndex].set(newPoint);
+            pointCache[insertIndex].userPersistentData = cache;
             pointCache[insertIndex].appliedImpulse = appliedImpulse;
             pointCache[insertIndex].appliedImpulseLateral1 = appliedLateralImpulse1;
             pointCache[insertIndex].appliedImpulseLateral2 = appliedLateralImpulse2;
 
             pointCache[insertIndex].lifeTime = lifeTime;
-            //#else
-            //		clearUserCache(m_pointCache[insertIndex]);
-            //		m_pointCache[insertIndex] = newPoint;
-            //#endif
+
         }
 
         private bool validContactDistance(ManifoldPoint pt)
@@ -282,6 +284,10 @@ namespace MobaGame.Collision
         public void clearManifold()
         {
             cachedPoints = 0;
+            for (int i = 0; i < cachedPoints; i++)
+            {
+                clearUserCache(pointCache[i]);
+            }
         }
 
     }
