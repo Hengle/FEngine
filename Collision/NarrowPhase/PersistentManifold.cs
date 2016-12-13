@@ -238,10 +238,9 @@ namespace MobaGame.Collision
         public void refreshContactPoints(VIntTransform trA, VIntTransform trB)
         {
             VInt3 tmp = new VInt3();
-		    int i;
 
 		    // first refresh worldspace positions and distance
-		    for (i = getNumContacts() - 1; i >= 0; i--) {
+		    for (int i = getNumContacts() - 1; i >= 0; i--) {
 			    ManifoldPoint manifoldPoint = pointCache[i];
 
                 manifoldPoint.positionWorldOnA = manifoldPoint.localPointA;
