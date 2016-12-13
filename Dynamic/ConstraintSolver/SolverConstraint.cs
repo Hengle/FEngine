@@ -31,6 +31,6 @@ namespace MobaGame.Collision
 
         public SolverConstraintType constraintType;
         public int frictionIndex;
-        public ManifoldPoint originalContactPoint;
+        public TypedConstraint originalContactPoint;
     }
 }

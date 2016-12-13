@@ -160,7 +160,7 @@ namespace MobaGame.Collision
             }
         }
 
-        void writebackVelocityAndTransform(VFixedPoint timeStep, VFixedPoint splitImpulseTurnErp)
+        public void writebackVelocityAndTransform(VFixedPoint timeStep, VFixedPoint splitImpulseTurnErp)
         {
             if (originalBody != null)
             {

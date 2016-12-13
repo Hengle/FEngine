@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace MobaGame.Framework
 { 
@@ -33,16 +34,19 @@ namespace MobaGame.Framework
             return old;
         }
 
-        public int get(int index)
+        public int this[int index]
         {
-            if (index >= size) throw new IndexOutOfRangeException();
-            return array[index];
-        }
+            set
+            {
+                if (index >= size) throw new IndexOutOfRangeException();
+                array[index] = value;
+            }
 
-        public void set(int index, int value)
-        {
-            if (index >= size) throw new IndexOutOfRangeException();
-            array[index] = value;
+            get
+            {
+                if (index >= size) throw new IndexOutOfRangeException();
+                return array[index];
+            }
         }
 
         public int Size()

@@ -21,9 +21,9 @@ namespace MobaGame.Collision
 
         private TypedConstraintType constraintType;
 
-        protected RigidBody rbA;
-        protected RigidBody rbB;
-        protected VFixedPoint appliedImpulse;
+        public RigidBody rbA;
+        public RigidBody rbB;
+        public VFixedPoint appliedImpulse;
 
         public TypedConstraint(TypedConstraintType type, RigidBody rbA): this(type, rbA, getFixed())
         {
