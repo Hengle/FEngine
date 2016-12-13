@@ -55,21 +55,21 @@ namespace MobaGame.Collision
             int pairIndex = overlappingPairArray.IndexOf(pair);
 
             // Remove the pair from the hash table.
-            int index = hashTable.get(hash);
+            int index = hashTable[hash];
 
             int previous = NULL_PAIR;
             while (index != pairIndex)
             {
                 previous = index;
-                index = next.get(index);
+                index = next[index];
             }
 
             if (previous != NULL_PAIR)
             {
-                next.set(previous, next.get(pairIndex));
+                next[previous] = next[pairIndex];
             }
             else {
-                hashTable.set(hash, next.get(pairIndex));
+                hashTable[hash] = next[pairIndex];
             }
 
             // We now move the last pair into spot of the
@@ -95,29 +95,29 @@ namespace MobaGame.Collision
             /* missing swap here too, Nat. */
             int lastHash = getHash(last.pProxy0.getUid(), last.pProxy1.getUid()) & (overlappingPairArray.Capacity - 1);
 
-            index = hashTable.get(lastHash);
+            index = hashTable[lastHash];
 
             previous = NULL_PAIR;
             while (index != lastPairIndex)
             {
                 previous = index;
-                index = next.get(index);
+                index = next[index];
             }
 
             if (previous != NULL_PAIR)
             {
-                next.set(previous, next.get(lastPairIndex));
+                next[previous] = next[lastPairIndex];
             }
             else {
-                hashTable.set(lastHash, next.get(lastPairIndex));
+                hashTable[lastHash] = next[lastPairIndex];
             }
 
             // Copy the last pair into the remove pair's spot.
             overlappingPairArray[pairIndex] = overlappingPairArray[lastPairIndex];
 
             // Insert the last pair into the hash table
-            next.set(pairIndex, hashTable.get(lastHash));
-            hashTable.set(lastHash, pairIndex);
+            next[pairIndex] = hashTable[lastHash];
+            hashTable[lastHash] = pairIndex;
 
             overlappingPairArray.RemoveAt(overlappingPairArray.Count - 1);
 
@@ -200,10 +200,10 @@ namespace MobaGame.Collision
                 return null;
             }
 
-            int index = hashTable.get(hash);
+            int index = hashTable[hash];
             while (index != NULL_PAIR && equalsPair(overlappingPairArray[index], proxyId1, proxyId2) == false)
             {
-                index = next.get(index);
+                index = next[index];
             }
 
             if (index == NULL_PAIR)
@@ -296,8 +296,8 @@ namespace MobaGame.Collision
 
             overlappingPairArray[overlappingPairArray.Count - 1] = pair;
 
-            next.set(count, hashTable.get(hash));
-            hashTable.set(hash, count);
+            next[count] =  hashTable[hash];
+            hashTable[hash] = count;
 
             return pair;
         }
@@ -316,11 +316,11 @@ namespace MobaGame.Collision
 
                 for (int i = 0; i < newCapacity; ++i)
                 {
-                    hashTable.set(i, NULL_PAIR);
+                    hashTable[i] = NULL_PAIR;
                 }
                 for (int i = 0; i < newCapacity; ++i)
                 {
-                    next.set(i, NULL_PAIR);
+                    next[i] = NULL_PAIR;
                 }
 
                 for (int i = 0; i < curHashtableSize; i++)
@@ -332,8 +332,8 @@ namespace MobaGame.Collision
                     /*if (proxyId1 > proxyId2) 
                     btSwap(proxyId1, proxyId2);*/
                     int hashValue = getHash(proxyId1, proxyId2) & (overlappingPairArray.Capacity - 1); // New hash value with new mask
-                    next.set(i, hashTable.get(hashValue));
-                    hashTable.set(hashValue, i);
+                    next[i] = hashTable[hashValue];
+                    hashTable[hashValue] = i;
                 }
             }
         }
@@ -366,11 +366,11 @@ namespace MobaGame.Collision
             //	btSwap(proxyId1, proxyId2);
             //#endif
 
-            int index = hashTable.get(hash);
+            int index = hashTable[hash];
 
             while (index != NULL_PAIR && equalsPair(overlappingPairArray[index], proxyId1, proxyId2) == false)
             {
-                index = next.get(index);
+                index = next[index];
             }
 
             if (index == NULL_PAIR)

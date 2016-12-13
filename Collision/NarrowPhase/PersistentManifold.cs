@@ -127,7 +127,7 @@ namespace MobaGame.Collision
 
         public void clearUserCache(ManifoldPoint pt)
         {
-            pt.userPersistentData = null;
+
         }
 
         public int getNumContacts()
@@ -200,7 +200,6 @@ namespace MobaGame.Collision
                 // TODO: possible bug
                 pointCache[index].set(pointCache[lastUsedIndex]);
                 //get rid of duplicated userPersistentData pointer
-                pointCache[lastUsedIndex].userPersistentData = null;
                 pointCache[lastUsedIndex].appliedImpulse = VFixedPoint.Zero;
                 pointCache[lastUsedIndex].lateralFrictionInitialized = false;
                 pointCache[lastUsedIndex].appliedImpulseLateral1 = VFixedPoint.Zero;
@@ -218,10 +217,7 @@ namespace MobaGame.Collision
             VFixedPoint appliedLateralImpulse1 = pointCache[insertIndex].appliedImpulseLateral1;
             VFixedPoint appliedLateralImpulse2 = pointCache[insertIndex].appliedImpulseLateral2;
 
-            ConstraintPersistentData cache = pointCache[insertIndex].userPersistentData;
-
             pointCache[insertIndex].set(newPoint);
-            pointCache[insertIndex].userPersistentData = cache;
             pointCache[insertIndex].appliedImpulse = appliedImpulse;
             pointCache[insertIndex].appliedImpulseLateral1 = appliedLateralImpulse1;
             pointCache[insertIndex].appliedImpulseLateral2 = appliedLateralImpulse2;
@@ -260,7 +256,7 @@ namespace MobaGame.Collision
             VInt3 projectedDifference = new VInt3();
             VInt3 projectedPoint = new VInt3();
 
-		    for (i = getNumContacts() - 1; i >= 0; i--) {
+		    for (int i = getNumContacts() - 1; i >= 0; i--) {
 
 			    ManifoldPoint manifoldPoint = pointCache[i];
 			    // contact becomes invalid when signed distance exceeds margin (projected on contactnormal direction)

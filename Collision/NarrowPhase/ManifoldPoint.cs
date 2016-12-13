@@ -20,7 +20,6 @@ namespace MobaGame.Collision
         public int index0;
         public int index1;
 
-        public ConstraintPersistentData userPersistentData;
         public VFixedPoint appliedImpulse;
 
         public bool lateralFrictionInitialized;
@@ -82,7 +81,6 @@ namespace MobaGame.Collision
             partId1 = p.partId1;
             index0 = p.index0;
             index1 = p.index1;
-            userPersistentData = p.userPersistentData;
             appliedImpulse = p.appliedImpulse;
             lateralFrictionInitialized = p.lateralFrictionInitialized;
             appliedImpulseLateral1 = p.appliedImpulseLateral1;
