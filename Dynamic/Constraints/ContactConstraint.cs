@@ -8,7 +8,7 @@ namespace MobaGame.Collision
         static ObjectPool<JacobianEntry> jacobiansPool = new ObjectPool<JacobianEntry>();
 
         /**
-	     * Response between two dynamic objects with friction.
+	     * Response between two dynamic objects without friction.
          */
 	    public static VFixedPoint resolveSingleCollision(
                 RigidBody body1,
@@ -68,7 +68,7 @@ namespace MobaGame.Collision
 
         /**
 	     * velocity + friction<br>
-	     * response between two dynamic objects with friction
+	     * response friction between two dynamic objects 
 	     */
         public static VFixedPoint resolveSingleFriction(
             RigidBody body1,
@@ -159,7 +159,6 @@ namespace MobaGame.Collision
 
             VFixedPoint Kfps = VFixedPoint.One / solverInfo.timeStep;
 
-            //btScalar damping = solverInfo.m_damping ;
             VFixedPoint Kerp = solverInfo.erp;
             VFixedPoint Kcor = Kerp * Kfps;
 
@@ -190,7 +189,6 @@ namespace MobaGame.Collision
             {
 			    body2.internalApplyImpulse(contactPoint.normalWorldOnB * body2.getInvMass(), cpd.angularComponentB, -normalImpulse);
 		    }
-
 		    
             //friction
             vel1 = body1.getVelocityInLocalPoint(rel_pos1);
@@ -209,17 +207,15 @@ namespace MobaGame.Collision
 					lat_vel  /= lat_rel_vel;
 
 					VInt3 temp1 = VInt3.Cross(rel_pos1, lat_vel);
-					body1.getInvInertiaTensorWorld().transform(temp1);
+                    temp1 = body1.getInvInertiaTensorWorld().Transform(temp1);
 
                     VInt3 temp2 = VInt3.Cross(rel_pos2, lat_vel);
-					body2.getInvInertiaTensorWorld().transform(temp2);
+                    temp2 = body2.getInvInertiaTensorWorld().Transform(temp2);
 
                     VInt3 java_tmp1 = VInt3.Cross(temp1, rel_pos1);
-
-					VInt3 java_tmp2 = VInt3.Cross(temp2, rel_pos2);
+                    VInt3 java_tmp2 = VInt3.Cross(temp2, rel_pos2);
 
                     VInt3 tmp = java_tmp1 + java_tmp2;
-
 					VFixedPoint friction_impulse = lat_rel_vel /
                             (body1.getInvMass() + body2.getInvMass() + VInt3.Dot(lat_vel, tmp));
                     VFixedPoint normal_impulse = cpd.appliedImpulse * combinedFriction;
