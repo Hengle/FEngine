@@ -1,34 +1,47 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    public class ContactConstraint
+    public class ContactConstraint: TypedConstraint
     {
-        static ObjectPool<JacobianEntry> jacobiansPool = new ObjectPool<JacobianEntry>();
+        protected PersistentManifold contactManifold;
+
+        ObjectPool<JacobianEntry> jacobiansPool = new ObjectPool<JacobianEntry>();
+
+        public ContactConstraint(PersistentManifold contactManifold, RigidBody rbA, RigidBody rbB):base(TypedConstraintType.CONTACT_CONSTRAINT_TYPE, rbA, rbB)
+        {
+            this.contactManifold = contactManifold;
+        }
+
+        public override ConstraintInfo1 getInfo1()
+        {
+            return null;
+        }
+
+        public override ConstraintInfo2 getInfo2()
+        {
+            return null;
+        }
 
         /**
 	     * Response between two dynamic objects without friction.
          */
-	    public static VFixedPoint resolveSingleCollision(
-                RigidBody body1,
-                RigidBody body2,
-                ManifoldPoint contactPoint,
-                ContactSolverInfo solverInfo)
+        public VFixedPoint resolveSingleCollision(RigidBody body1, RigidBody body2, ManifoldPoint contactPoint, ContactSolverInfo solverInfo)
         {
-		    VInt3 pos1_ = contactPoint.getPositionWorldOnA();
-		    VInt3 pos2_ = contactPoint.getPositionWorldOnB();
-		    VInt3 normal = contactPoint.normalWorldOnB;
+            VInt3 pos1_ = contactPoint.getPositionWorldOnA();
+            VInt3 pos2_ = contactPoint.getPositionWorldOnB();
+            VInt3 normal = contactPoint.normalWorldOnB;
 
             // constant over all iterations
             VInt3 rel_pos1 = pos1_ - body1.getCenterOfMassPosition();
             VInt3 rel_pos2 = pos2_ - body2.getCenterOfMassPosition();
 
             VInt3 vel1 = body1.getVelocityInLocalPoint(rel_pos1);
-		    VInt3 vel2 = body2.getVelocityInLocalPoint(rel_pos2);
-		    VInt3 vel = vel1 - vel2;
+            VInt3 vel2 = body2.getVelocityInLocalPoint(rel_pos2);
+            VInt3 vel = vel1 - vel2;
 
-		    VFixedPoint rel_vel = VInt3.Dot(normal, vel);
+            VFixedPoint rel_vel = VInt3.Dot(normal, vel);
 
             VFixedPoint Kfps = VFixedPoint.One / solverInfo.timeStep;
 
@@ -50,27 +63,27 @@ namespace MobaGame.Collision
             // See Erin Catto's GDC 2006 paper: Clamp the accumulated impulse
             VFixedPoint oldNormalImpulse = cpd.appliedImpulse;
             VFixedPoint sum = oldNormalImpulse + normalImpulse;
-            cpd.appliedImpulse = VFixedPoint.Zero > sum? VFixedPoint.Zero : sum;
+            cpd.appliedImpulse = VFixedPoint.Zero > sum ? VFixedPoint.Zero : sum;
 
-		    normalImpulse = cpd.appliedImpulse - oldNormalImpulse;
+            normalImpulse = cpd.appliedImpulse - oldNormalImpulse;
 
-		    if (body1.getInvMass() != VFixedPoint.Zero)
+            if (body1.getInvMass() != VFixedPoint.Zero)
             {
-			    body1.internalApplyImpulse(contactPoint.normalWorldOnB * body1.getInvMass(), cpd.angularComponentA, normalImpulse);
-		    }
-		    if (body2.getInvMass() != VFixedPoint.Zero)
+                body1.internalApplyImpulse(contactPoint.normalWorldOnB * body1.getInvMass(), cpd.angularComponentA, normalImpulse);
+            }
+            if (body2.getInvMass() != VFixedPoint.Zero)
             {
-			    body2.internalApplyImpulse(contactPoint.normalWorldOnB * body2.getInvMass(), cpd.angularComponentB, -normalImpulse);
-		    }
+                body2.internalApplyImpulse(contactPoint.normalWorldOnB * body2.getInvMass(), cpd.angularComponentB, -normalImpulse);
+            }
 
-		    return normalImpulse;
-	    }
+            return normalImpulse;
+        }
 
         /**
 	     * velocity + friction<br>
 	     * response friction between two dynamic objects 
 	     */
-        public static VFixedPoint resolveSingleFriction(
+        public static VFixedPoint ResolveSingleFriction(
             RigidBody body1,
             RigidBody body2,
             ManifoldPoint contactPoint,
@@ -82,7 +95,7 @@ namespace MobaGame.Collision
             VInt3 rel_pos1 = pos1 - body1.getCenterOfMassPosition();
             VInt3 rel_pos2 = pos2 - body2.getCenterOfMassPosition();
 
-		    ConstraintPersistentData cpd = (ConstraintPersistentData)contactPoint.userPersistentData;
+		    ConstraintPersistentData cpd = contactPoint.userPersistentData;
 
             VFixedPoint combinedFriction = cpd.friction;
 
@@ -138,7 +151,7 @@ namespace MobaGame.Collision
 	     * velocity + friction<br>
 	     * response between two dynamic objects with friction
 	     */
-        public static VFixedPoint resolveSingleCollisionCombined(
+        public static VFixedPoint ResolveSingleCollisionCombined(
                 RigidBody body1,
                 RigidBody body2,
                 ManifoldPoint contactPoint,
@@ -162,7 +175,7 @@ namespace MobaGame.Collision
             VFixedPoint Kerp = solverInfo.erp;
             VFixedPoint Kcor = Kerp * Kfps;
 
-            ConstraintPersistentData cpd = (ConstraintPersistentData)contactPoint.userPersistentData;
+            ConstraintPersistentData cpd = contactPoint.userPersistentData;
 
             VFixedPoint distance = cpd.penetration;
             VFixedPoint positionalError = Kcor * -distance;
@@ -228,14 +241,5 @@ namespace MobaGame.Collision
 			}
 		    return normalImpulse;
 	    }
-
-        public static VFixedPoint resolveSingleFrictionEmpty(
-            RigidBody body1,
-            RigidBody body2,
-            ManifoldPoint contactPoint,
-            ContactSolverInfo solverInfo)
-        {
-            return VFixedPoint.Zero;
-        }
     }
 }
