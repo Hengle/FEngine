@@ -40,8 +40,6 @@
         public override void removeOverlappingPairsContainingProxy(BroadphaseProxy proxy0, Dispatcher dispatcher)
         {
 
-            // need to keep track of all ghost objects and call them here
-            // hashPairCache.removeOverlappingPairsContainingProxy(proxy0, dispatcher);
         }
     }
 }

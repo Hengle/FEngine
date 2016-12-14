@@ -41,8 +41,6 @@ namespace MobaGame.Collision
             //also need to keep 'deepest'
 
             int maxPenetrationIndex = -1;
-            //#define KEEP_DEEPEST_POINT 1
-            //#ifdef KEEP_DEEPEST_POINT
             VFixedPoint maxPenetration = pt.getDistance();
             for (int i = 0; i < 4; i++)
             {
@@ -52,7 +50,6 @@ namespace MobaGame.Collision
                     maxPenetration = pointCache[i].getDistance();
                 }
             }
-            //#endif //KEEP_DEEPEST_POINT
 
             VFixedPoint maxVal = VFixedPoint.MinValue;
             int maxNum = -1;

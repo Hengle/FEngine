@@ -15,21 +15,22 @@ namespace MobaGame.Collision
 
         private IntArrayList hashTable = new IntArrayList();
         private IntArrayList next = new IntArrayList();
-        protected OverlappingPairCallback ghostPairCallback;
 
         public override BroadphasePair addOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1)
         {
-
             if (!needsBroadphaseCollision(proxy0, proxy1))
             {
                 return null;
             }
 
+            base.addOverlappingPair(proxy0, proxy1);
             return internalAddPair(proxy0, proxy1);
         }
 
         public override void removeOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1, Dispatcher dispatcher)
         {
+            base.removeOverlappingPair(proxy0, proxy1, dispatcher);
+
             if (proxy0.getUid() > proxy1.getUid())
             {
                 BroadphaseProxy tmp = proxy0;
@@ -75,12 +76,7 @@ namespace MobaGame.Collision
             // table indices to support the move.
 
             int lastPairIndex = overlappingPairArray.Count - 1;
-
-            if (ghostPairCallback != null)
-            {
-                ghostPairCallback.removeOverlappingPair(proxy0, proxy1, dispatcher);
-            }
-
+         
             // If the removed pair is the last pair, we are done.
             if (lastPairIndex == pairIndex)
             {
@@ -256,12 +252,6 @@ namespace MobaGame.Collision
             int oldCapacity = overlappingPairArray.Capacity;
             overlappingPairArray.Add(null);
 
-            // this is where we add an actual pair, so also call the 'ghost'
-            if (ghostPairCallback != null)
-            {
-                ghostPairCallback.addOverlappingPair(proxy0, proxy1);
-            }
-
             int newCapacity = overlappingPairArray.Capacity;
 
             if (oldCapacity < newCapacity)
@@ -353,11 +343,6 @@ namespace MobaGame.Collision
             }
 
             return overlappingPairArray[index];
-        }
-
-        public override void setInternalGhostPairCallback(OverlappingPairCallback ghostPairCallback)
-        {
-            this.ghostPairCallback = ghostPairCallback;
         }
 
         private class RemovePairCallback: OverlapCallback

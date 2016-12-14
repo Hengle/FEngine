@@ -158,6 +158,7 @@ namespace MobaGame.Collision
             public override bool processOverlap(BroadphasePair pair)
             {
                 ManifoldResult result = dispatcher.getNearCallback().handleCollision(pair, dispatcher, dispatchInfo);
+                //remove pair without contact
                 return result.getPersistentManifold().getNumContacts() == 0;
             }
         }

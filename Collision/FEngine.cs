@@ -10,7 +10,8 @@ namespace MobaGame.Collision
 
         public FEngine()
         {
-            broadPhase = new DbvtBroadphase(new HashedOverlappingPairCache());
+            HashedOverlappingPairCache pbp = new HashedOverlappingPairCache();
+            broadPhase = new DbvtBroadphase(pbp);
             dispatcher = new CollisionDispatcher(new DefaultCollisionConfiguration());
             collisionWorld = new CollisionWorld(dispatcher, broadPhase);
         }
