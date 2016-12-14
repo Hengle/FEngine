@@ -21,12 +21,12 @@ namespace MobaGame.Collision
             }
         }
 
-        public PersistentManifold(CollisionObject body0, CollisionObject body1, int bla):this()
+        public PersistentManifold(CollisionObject body0, CollisionObject body1):this()
         {
-            init(body0, body1, bla);
+            init(body0, body1);
         }
 
-        public void init(CollisionObject body0, CollisionObject body1, int bla)
+        public void init(CollisionObject body0, CollisionObject body1)
         {
             this.body0 = body0;
             this.body1 = body1;

@@ -7,9 +7,7 @@ namespace MobaGame.Collision
         protected readonly ObjectPool<PersistentManifold> manifoldsPool = new ObjectPool<PersistentManifold>();
 
 	    private static readonly int MAX_BROADPHASE_COLLISION_TYPES = (int)BroadphaseNativeType.MAX_BROADPHASE_COLLISION_TYPES;
-        private int count = 0;
         private readonly List<PersistentManifold> manifoldsPtr = new List<PersistentManifold>();
-        private bool useIslands = true;
         private bool staticWarningReported = false;
         private ManifoldResult defaultManifoldResult;
         private NearCallback nearCallback;
@@ -84,7 +82,7 @@ namespace MobaGame.Collision
         public override PersistentManifold getNewManifold(CollisionObject body0, CollisionObject body1)
         {
             PersistentManifold manifold = manifoldsPool.Get();
-            manifold.init(body0, body1, 0);
+            manifold.init(body0, body1);
 
             manifold.index1a = manifoldsPtr.Count;
             manifoldsPtr.Add(manifold);
@@ -114,7 +112,6 @@ namespace MobaGame.Collision
         {
             bool needsCollision = true;
 
-            //#ifdef BT_DEBUG
             if (!staticWarningReported)
             {
                 // broadphase filtering already deals with this
@@ -124,7 +121,6 @@ namespace MobaGame.Collision
                     staticWarningReported = true;
                 }
             }
-            //#endif //BT_DEBUG
 
             if ((!body0.isActive()) && (!body1.isActive()))
             {
@@ -161,8 +157,8 @@ namespace MobaGame.Collision
 
             public override bool processOverlap(BroadphasePair pair)
             {
-                dispatcher.getNearCallback().handleCollision(pair, dispatcher, dispatchInfo);
-                return false;
+                ManifoldResult result = dispatcher.getNearCallback().handleCollision(pair, dispatcher, dispatchInfo);
+                return result.getPersistentManifold().getNumContacts() == 0;
             }
         }
 
@@ -170,10 +166,8 @@ namespace MobaGame.Collision
 
         public override void dispatchAllCollisionPairs(OverlappingPairCache pairCache, DispatcherInfo dispatchInfo, Dispatcher dispatcher)
         {
-            //m_blockedForChanges = true;
             collisionPairCallback.init(dispatchInfo, this);
             pairCache.processAllOverlappingPairs(collisionPairCallback, dispatcher);
-            //m_blockedForChanges = false;
         }
 
         public override int getNumManifolds()

@@ -50,8 +50,6 @@ namespace MobaGame.Collision
 
             cleanOverlappingPair(pair, dispatcher);
 
-            // JAVA TODO: optimize
-            //int pairIndex = int(pair - &m_overlappingPairArray[0]);
             int pairIndex = overlappingPairArray.IndexOf(pair);
 
             // Remove the pair from the hash table.
@@ -139,10 +137,8 @@ namespace MobaGame.Collision
 
         public override void processAllOverlappingPairs(OverlapCallback callback, Dispatcher dispatcher)
         {
-            //	printf("m_overlappingPairArray.size()=%d\n",m_overlappingPairArray.size());
             for (int i = 0; i < overlappingPairArray.Count;)
             {
-
                 BroadphasePair pair = overlappingPairArray[i];
                 if (callback.processOverlap(pair))
                 {
@@ -189,9 +185,6 @@ namespace MobaGame.Collision
             }
             UUID proxyId1 = proxy0.getUid();
             UUID proxyId2 = proxy1.getUid();
-
-            /*if (proxyId1 > proxyId2) 
-                btSwap(proxyId1, proxyId2);*/
 
             int hash = getHash(proxyId1, proxyId2) & (overlappingPairArray.Capacity - 1);
 
@@ -251,9 +244,6 @@ namespace MobaGame.Collision
             UUID proxyId1 = proxy0.getUid();
             UUID proxyId2 = proxy1.getUid();
 
-            /*if (proxyId1 > proxyId2) 
-            btSwap(proxyId1, proxyId2);*/
-
             int hash = getHash(proxyId1, proxyId2) & (overlappingPairArray.Capacity - 1); // New hash value with new mask
 
             BroadphasePair pair = internalFindPair(proxy0, proxy1, hash);
@@ -261,15 +251,7 @@ namespace MobaGame.Collision
             {
                 return pair;
             }
-            /*for(int i=0;i<m_overlappingPairArray.size();++i)
-            {
-            if(	(m_overlappingPairArray[i].m_pProxy0==proxy0)&&
-            (m_overlappingPairArray[i].m_pProxy1==proxy1))
-            {
-            printf("Adding duplicated %u<>%u\r\n",proxyId1,proxyId2);
-            internalFindPair(proxy0, proxy1, hash);
-            }
-            }*/
+
             int count = overlappingPairArray.Count;
             int oldCapacity = overlappingPairArray.Capacity;
             overlappingPairArray.Add(null);
@@ -290,8 +272,6 @@ namespace MobaGame.Collision
             }
 
             pair = new BroadphasePair(proxy0, proxy1);
-            //	pair->m_pProxy0 = proxy0;
-            //	pair->m_pProxy1 = proxy1;
             pair.algorithm = null;
 
             overlappingPairArray[overlappingPairArray.Count - 1] = pair;
@@ -329,8 +309,6 @@ namespace MobaGame.Collision
                     BroadphasePair pair = overlappingPairArray[i];
                     UUID proxyId1 = pair.pProxy0.getUid();
                     UUID proxyId2 = pair.pProxy1.getUid();
-                    /*if (proxyId1 > proxyId2) 
-                    btSwap(proxyId1, proxyId2);*/
                     int hashValue = getHash(proxyId1, proxyId2) & (overlappingPairArray.Capacity - 1); // New hash value with new mask
                     next[i] = hashTable[hashValue];
                     hashTable[hashValue] = i;
@@ -361,10 +339,6 @@ namespace MobaGame.Collision
         {
             UUID proxyId1 = proxy0.getUid();
             UUID proxyId2 = proxy1.getUid();
-            //#if 0 // wrong, 'equalsPair' use unsorted uids, copy-past devil striked again. Nat.
-            //if (proxyId1 > proxyId2) 
-            //	btSwap(proxyId1, proxyId2);
-            //#endif
 
             int index = hashTable[hash];
 

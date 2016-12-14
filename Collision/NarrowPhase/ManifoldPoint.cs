@@ -11,8 +11,6 @@ namespace MobaGame.Collision
         public VInt3 normalWorldOnB;
 
         public VFixedPoint distance1;
-        public VFixedPoint combinedFriction;
-        public VFixedPoint combinedRestitution;
 
         // BP mod, store contact triangles.
         public int partId0;
@@ -48,8 +46,6 @@ namespace MobaGame.Collision
             this.localPointB = pointB;
             this.normalWorldOnB = normal;
             this.distance1 = distance;
-            this.combinedFriction = VFixedPoint.Zero;
-            this.combinedRestitution = VFixedPoint.Zero;
             this.appliedImpulse = VFixedPoint.Zero;
             this.lateralFrictionInitialized = false;
             this.appliedImpulseLateral1 = VFixedPoint.Zero;
@@ -75,8 +71,6 @@ namespace MobaGame.Collision
             positionWorldOnB = p.positionWorldOnB;
             normalWorldOnB = p.normalWorldOnB;
             distance1 = p.distance1;
-            combinedFriction = p.combinedFriction;
-            combinedRestitution = p.combinedRestitution;
             partId0 = p.partId0;
             partId1 = p.partId1;
             index0 = p.index0;

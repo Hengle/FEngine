@@ -55,14 +55,10 @@ namespace MobaGame.Collision
             ClosestPointInput input = pointInputsPool.Get();
             input.init();
 
-            // JAVA NOTE: original: TODO: if (dispatchInfo.m_useContinuous)
             gjkPairDetector.setMinkowskiA(min0);
             gjkPairDetector.setMinkowskiB(min1);
             input.maximumDistanceSquared = min0.getMargin() + min1.getMargin() + manifoldPtr.getContactBreakingThreshold();
             input.maximumDistanceSquared *= input.maximumDistanceSquared;
-            //input.m_stackAlloc = dispatchInfo.m_stackAllocator;
-
-            //	input.m_maximumDistanceSquared = btScalar(1e30);
 
             input.transformA = body0.getWorldTransform();
             input.transformB = body1.getWorldTransform();
@@ -70,15 +66,12 @@ namespace MobaGame.Collision
             gjkPairDetector.getClosestPoints(input, resultOut);
 
             pointInputsPool.Release(input);
-            //	#endif
 
             if (ownManifold)
             {
                 resultOut.refreshContactPoints();
             }
         }
-
-        //private static bool disableCcd = false;
 
         public override VFixedPoint calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {

@@ -6,10 +6,12 @@ namespace MobaGame.Collision
     {
         private readonly ManifoldResult contactPointResult = new ManifoldResult();
 
-        public override void handleCollision(BroadphasePair collisionPair, CollisionDispatcher dispatcher, DispatcherInfo dispatchInfo)
+        public override ManifoldResult handleCollision(BroadphasePair collisionPair, CollisionDispatcher dispatcher, DispatcherInfo dispatchInfo)
         {
             CollisionObject colObj0 = collisionPair.pProxy0.clientObject;
             CollisionObject colObj1 = collisionPair.pProxy1.clientObject;
+
+            contactPointResult.init(colObj0, colObj1);
 
             if (dispatcher.needsCollision(colObj0, colObj1))
             {
@@ -22,23 +24,20 @@ namespace MobaGame.Collision
                 if (collisionPair.algorithm != null)
                 {
                     //ManifoldResult contactPointResult = new ManifoldResult(colObj0, colObj1);
-                    contactPointResult.init(colObj0, colObj1);
+                    
 
                     if (dispatchInfo.dispatchFunc == DispatchFunc.DISPATCH_DISCRETE)
                     {
                         // discrete collision detection query
                         collisionPair.algorithm.processCollision(colObj0, colObj1, dispatchInfo, contactPointResult);
                     }
-                    else {
-                        // continuous collision detection query, time of impact (toi)
-                        VFixedPoint toi = collisionPair.algorithm.calculateTimeOfImpact(colObj0, colObj1, dispatchInfo, contactPointResult);
-                        if (dispatchInfo.timeOfImpact > toi)
-                        {
-                            dispatchInfo.timeOfImpact = toi;
-                        }
+                    else
+                    {
+                        //continuous version not implemented
                     }
                 }
             }
+            return contactPointResult;
         }
     }
 }

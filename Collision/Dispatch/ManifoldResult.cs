@@ -87,9 +87,6 @@ namespace MobaGame.Collision
 
             int insertIndex = manifoldPtr.getCacheEntry(newPt);
 
-            newPt.combinedFriction = calculateCombinedFriction(body0, body1);
-            newPt.combinedRestitution = calculateCombinedRestitution(body0, body1);
-
             // BP mod, store contact triangles.
             newPt.partId0 = partId0;
             newPt.partId1 = partId1;
@@ -109,27 +106,6 @@ namespace MobaGame.Collision
             pointsPool.Release(newPt);
         }
 
-        private static VFixedPoint calculateCombinedFriction(CollisionObject body0, CollisionObject body1)
-        {
-            VFixedPoint friction = body0.getFriction() * body1.getFriction();
-
-            VFixedPoint MAX_FRICTION = VFixedPoint.Create(10);
-            if (friction < -MAX_FRICTION)
-            {
-                friction = -MAX_FRICTION;
-            }
-            if (friction > MAX_FRICTION)
-            {
-                friction = MAX_FRICTION;
-            }
-            return friction;
-        }
-
-        private static VFixedPoint calculateCombinedRestitution(CollisionObject body0, CollisionObject body1)
-        {
-            return body0.getRestitution() * body1.getRestitution();
-        }
-
         public void refreshContactPoints()
         {
             if (manifoldPtr.getNumContacts() == 0)
@@ -143,7 +119,8 @@ namespace MobaGame.Collision
             {
                 manifoldPtr.refreshContactPoints(rootTransB, rootTransA);
             }
-            else {
+            else
+            {
                 manifoldPtr.refreshContactPoints(rootTransA, rootTransB);
             }
         }
