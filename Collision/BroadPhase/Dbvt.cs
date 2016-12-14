@@ -45,8 +45,7 @@ namespace MobaGame.Collision
                     int bit = 0;
                     while (node.isinternal())
                     {
-                        node = sort(node, ref root).childs[(opath >> bit) & 1];
-
+                        node = node.childs[(opath >> bit) & 1];
                         bit = (bit + 1) & (/*sizeof(unsigned)*/4 * 8 - 1);
                     }
                     update(node);
@@ -404,38 +403,6 @@ namespace MobaGame.Collision
                     return pdbvt.root;
                 }
             }
-        }
-
-        private static Node sort(Node n, ref Node r)
-        {
-            Node p = n.parent;
-            if (p != null && p.id > n.id)
-            {
-                int i = indexof(n);
-                int j = 1 - i;
-                Node s = p.childs[j];
-                Node q = p.parent;
-                if (q != null)
-                {
-                    q.childs[indexof(p)] = n;
-                }
-                else {
-                    r = n;
-                }
-                s.parent = n;
-                p.parent = n;
-                n.parent = q;
-                p.childs[0] = n.childs[0];
-                p.childs[1] = n.childs[1];
-                n.childs[0].parent = p;
-                n.childs[1].parent = p;
-                n.childs[i] = p;
-                n.childs[j] = s;
-
-                DbvtAabbMm.swap(p.volume, n.volume);
-                return p;
-            }
-            return n;
         }
 
         public class Node

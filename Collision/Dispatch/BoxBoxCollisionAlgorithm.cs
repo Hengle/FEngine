@@ -59,6 +59,8 @@ namespace MobaGame.Collision
             }
         }
 
+
+
         public override VFixedPoint calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             return VFixedPoint.One;

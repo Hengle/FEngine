@@ -5,7 +5,7 @@ namespace MobaGame.Collision
 {
     public abstract class OverlappingPairCache: OverlappingPairCallback
     {
-        protected OverlappingPairCallback ghostPairCallback = new GhostPairCallback();
+        protected GhostPairCallback ghostPairCallback = new GhostPairCallback();
 
         public abstract List<BroadphasePair> getOverlappingPairArray();
 
@@ -23,7 +23,7 @@ namespace MobaGame.Collision
 
         public abstract bool hasDeferredRemoval();
 
-        public void setInternalGhostPairCallback(OverlappingPairCallback ghostPairCallback)
+        public void setInternalGhostPairCallback(GhostPairCallback ghostPairCallback)
         {
             this.ghostPairCallback = ghostPairCallback;
         }
