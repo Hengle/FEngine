@@ -8,6 +8,7 @@ namespace MobaGame.Collision
     {
         bool ownManifold;
         PersistentManifold manifoldPtr;
+        BoxBoxDetector detector = new BoxBoxDetector();
 
         public void init(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
         {
@@ -50,7 +51,6 @@ namespace MobaGame.Collision
             input.transformA = body0.getWorldTransform();
             input.transformB = body1.getWorldTransform();
 
-            BoxBoxDetector detector = new BoxBoxDetector(box0, box1);
             detector.getClosestPoints(input, resultOut);
 
             if (ownManifold)
