@@ -25,5 +25,10 @@ namespace MobaGame.Collision
         {
             collisionWorld.performDiscreteCollisionDetection();
         }
+
+        public CollisionWorld GetCollisionWorld()
+        {
+            return collisionWorld;
+        }
     }
 }

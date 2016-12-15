@@ -27,6 +27,7 @@ namespace MobaGame.Collision
         // the smallest depth normal so far. otherwise normalR is 0 and normalC is
         // set to a vector relative to body 1. invert_normal is 1 if the sign of
         // the normal should be flipped.
+        //UNFINISHED
 
         public override void getClosestPoints(ClosestPointInput input, Result output)
         {
@@ -43,6 +44,9 @@ namespace MobaGame.Collision
             bu[1] = transformB.up;
             bu[2] = transformB.forward;
 
+            VInt3 A = polyA.getHalfExtentsWithMargin();
+            VInt3 B = polyB.getHalfExtentsWithMargin();
+
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 3; j++)
@@ -51,28 +55,28 @@ namespace MobaGame.Collision
                     AbsR[i, j] = R[i, j].Abs() + Globals.EPS;
                 }
             }
-            VFixedPoint ra, rb;
-            VFixedPoint depth, minDepth = VFixedPoint.MaxValue;
-            VInt3 normal = VInt3.zero;
+            VFixedPoint ra, rb, T;
+            VFixedPoint depth, maxDepth = VFixedPoint.MinValue;
+            VInt3 normal = VInt3.zero, worldNormal = VInt3.zero;
 
             int code = 0;
-
             // Test axes L = A0, L = A1, L = A2
             for (int i = 0; i < 3; i++)
             {
-                ra = polyA.getHalfExtentsWithMargin()[i];
-                rb = polyB.getHalfExtentsWithMargin()[0] * AbsR[i,0]
-                     + polyB.getHalfExtentsWithMargin()[1] * AbsR[i,1]
-                     + polyB.getHalfExtentsWithMargin()[2] * AbsR[i,2];
-                depth = t[i].Abs() - (ra + rb);
+                T = t[i];
+                ra = A[i];
+                rb = B[0] * AbsR[i,0]
+                     + B[1] * AbsR[i,1]
+                     + B[2] * AbsR[i,2];
+                depth = T.Abs() - (ra + rb);
                 if (depth > VFixedPoint.Zero)
                 {
                     return;
                 }
-                else if (depth < minDepth)
+                else if (depth > maxDepth)
                 {
-                    minDepth = depth;
-                    normal = au[i];
+                    maxDepth = depth;
+                    worldNormal = au[i] * (T < VFixedPoint.Zero ? -1 : 1);
                     code = i + 1;
                 }
             }
@@ -80,166 +84,237 @@ namespace MobaGame.Collision
             // Test axes L = B0, L = B1, L = B2
             for (int i = 0; i < 3; i++)
             {
-                ra = polyA.getHalfExtentsWithMargin()[0] * AbsR[0,i]
+                T = t[0] * R[0, i] + t[1] * R[1, i] + t[2] * R[2, i];
+                ra = A[0] * AbsR[0,i]
                      + polyA.getHalfExtentsWithMargin()[1] * AbsR[1, i]
-                     + polyA.getHalfExtentsWithMargin()[2] * AbsR[2, i];
-                rb = polyB.getHalfExtentsWithMargin()[i];
-                depth = (t[0] * R[0, i] + t[1] * R[1, i] + t[2] * R[2, i]).Abs() - (ra + rb);
+                     + A[2] * AbsR[2, i];
+                rb = B[i];
+                depth = T.Abs() - (ra + rb);
                 if (depth > VFixedPoint.Zero)
                 {
                     return;
                 }
-                else if (depth < minDepth)
+                else if (depth > maxDepth)
                 {
-                    minDepth = depth;
-                    normal = bu[i];
+                    maxDepth = depth;
+                    worldNormal = bu[i] * (T < VFixedPoint.Zero ? -1 : 1);
                     code = i + 4;
                 }
             }
 
             // Test axis L = A0 x B0
-            ra = polyA.getHalfExtentsWithMargin()[1] * AbsR[2, 0] + polyA.getHalfExtentsWithMargin()[2] * AbsR[1, 0];
-            rb = polyB.getHalfExtentsWithMargin()[1] * AbsR[0, 2] + polyB.getHalfExtentsWithMargin()[2] * AbsR[0, 1];
-            depth = (t[2] * R[1, 0] - t[1] * R[2, 0]).Abs() - (ra + rb);
+            T = t[2] * R[1, 0] - t[1] * R[2, 0];
+            ra = A[1] * AbsR[2, 0] + A[2] * AbsR[1, 0];
+            rb = B[1] * AbsR[0, 2] + B[2] * AbsR[0, 1];
+            depth = T.Abs() - (ra + rb);
             if (depth > VFixedPoint.Zero)
             {
                 return;
             }
-            else if (depth < minDepth)
+            else if (depth > maxDepth)
             {
-                minDepth = depth;
-                normal = new VInt3(VFixedPoint.Zero,-R[3, 1], R[2, 1]);
+                maxDepth = depth;
+                normal = new VInt3(VFixedPoint.Zero,-R[3, 1], R[2, 1]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 7;
             }
 
             // Test axis L = A0 x B1
-            ra = polyA.getHalfExtentsWithMargin()[1] * AbsR[2, 1] + polyA.getHalfExtentsWithMargin()[2] * AbsR[1, 1];
-            rb = polyB.getHalfExtentsWithMargin()[0] * AbsR[0, 2] + polyB.getHalfExtentsWithMargin()[2] * AbsR[0, 0];
-            depth = (t[2] * R[1, 1] - t[1] * R[2, 1]).Abs() - (ra + rb);
+            T = t[2] * R[1, 1] - t[1] * R[2, 1];
+            ra = A[1] * AbsR[2, 1] + A[2] * AbsR[1, 1];
+            rb = B[0] * AbsR[0, 2] + B[2] * AbsR[0, 0];
+            depth = T.Abs() - (ra + rb);
             if (depth > VFixedPoint.Zero)
             {
                 return;
             }
-            else if (depth < minDepth)
+            else if (depth > maxDepth)
             {
-                minDepth = depth;
-                normal = new VInt3(VFixedPoint.Zero,-R[3, 2], R[2, 2]);
+                maxDepth = depth;
+                normal = new VInt3(VFixedPoint.Zero,-R[3, 2], R[2, 2]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 8;
             }
 
             // Test axis L = A0 x B2
-            ra = polyA.getHalfExtentsWithMargin()[1] * AbsR[2, 2] + polyA.getHalfExtentsWithMargin()[2] * AbsR[1, 2];
-            rb = polyB.getHalfExtentsWithMargin()[0] * AbsR[0, 1] + polyB.getHalfExtentsWithMargin()[1] * AbsR[0, 0];
-            depth = (t[2] * R[1, 2] - t[1] * R[2, 2]).Abs() - (ra + rb);
+            T = t[2] * R[1, 2] - t[1] * R[2, 2];
+            ra = A[1] * AbsR[2, 2] + A[2] * AbsR[1, 2];
+            rb = B[0] * AbsR[0, 1] + B[1] * AbsR[0, 0];
+            depth = T.Abs() - (ra + rb);
             if (depth > VFixedPoint.Zero)
             {
                 return;
             }
-            else if (depth < minDepth)
+            else if (depth > maxDepth)
             {
-                minDepth = depth;
-                normal = new VInt3(VFixedPoint.Zero,-R[3, 3], R[2, 3]);
+                maxDepth = depth;
+                normal = new VInt3(VFixedPoint.Zero,-R[3, 3], R[2, 3]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 9;
             }
 
             // Test axis L = A1 x B0
-            ra = polyA.getHalfExtentsWithMargin()[0] * AbsR[2, 0] + polyA.getHalfExtentsWithMargin()[2] * AbsR[0, 0];
-            rb = polyB.getHalfExtentsWithMargin()[1] * AbsR[1, 2] + polyB.getHalfExtentsWithMargin()[2] * AbsR[1, 1];
-            depth = (t[0] * R[2, 0] - t[2] * R[0, 0]).Abs() - (ra + rb);
+            T = t[0] * R[2, 0] - t[2] * R[0, 0];
+            ra = A[0] * AbsR[2, 0] + A[2] * AbsR[0, 0];
+            rb = B[1] * AbsR[1, 2] + B[2] * AbsR[1, 1];
+            depth = T.Abs() - (ra + rb);
             if (depth > VFixedPoint.Zero)
             {
                 return;
             }
-            else if (depth < minDepth)
+            else if (depth > maxDepth)
             {
-                minDepth = depth;
-                normal = new VInt3(R[3, 1], VFixedPoint.Zero, -R[1, 1]);
+                maxDepth = depth;
+                normal = new VInt3(R[3, 1], VFixedPoint.Zero, -R[1, 1]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 10;
             }
 
             // Test axis L = A1 x B1
-            ra = polyA.getHalfExtentsWithMargin()[0] * AbsR[2, 1] + polyA.getHalfExtentsWithMargin()[2] * AbsR[0, 1];
-            rb = polyB.getHalfExtentsWithMargin()[0] * AbsR[1, 2] + polyB.getHalfExtentsWithMargin()[2] * AbsR[1, 0];
-            depth = (t[0] * R[2, 1] - t[2] * R[0, 1]).Abs() - (ra + rb);
+            T = t[0] * R[2, 1] - t[2] * R[0, 1];
+            ra = A[0] * AbsR[2, 1] + A[2] * AbsR[0, 1];
+            rb = B[0] * AbsR[1, 2] + B[2] * AbsR[1, 0];
+            depth = T.Abs() - (ra + rb);
             if (depth > VFixedPoint.Zero)
             {
                 return;
             }
-            else if (depth < minDepth)
+            else if (depth > maxDepth)
             {
-                minDepth = depth;
-                normal = new VInt3(R[3, 2], VFixedPoint.Zero, -R[1, 2]);
+                maxDepth = depth;
+                normal = new VInt3(R[3, 2], VFixedPoint.Zero, -R[1, 2]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 11;
             }
 
             // Test axis L = A1 x B2
-            ra = polyA.getHalfExtentsWithMargin()[0] * AbsR[2, 2] + polyA.getHalfExtentsWithMargin()[2] * AbsR[0, 2];
-            rb = polyB.getHalfExtentsWithMargin()[0] * AbsR[1, 1] + polyB.getHalfExtentsWithMargin()[1] * AbsR[1, 0];
-            depth = (t[0] * R[2, 2] - t[2] * R[0, 2]).Abs() - (ra + rb);
+            T = t[0] * R[2, 2] - t[2] * R[0, 2];
+            ra = A[0] * AbsR[2, 2] + A[2] * AbsR[0, 2];
+            rb = B[0] * AbsR[1, 1] + B[1] * AbsR[1, 0];
+            depth = T.Abs() - (ra + rb);
             if (depth > VFixedPoint.Zero)
             {
                 return;
             }
-            else if (depth < minDepth)
+            else if (depth > maxDepth)
             {
-                minDepth = depth;
-                normal = new VInt3(R[3, 3], VFixedPoint.Zero, -R[1, 3]);
+                maxDepth = depth;
+                normal = new VInt3(R[3, 3], VFixedPoint.Zero, -R[1, 3]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 12;
             }
 
             // Test axis L = A2 x B0
-            ra = polyA.getHalfExtentsWithMargin()[0] * AbsR[1, 0] + polyA.getHalfExtentsWithMargin()[1] * AbsR[0, 0];
-            rb = polyB.getHalfExtentsWithMargin()[1] * AbsR[2, 2] + polyB.getHalfExtentsWithMargin()[2] * AbsR[2, 1];
-            depth = (t[1] * R[0, 0] - t[0] * R[1, 0]).Abs() - (ra + rb);
+            T = t[1] * R[0, 0] - t[0] * R[1, 0];
+            ra = A[0] * AbsR[1, 0] + A[1] * AbsR[0, 0];
+            rb = B[1] * AbsR[2, 2] + B[2] * AbsR[2, 1];
+            depth = T.Abs() - (ra + rb);
             if (depth > VFixedPoint.Zero)
             {
                 return;
             }
-            else if (depth < minDepth)
+            else if (depth > maxDepth)
             {
-                minDepth = depth;
-                normal = new VInt3(-R[2, 1], R[1, 1], VFixedPoint.Zero);
+                maxDepth = depth;
+                normal = new VInt3(-R[2, 1], R[1, 1], VFixedPoint.Zero) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 13;
             }
 
             // Test axis L = A2 x B1
-            ra = polyA.getHalfExtentsWithMargin()[0] * AbsR[1, 1] + polyA.getHalfExtentsWithMargin()[1] * AbsR[0, 1];
-            rb = polyB.getHalfExtentsWithMargin()[0] * AbsR[2, 2] + polyB.getHalfExtentsWithMargin()[2] * AbsR[2, 0];
-            depth = (t[1] * R[0, 1] - t[0] * R[1, 1]).Abs() - (ra + rb);
+            T = t[1] * R[0, 1] - t[0] * R[1, 1];
+            ra = A[0] * AbsR[1, 1] + A[1] * AbsR[0, 1];
+            rb = B[0] * AbsR[2, 2] + B[2] * AbsR[2, 0];
+            depth = T.Abs() - (ra + rb);
             if (depth > VFixedPoint.Zero)
             {
                 return;
             }
-            else if (depth < minDepth)
+            else if (depth > maxDepth)
             {
-                minDepth = depth;
-                normal = new VInt3(-R[2, 2], R[1, 2], VFixedPoint.Zero);
+                maxDepth = depth;
+                normal = new VInt3(-R[2, 2], R[1, 2], VFixedPoint.Zero) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 14;
             }
 
             // Test axis L = A2 x B2
-            ra = polyA.getHalfExtentsWithMargin()[0] * AbsR[1, 2] + polyA.getHalfExtentsWithMargin()[1] * AbsR[0, 2];
-            rb = polyB.getHalfExtentsWithMargin()[0] * AbsR[2, 1] + polyB.getHalfExtentsWithMargin()[1] * AbsR[2, 0];
-            depth = (t[1] * R[0, 2] - t[0] * R[1, 2]).Abs() - (ra + rb);
+            T = t[1] * R[0, 2] - t[0] * R[1, 2];
+            ra = A[0] * AbsR[1, 2] + A[1] * AbsR[0, 2];
+            rb = B[0] * AbsR[2, 1] + B[1] * AbsR[2, 0];
+            depth = T.Abs() - (ra + rb);
             if (depth > VFixedPoint.Zero)
             {
                 return;
             }
-            else if (depth < minDepth)
+            else if (depth > maxDepth)
             {
-                minDepth = depth;
-                normal = new VInt3(-R[2, 3], R[1, 3], VFixedPoint.Zero);
+                maxDepth = depth;
+                normal = new VInt3(-R[2, 3], R[1, 3], VFixedPoint.Zero) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 15;
             }
 
+            // compute contact point(s)
             if (code > 6)
             {
-                normal = transformA.TransformDirection(normal);
+                //transform normal to world coordinate
+                worldNormal = transformA.TransformDirection(normal);
+
+                // an edge from box 1 touches an edge from box 2.
+                // find a point pa on the intersecting edge of box 1
+                VInt3 pa = transformA.position;
+                int sign;
+                for (int j = 0; j < 3; j++)
+                {
+                    sign = normal[j] > VFixedPoint.Zero ? 1 : -1;
+                    pa += au[j] * A[j] * sign;
+                }
+
+                // find a point pb on the intersecting edge of box 2
+                VInt3 pb = transformB.position;
+                for (int j = 0; j < 3; j++)
+                {
+                    sign = normal[j] > VFixedPoint.Zero ? -1 : 1;
+                    pb = bu[j] * B[j] * sign;
+                }
+
+                VFixedPoint alpha, beta;
+                VInt3 ua = au[(code - 7) / 3];
+                VInt3 ub = bu[(code - 7) % 3];
+
+                dLineClosestApproach(pa, ua, pb, ub, out alpha, out beta);
+                for (int i = 0; i < 3; i++)
+                    pa[i] += ua[i] * alpha;
+                for (int i = 0; i < 3; i++)
+                    pb[i] += ub[i] * beta;
+
+                VInt3 pointInWorld = VInt3.zero;
+                for (int i = 0; i < 3; i++)
+                    pointInWorld[i] = (pa[i] + pb[i]) * VFixedPoint.Half;
+                output.addContactPoint(-worldNormal, pointInWorld, maxDepth);                
+                return;
             }
-
-            output.addContactPoint(normal, , minDepth);
-
+            else
+            {
+                // okay, we have a face-something intersection (because the separating
+                // axis is perpendicular to a face). define face 'a' to be the reference
+                // face (i.e. the normal vector is perpendicular to this) and face 'b' to be
+                // the incident face (the closest face of the other box).
+                
+            }
         }
 
+        void dLineClosestApproach(VInt3 pa, VInt3 ua, VInt3 pb, VInt3 ub, out VFixedPoint alpha, out VFixedPoint beta)
+        {
+            VInt3 p = pb - pa;
+            VFixedPoint uaub = VInt3.Dot(ua, ub);
+            VFixedPoint q1 = VInt3.Dot(ua, p);
+            VFixedPoint q2 = -VInt3.Dot(ub, p);
+            VFixedPoint d = VFixedPoint.One - uaub * uaub;
+            if (d <= Globals.EPS)
+            {
+                // @@@ this needs to be made more robust
+                alpha = VFixedPoint.Zero;
+                beta  = VFixedPoint.Zero;
+            }
+            else
+            {
+                d = VFixedPoint.One/d;
+                alpha = (q1 + uaub * q2) * d;
+                beta = (uaub * q1 + q2) * d;
+            }
+        }
     }
 }

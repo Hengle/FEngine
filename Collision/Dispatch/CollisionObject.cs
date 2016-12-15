@@ -18,25 +18,14 @@ namespace MobaGame.Collision
 
         protected BroadphaseProxy broadphaseHandle;
         protected CollisionShape collisionShape;
-        protected CollisionShape rootCollisionShape;
 
         protected int collisionFlags;
         protected int islandTag1;
         protected int companionId;
         protected int activationState1;
         protected VFixedPoint deactivationTime;
-        protected VFixedPoint friction;
-        protected VFixedPoint restitution;
 
         protected CollisionObjectType internalType = CollisionObjectType.COLLISION_OBJECT;
-
-        ///time of impact calculation
-        protected VFixedPoint hitFraction;
-        ///Swept sphere radius (0.0 by default), see btConvexConvexAlgorithm::
-        protected VFixedPoint ccdSweptSphereRadius;
-        /// Don't do continuous collision detection if the motion (in one step) is less then ccdMotionThreshold
-        protected VFixedPoint ccdMotionThreshold = VFixedPoint.Zero;
-        /// If some object should have elaborate collision filtering by sub-classes
         protected bool checkCollideWith;
 
         public CollisionObject()
@@ -45,8 +34,6 @@ namespace MobaGame.Collision
             this.islandTag1 = -1;
             this.companionId = -1;
             this.activationState1 = 1;
-            this.friction = VFixedPoint.Create(0.5f);
-            this.hitFraction = VFixedPoint.One;
         }
 
         public virtual bool checkCollideWithOverride(CollisionObject co)
@@ -88,12 +75,6 @@ namespace MobaGame.Collision
         public void setCollisionShape(CollisionShape collisionShape)
         {
             this.collisionShape = collisionShape;
-            this.rootCollisionShape = collisionShape;
-        }
-
-        public CollisionShape getRootCollisionShape()
-        {
-            return rootCollisionShape;
         }
 
         /**
@@ -150,26 +131,6 @@ namespace MobaGame.Collision
         public bool isActive()
         {
             return ((getActivationState() != ISLAND_SLEEPING) && (getActivationState() != DISABLE_SIMULATION));
-        }
-
-        public VFixedPoint getRestitution()
-        {
-            return restitution;
-        }
-
-        public void setRestitution(VFixedPoint restitution)
-        {
-            this.restitution = restitution;
-        }
-
-        public VFixedPoint getFriction()
-        {
-            return friction;
-        }
-
-        public void setFriction(VFixedPoint friction)
-        {
-            this.friction = friction;
         }
 
         // reserved for Bullet internal usage
@@ -250,16 +211,6 @@ namespace MobaGame.Collision
             this.companionId = companionId;
         }
 
-        public VFixedPoint getHitFraction()
-        {
-            return hitFraction;
-        }
-
-        public void setHitFraction(VFixedPoint hitFraction)
-        {
-            this.hitFraction = hitFraction;
-        }
-
         public int getCollisionFlags()
         {
             return collisionFlags;
@@ -268,35 +219,6 @@ namespace MobaGame.Collision
         public void setCollisionFlags(int collisionFlags)
         {
             this.collisionFlags = collisionFlags;
-        }
-
-        // Swept sphere radius (0.0 by default), see btConvexConvexAlgorithm::
-        public VFixedPoint getCcdSweptSphereRadius()
-        {
-            return ccdSweptSphereRadius;
-        }
-
-        // Swept sphere radius (0.0 by default), see btConvexConvexAlgorithm::
-        public void setCcdSweptSphereRadius(VFixedPoint ccdSweptSphereRadius)
-        {
-            this.ccdSweptSphereRadius = ccdSweptSphereRadius;
-        }
-
-        public VFixedPoint getCcdMotionThreshold()
-        {
-            return ccdMotionThreshold;
-        }
-
-        public VFixedPoint getCcdSquareMotionThreshold()
-        {
-            return ccdMotionThreshold * ccdMotionThreshold;
-        }
-
-        // Don't do continuous collision detection if the motion (in one step) is less then ccdMotionThreshold
-        public void setCcdMotionThreshold(VFixedPoint ccdMotionThreshold)
-        {
-            // JAVA NOTE: fixed bug with usage of ccdMotionThreshold*ccdMotionThreshold
-            this.ccdMotionThreshold = ccdMotionThreshold;
         }
 
         public bool CheckCollideWith(CollisionObject co)
