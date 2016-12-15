@@ -204,12 +204,12 @@ namespace MobaGame.Collision
 
             // hash with new capacity
             hash = getHash(proxyId1, proxyId2);
-            hashTable[hash] = overlappingPairArray.Count - 1;
 
             pair = new BroadphasePair(proxy0, proxy1);
             pair.algorithm = null;
 
             overlappingPairArray.Add(pair);
+            hashTable[hash] = overlappingPairArray.Count - 1;
             return pair;
         }
 
