@@ -8,8 +8,6 @@ namespace MobaGame.Collision
 
 	    private static readonly int MAX_BROADPHASE_COLLISION_TYPES = (int)BroadphaseNativeType.MAX_BROADPHASE_COLLISION_TYPES;
         private readonly List<PersistentManifold> manifoldsPtr = new List<PersistentManifold>();
-        private bool staticWarningReported = false;
-        private ManifoldResult defaultManifoldResult;
         private NearCallback nearCallback;
         private readonly CollisionAlgorithmCreateFunc[,] doubleDispatch = new CollisionAlgorithmCreateFunc[MAX_BROADPHASE_COLLISION_TYPES,MAX_BROADPHASE_COLLISION_TYPES];
 	    private CollisionConfiguration collisionConfiguration;
@@ -111,16 +109,6 @@ namespace MobaGame.Collision
         public override bool needsCollision(CollisionObject body0, CollisionObject body1)
         {
             bool needsCollision = true;
-
-            if (!staticWarningReported)
-            {
-                // broadphase filtering already deals with this
-                if ((body0.isStaticObject() || body0.isKinematicObject()) &&
-                        (body1.isStaticObject() || body1.isKinematicObject()))
-                {
-                    staticWarningReported = true;
-                }
-            }
 
             if ((!body0.isActive()) && (!body1.isActive()))
             {

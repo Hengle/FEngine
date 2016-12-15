@@ -7,8 +7,6 @@ namespace MobaGame.Collision
     {
         private ObjectPool<BroadphasePair> pairsPool = new ObjectPool<BroadphasePair>();
 	
-	    private static readonly int NULL_PAIR = -1;
-
         private List<BroadphasePair> overlappingPairArray = new List<BroadphasePair>(16);
         private OverlapFilterCallback overlapFilterCallback;
 

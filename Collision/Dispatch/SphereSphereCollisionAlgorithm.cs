@@ -58,9 +58,9 @@ namespace MobaGame.Collision
             // distance (negative means penetration)
             VFixedPoint dist = len - (radius0 + radius1);
 
-            VInt3 normalOnSurfaceB = new VInt3(VFixedPoint.One, VFixedPoint.Zero, VFixedPoint.One);
+            VInt3 normalOnSurfaceB = new VInt3(VFixedPoint.One, VFixedPoint.Zero, VFixedPoint.Zero);
             if (len > Globals.EPS) {
-                normalOnSurfaceB = normalOnSurfaceB.Normalize();
+                normalOnSurfaceB = diff/len;
             }
 
             // point on A (worldspace)
