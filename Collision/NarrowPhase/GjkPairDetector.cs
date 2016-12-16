@@ -7,7 +7,6 @@ namespace MobaGame.Collision
         // must be above the machine epsilon
         private static readonly VFixedPoint REL_ERROR2 = Globals.EPS2;
 
-        private static VInt3 ORIGIN = VInt3.zero;
         public static readonly int DEFAULT_MAX_ITERATIONS = 30;
         protected int maxIterations = DEFAULT_MAX_ITERATIONS;
 
@@ -48,10 +47,9 @@ namespace MobaGame.Collision
 
         public override void getClosestPoints(ClosestPointInput input, Result output)
         {
-            VFixedPoint distance = VFixedPoint.Zero;
-            VInt3 normalInB = VInt3.zero;
             VInt3 pointOnA;
             VInt3 pointOnB;
+            VInt3 normalInB;
             VIntTransform localTransA = input.transformA;
             VIntTransform localTransB = input.transformB;
             VFixedPoint marginA = minkowskiA.getMargin();
@@ -60,14 +58,14 @@ namespace MobaGame.Collision
 
 
             VFixedPoint sDist = VFixedPoint.MaxValue;
-            VFixedPoint minDist = sDist;
+            VFixedPoint minDist;
 
             VFixedPoint margin = marginA + marginB;
+
             simplexSolver.reset();
             int iterations = 0;
-            bool notTerminated = true;
 
-            do
+            while (iterations < maxIterations)
             {
                 minDist = sDist;
 
@@ -81,31 +79,41 @@ namespace MobaGame.Collision
                 VInt3 qWorld = localTransB.TransformPoint(qInB);
 
                 VInt3 w = pWorld - qWorld;
+                simplexSolver.addVertex(w, pWorld, qWorld);
 
-                if (containsOrigin(Q))
+                if(VInt3.Dot(w, cachedSeparatingAxis) <= VFixedPoint.Zero)
                 {
-                    separation.distance = VFixedPoint.Zero;
-                    separation.normal = VInt3.zero;
-                    return true;
+                    return;
                 }
 
-                size++;
-                v = DoSimplex(Q, support.point, ref size) * -1;
-                sDist = v.sqrMagnitude;
-                notTerminated = minDist - sDist > eps2 && iterations < maxIterations;
+                SimplexSolverInterface.COMPUTE_POINTS_RESULT result = simplexSolver.compute_points(out pointOnA, out pointOnB);
+                normalInB = (pointOnA - pointOnB).Normalize();
+                sDist = normalInB.magnitude;
+                normalInB = normalInB / sDist;
+                if (result != SimplexSolverInterface.COMPUTE_POINTS_RESULT.NOT_CONTACT)
+                {
+                    if(result == SimplexSolverInterface.COMPUTE_POINTS_RESULT.CONTACT)
+                    {
+
+                    }
+                    else if(result == SimplexSolverInterface.COMPUTE_POINTS_RESULT.DEGENERATED)
+                    {
+                        normalInB = (pointOnA - pointOnB).Normalize();
+                        output.addContactPoint(normalInB, pointOnB, VFixedPoint.Zero);
+                    }
+                    
+                    return;
+                }
                 iterations++;
             }
-            while (notTerminated);
-
-
         }
 
         protected VInt3 getInitialDirection(VIntTransform transform1, VIntTransform transform2)
         {
             VInt3 c1 = transform1.position;
             VInt3 c2 = transform2.position;
-
-            return c2 - c1;
+            VInt3 c = c2 - c1;
+            return c.sqrMagnitude > Globals.EPS2 ? c : VInt3.forward;
         }
     }
 }
