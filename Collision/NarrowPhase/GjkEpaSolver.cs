@@ -27,53 +27,36 @@ namespace MobaGame.Collision
             int numVertsLocal = 0;
             heap.Clear();
 
-            switch (size)
+            //check for input face normal. All face normals in this tetrahedron should be all pointing either inwards or outwards. If all face normals are pointing outward, we are good to go. Otherwise, we need to 
+            //shuffle the input vertexes and make sure all face normals are pointing outward
+            VFixedPoint planeDist0 = calculatePlaneDist(0, 1, 2, aBuf, bBuf);
+            if (planeDist0 < VFixedPoint.Zero)
             {
-                case 1:
-                    if (!expandPoint(a, b, transformA, transformB, ref numVertsLocal, lower_bound, upper_bound))
-                        return 4;
-                    break;
-                case 2:
-                    if (!expandSegment(a, b, transformA, transformB, ref numVertsLocal, lower_bound, upper_bound))
-                        return 4;
-                    break;
-                case 3:
-                    if (!expandTriangle(ref numVertsLocal, lower_bound, upper_bound))
-                        return 4;
-                    break;
-                case 4:
-                    //check for input face normal. All face normals in this tetrahedron should be all pointing either inwards or outwards. If all face normals are pointing outward, we are good to go. Otherwise, we need to 
-                    //shuffle the input vertexes and make sure all face normals are pointing outward
-                    VFixedPoint planeDist0 = calculatePlaneDist(0, 1, 2, aBuf, bBuf);
-                    if (planeDist0 < VFixedPoint.Zero)
-                    {
-                        //shuffle the input vertexes
-                        VInt3 tempA = aBuf[2];
-                        VInt3 tempB = bBuf[2];
-                        aBuf[2] = aBuf[1];
-                        bBuf[2] = bBuf[1];
-                        aBuf[1] = tempA;
-                        bBuf[1] = tempB;
-                    }
-
-                    Facet f0 = addFacet(0, 1, 2, lower_bound, upper_bound);
-                    Facet f1 = addFacet(0, 3, 1, lower_bound, upper_bound);
-                    Facet f2 = addFacet(0, 2, 3, lower_bound, upper_bound);
-                    Facet f3 = addFacet(1, 3, 2, lower_bound, upper_bound);
-
-                    if ((f0 == null) || (f1 == null) || (f2 == null) || (f3 == null) || heap.IsEmpty())
-                        return 4;
-
-                    f0.link(0, f1, 2);
-                    f0.link(1, f3, 2);
-                    f0.link(2, f2, 0);
-                    f1.link(0, f2, 2);
-                    f1.link(1, f3, 0);
-                    f2.link(1, f3, 1);
-                    numVertsLocal = 4;
-
-                    break;
+                //shuffle the input vertexes
+                VInt3 tempA = aBuf[2];
+                VInt3 tempB = bBuf[2];
+                aBuf[2] = aBuf[1];
+                bBuf[2] = bBuf[1];
+                aBuf[1] = tempA;
+                bBuf[1] = tempB;
             }
+
+            Facet f0 = addFacet(0, 1, 2, lower_bound, upper_bound);
+            Facet f1 = addFacet(0, 3, 1, lower_bound, upper_bound);
+            Facet f2 = addFacet(0, 2, 3, lower_bound, upper_bound);
+            Facet f3 = addFacet(1, 3, 2, lower_bound, upper_bound);
+
+            if ((f0 == null) || (f1 == null) || (f2 == null) || (f3 == null) || heap.IsEmpty())
+                return 4;
+
+            f0.link(0, f1, 2);
+            f0.link(1, f3, 2);
+            f0.link(2, f2, 0);
+            f1.link(0, f2, 2);
+            f1.link(1, f3, 0);
+            f2.link(1, f3, 1);
+            numVertsLocal = 4;
+          
 
             Facet facet = null;
             Facet bestFacet = null;
@@ -212,61 +195,6 @@ namespace MobaGame.Collision
             VInt3 planeNormal = VInt3.Cross(v, v3).Normalize();
             return VInt3.Dot(planeNormal, p0);
         }
-
-        bool expandPoint(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, ref int numVerts, VFixedPoint lowerBound, VFixedPoint upperBound)
-	    {
-            VInt3 x = VInt3.right;
-
-            VInt3 q0 = new VInt3();
-            doSupport(a, b, transformA, transformB, x, ref aBuf[1], ref bBuf[1], ref q0);
-		    return expandSegment(a, b, transformA, transformB, ref numVerts, lowerBound, upperBound);
-        }
-
-        bool expandSegment(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, ref int numVerts, VFixedPoint lowerBound, VFixedPoint upperBound)
-	    {
-            VInt3 q3 = aBuf[0] - bBuf[0];
-            VInt3 q4 = aBuf[1] - bBuf[1];
-
-            VInt3 dir = (q3 - q4).Normalize();
-
-            VFixedPoint sDir = VFixedPoint.One;
-            VInt3 temp2 = new VInt3(sDir, sDir, sDir);
-            VInt3 t1 = VInt3.Cross(temp2, dir).Normalize();
-            VInt3 aux1 = VInt3.Cross(dir, t1);
-
-            VInt3 q0 = new VInt3();
-            doSupport(a, b, transformA, transformB, aux1, ref aBuf[0], ref bBuf[0], ref q0);
-
-            VIntQuaternion qua0 = VIntQuaternion.AngleAxis(FMath.Pi * 2 / 3, dir);
-            VInt3 aux2 = (qua0 * aux1).Normalize();
-
-            VInt3 q1 = new VInt3();
-            doSupport(a, b, transformA, transformB, aux2, ref aBuf[1], ref bBuf[1], ref q1);
-
-            VInt3 aux3 = (qua0 * aux2).Normalize();//(aux2 * qua0);
-
-            VInt3 q2 = new VInt3();
-            doSupport(a, b, transformA, transformB, aux3, ref aBuf[2], ref bBuf[2], ref q2);
-
-		    return expandTriangle(ref numVerts, lowerBound, upperBound);
-        }
-
-        bool expandTriangle(ref int numVerts, VFixedPoint lowerBound, VFixedPoint upperBound)
-	    {
-            numVerts = 3;
-
-		    Facet f0 = addFacet(0, 1, 2, lowerBound, upperBound);
-            Facet f1 = addFacet(1, 0, 2, lowerBound, upperBound);
-
-		    if(f0 == null || f1 == null || heap.IsEmpty())
-			    return false;
-
-		    f0.link(0, f1, 0);
-            f0.link(1, f1, 2);
-            f0.link(2, f1, 1);
-		
-		    return true;
-	    }
 
         Facet addFacet(int i0, int i1, int i2, VFixedPoint lower2, VFixedPoint upper2)
         {

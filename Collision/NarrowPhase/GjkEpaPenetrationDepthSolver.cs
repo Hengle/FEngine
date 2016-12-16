@@ -7,7 +7,7 @@ namespace MobaGame.Collision
         public override bool calcPenDepth(SimplexSolverInterface simplexSolver,
                                                   ConvexShape pConvexA, ConvexShape pConvexB,
                                                   VIntTransform transformA, VIntTransform transformB,
-                                                  ref VInt3 wWitnessOnA, ref VInt3 wWitnessOnB)
+                                                  ref VInt3 wWitnessOnA, ref VInt3 wWitnessOnB, ref VInt3 normal, ref VFixedPoint depth)
         {
             VInt3[] Q = new VInt3[4];
             VInt3[] A = new VInt3[4];
@@ -16,28 +16,10 @@ namespace MobaGame.Collision
 
             int size = simplexSolver.numVertices();
             GjkEpaSolver Epa = new GjkEpaSolver();
-            VInt3 normal = new VInt3();
-            VFixedPoint dist = VFixedPoint.Zero;
-            return Epa.PenetrationDepth(pConvexA, pConvexB, transformA, transformB, Q, A, B, size, ref wWitnessOnA, ref wWitnessOnB, ref normal, ref dist) == 6;
+            normal = new VInt3();
+            depth = VFixedPoint.Zero;
+            return Epa.PenetrationDepth(pConvexA, pConvexB, transformA, transformB, Q, A, B, size, ref wWitnessOnA, ref wWitnessOnB, ref normal, ref depth) == 6;
 
-        }
-
-        public enum ResultsStatus
-        {
-            Separated,      /* Shapes doesnt penetrate												*/
-            Penetrating,    /* Shapes are penetrating												*/
-            GJK_Failed,     /* GJK phase fail, no big issue, shapes are probably just 'touching'	*/
-            EPA_Failed,     /* EPA phase fail, bigger problem, need to save parameters, and debug	*/
-        }
-
-        public class Results
-        {
-            public ResultsStatus status;
-            public VInt3[] witnesses/*[2]*/ = new VInt3[] { VInt3.zero, VInt3.zero };
-            public VInt3 normal = new VInt3();
-            public VFixedPoint depth;
-            public int epa_iterations;
-            public int gjk_iterations;
         }
     }
 }

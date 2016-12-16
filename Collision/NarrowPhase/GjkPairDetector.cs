@@ -15,6 +15,8 @@ namespace MobaGame.Collision
         private ConvexShape minkowskiA;
         private ConvexShape minkowskiB;
 
+        private ConvexPenetrationDepthSolver penetrationDepthSolver;
+
 
         public void init(ConvexShape objectA, ConvexShape objectB, SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver penetrationDepthSolver)
         {
@@ -23,6 +25,7 @@ namespace MobaGame.Collision
             this.simplexSolver = simplexSolver;
             minkowskiA = objectA;
             minkowskiB = objectB;
+            this.penetrationDepthSolver = penetrationDepthSolver;
         }
 
         public void setMinkowskiA(ConvexShape minkA)
@@ -42,7 +45,7 @@ namespace MobaGame.Collision
 
         public void setPenetrationDepthSolver(ConvexPenetrationDepthSolver penetrationDepthSolver)
         {
-            //this.penetrationDepthSolver = penetrationDepthSolver;
+            this.penetrationDepthSolver = penetrationDepthSolver;
         }
 
         public override void getClosestPoints(ClosestPointInput input, Result output)
@@ -94,11 +97,12 @@ namespace MobaGame.Collision
                 {
                     if(result == SimplexSolverInterface.COMPUTE_POINTS_RESULT.CONTACT)
                     {
-
+                        VFixedPoint depth = VFixedPoint.Zero;
+                        penetrationDepthSolver.calcPenDepth(simplexSolver, minkowskiA, minkowskiB, localTransA, localTransB, ref pointOnA, ref pointOnB, ref normalInB, ref depth);
+                        output.addContactPoint(normalInB.Normalize(), pointOnB, depth);
                     }
                     else if(result == SimplexSolverInterface.COMPUTE_POINTS_RESULT.DEGENERATED)
                     {
-                        normalInB = (pointOnA - pointOnB).Normalize();
                         output.addContactPoint(normalInB, pointOnB, VFixedPoint.Zero);
                     }
                     
