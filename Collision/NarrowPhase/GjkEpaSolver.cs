@@ -9,11 +9,11 @@ namespace MobaGame.Collision
         const int MaxFacets = 64;
         const int MaxSupportPoints = 64;
 
-        Heap<Facet> heap;
+        Heap<Facet> heap = new Heap<Facet>();
         VInt3[] aBuf = new VInt3[MaxSupportPoints];
         VInt3[] bBuf = new VInt3[MaxSupportPoints];
         Facet[] facetBuf = new Facet[MaxFacets];
-        EdgeBuffer edgeBuffer;
+        EdgeBuffer edgeBuffer = new EdgeBuffer();
         DeferredIDPoolBase facetManager = new DeferredIDPoolBase(MaxFacets);
 
         public int PenetrationDepth(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, VInt3[] Q, VInt3[] A, VInt3[] B, int size, ref VInt3 pa, ref VInt3 pb, ref VInt3 normal, ref VFixedPoint penDepth)

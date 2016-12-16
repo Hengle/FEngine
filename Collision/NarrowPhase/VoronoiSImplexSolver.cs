@@ -4,10 +4,9 @@ namespace MobaGame.Collision
 {
     public class VoronoiSimplexSolver: SimplexSolverInterface
     {
-        //protected  BulletStack stack = BulletStack.get();
         protected ObjectPool<SubSimplexClosestResult> subsimplexResultsPool = new ObjectPool<SubSimplexClosestResult>();
 	
-	    private static  int VORONOI_SIMPLEX_MAX_VERTS = 5;
+	    private static  int VORONOI_SIMPLEX_MAX_VERTS = 4;
 
         private static  int VERTA = 0;
         private static  int VERTB = 1;
@@ -23,8 +22,6 @@ namespace MobaGame.Collision
 	    public  VInt3 cachedP1 = new VInt3();
         public  VInt3 cachedP2 = new VInt3();
         public  VInt3 cachedV = new VInt3();
-        public  VInt3 lastW = new VInt3();
-        public bool cachedValidClosest;
 
         public  SubSimplexClosestResult cachedBC = new SubSimplexClosestResult();
 
@@ -74,8 +71,7 @@ namespace MobaGame.Collision
                 switch (numVertices())
                 {
                     case 0:
-                        cachedValidClosest = false;
-                        break;
+                        return false;
                     case 1:
                         {
                             cachedP1 = simplexPointsP[0];
@@ -83,8 +79,7 @@ namespace MobaGame.Collision
                             cachedV = cachedP1 - cachedP2; //== m_simplexVectorW[0]
                             cachedBC.reset();
                             cachedBC.setBarycentricCoordinates(VFixedPoint.One, VFixedPoint.Zero, VFixedPoint.Zero, VFixedPoint.Zero);
-                            cachedValidClosest = cachedBC.isValid();
-                            break;
+                            return true;
                         }
                     case 2:
                         {
@@ -139,8 +134,7 @@ namespace MobaGame.Collision
 
                             reduceVertices(cachedBC.usedVertices);
 
-                            cachedValidClosest = cachedBC.isValid();
-					        break;
+                            return cachedBC.isValid();
 				        }
 			        case 3: 
 				        { 				
@@ -156,8 +150,7 @@ namespace MobaGame.Collision
                             cachedP2 = simplexPointsQ[0] * cachedBC.barycentricCoords[0] + simplexPointsQ[1] * cachedBC.barycentricCoords[1] + simplexPointsQ[2] * cachedBC.barycentricCoords[2];
                             cachedV = cachedP1 - cachedP2;
                             reduceVertices(cachedBC.usedVertices);
-                            cachedValidClosest = cachedBC.isValid(); 
-					        break; 
+                            return cachedBC.isValid(); 
 				        }
 			        case 4:
 				        {				
@@ -170,39 +163,27 @@ namespace MobaGame.Collision
 
                             bool hasSeperation = closestPtPointTetrahedron(p, a, b, c, d, cachedBC);
 
-					        if (hasSeperation)
-					        {
+                            if (hasSeperation)
+                            {
                                 cachedP1 = simplexPointsP[0] * cachedBC.barycentricCoords[0] + simplexPointsP[1] * cachedBC.barycentricCoords[1] + simplexPointsP[2] * cachedBC.barycentricCoords[2] + simplexPointsP[3] * cachedBC.barycentricCoords[3];
                                 cachedP2 = simplexPointsQ[0] * cachedBC.barycentricCoords[0] + simplexPointsQ[1] * cachedBC.barycentricCoords[1] + simplexPointsQ[2] * cachedBC.barycentricCoords[2] + simplexPointsQ[3] * cachedBC.barycentricCoords[3];
                                 cachedV = cachedP1 - cachedP2;
                                 reduceVertices(cachedBC.usedVertices);
-					        }
+                                return true;
+                            }
                             else
-					        {
-						        if (cachedBC.degenerate)
-						        {
-							        cachedValidClosest = false;
-						        }
-						        else
-						        {
-							        cachedValidClosest = true;
-							        cachedV = VInt3.zero;
-						        }
-						        break;
-					        }
-					        cachedValidClosest = cachedBC.isValid();
-					        //closest point origin from tetrahedron
-					        break;
+                            {
+                                return false;
+                            }
 				        }
 			        default:
 				    {
-					    cachedValidClosest = false;
-                        break;
+                        return false;
 				    }
 			    }
 		    }
 
-		    return cachedValidClosest;
+		    return false;
 	    }
 
         public bool closestPtPointTriangle(VInt3 p, VInt3 a, VInt3 b, VInt3 c, SubSimplexClosestResult result)
@@ -303,6 +284,7 @@ namespace MobaGame.Collision
 		    return true;
 	    }
 
+        //return: -1 degenerate, 0 p is inside abcd, 1 p is outside abcd
         public static int pointOutsideOfPlane(VInt3 p, VInt3 a, VInt3 b, VInt3 c, VInt3 d)
         {
 		    VInt3 normal = VInt3.Cross(b - a, c - a);
@@ -339,12 +321,13 @@ namespace MobaGame.Collision
 
 		        if (pointOutsideABC < 0 || pointOutsideACD < 0 || pointOutsideADB < 0 || pointOutsideBDC < 0)
 		        {
-			        finalResult.degenerate = true;
+                    //degenerate condition, no need to update
 			        return false;
 		        }
 
 		        if (pointOutsideABC == 0 && pointOutsideACD == 0 && pointOutsideADB == 0 && pointOutsideBDC == 0)
 			    {
+                    //point is inside tethahedron, no need to update
 				     return false;
 			    }
 
@@ -458,16 +441,6 @@ namespace MobaGame.Collision
 				    }
 			    }
 
-			    //help! we ended up full !
-
-			    if (finalResult.usedVertices.usedVertexA &&
-				    finalResult.usedVertices.usedVertexB &&
-				    finalResult.usedVertices.usedVertexC &&
-				    finalResult.usedVertices.usedVertexD) 
-			    {
-				    return true;
-			    }
-
 			    return true;
 		    }
 		    finally
@@ -481,16 +454,13 @@ namespace MobaGame.Collision
 	     */
         public override void reset()
         {
-            cachedValidClosest = false;
             _numVertices = 0;
             needsUpdate = true;
-            lastW = new VInt3(VFixedPoint.MaxValue, VFixedPoint.MaxValue, VFixedPoint.MaxValue);
             cachedBC.reset();
         }
 
         public override void addVertex(VInt3 w, VInt3 p, VInt3 q)
         {
-            lastW = w;
             needsUpdate = true;
 
             simplexVectorW[_numVertices] = w;
@@ -541,30 +511,6 @@ namespace MobaGame.Collision
             return numVertices();
         }
 
-        public override bool inSimplex(VInt3 w)
-        {
-            bool found = false;
-            int i, numverts = numVertices();
-            //btScalar maxV = btScalar(0.);
-
-            //w is in the current (reduced) simplex
-            for (i = 0; i < numverts; i++)
-            {
-                if (simplexVectorW[i] == w)
-                {
-                    found = true;
-                }
-            }
-
-            //check in case lastW is already removed
-            if (w == lastW)
-            {
-                return true;
-            }
-
-            return found;
-        }
-
         public override void backup_closest(VInt3 v)
         {
             v = cachedV;
@@ -612,11 +558,9 @@ namespace MobaGame.Collision
         // if m_usedVertices & MASK then the related vertex is used
         public UsageBitfield usedVertices = new UsageBitfield();
         public VFixedPoint[] barycentricCoords = new VFixedPoint[4];
-        public bool degenerate;
 
         public void reset()
         {
-            degenerate = false;
             setBarycentricCoordinates(VFixedPoint.Zero, VFixedPoint.Zero, VFixedPoint.Zero, VFixedPoint.Zero);
             usedVertices.reset();
         }

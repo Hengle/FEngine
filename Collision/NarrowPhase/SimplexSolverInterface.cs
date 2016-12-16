@@ -16,8 +16,6 @@ namespace MobaGame.Collision
 
         public abstract int getSimplex(VInt3[] pBuf, VInt3[] qBuf, VInt3[] yBuf);
 
-        public abstract bool inSimplex(VInt3 w);
-
         public abstract void backup_closest(VInt3 v);
 
         public abstract bool emptySimplex();
