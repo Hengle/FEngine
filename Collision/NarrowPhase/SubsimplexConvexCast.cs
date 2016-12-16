@@ -96,7 +96,7 @@ namespace MobaGame.Collision
                 VInt3 pointOnA, pointOnB;
                 SimplexSolverInterface.COMPUTE_POINTS_RESULT success = simplexSolver.compute_points(out pointOnA, out pointOnB);
                 v = pointOnA - pointOnB;
-                if (success == SimplexSolverInterface.COMPUTE_POINTS_RESULT.NOT_CONTACT)
+                if (success == SimplexSolverInterface.COMPUTE_POINTS_RESULT.CONTACT)
                 {
 				    dist2 = v.sqrMagnitude;
 			    }
