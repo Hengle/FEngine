@@ -93,7 +93,10 @@ namespace MobaGame.Collision
 				    }
                 }
                 simplexSolver.addVertex(w, supVertexA , supVertexB);
-			    if (simplexSolver.closest(ref v))
+                VInt3 pointOnA, pointOnB;
+                SimplexSolverInterface.COMPUTE_POINTS_RESULT success = simplexSolver.compute_points(out pointOnA, out pointOnB);
+                v = pointOnA - pointOnB;
+                if (success == SimplexSolverInterface.COMPUTE_POINTS_RESULT.NOT_CONTACT)
                 {
 				    dist2 = v.sqrMagnitude;
 			    }
@@ -118,9 +121,9 @@ namespace MobaGame.Collision
 		    if (VInt3.Dot(result.normal, r) >= -result.allowedPenetration)
 			    return false;
 
-		    VInt3 hitA = VInt3.zero;
-		    VInt3 hitB = VInt3.zero;
-		    simplexSolver.compute_points(ref hitA,ref hitB);
+		    VInt3 hitA;
+		    VInt3 hitB;
+		    simplexSolver.compute_points(out hitA, out hitB);
 		    result.hitPoint = hitB;
 		    return true;
 	    }

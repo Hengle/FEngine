@@ -4,7 +4,7 @@ using System;
 
 namespace MobaGame.Collision
 {
-    public class GjkEpaSolver
+    public class GjkEpaSolver: ConvexPenetrationDepthSolver
     {
         const int MaxFacets = 64;
         const int MaxSupportPoints = 64;
@@ -16,8 +16,17 @@ namespace MobaGame.Collision
         EdgeBuffer edgeBuffer = new EdgeBuffer();
         DeferredIDPoolBase facetManager = new DeferredIDPoolBase(MaxFacets);
 
-        public int PenetrationDepth(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, VInt3[] Q, VInt3[] A, VInt3[] B, int size, ref VInt3 pa, ref VInt3 pb, ref VInt3 normal, ref VFixedPoint penDepth)
+        public override bool calcPenDepth(SimplexSolverInterface simplexSolver, 
+            ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, 
+            ref VInt3 pa, ref VInt3 pb, ref VInt3 normal, ref VFixedPoint penDepth)
         {
+            VInt3[] Q = new VInt3[4];
+            VInt3[] A = new VInt3[4];
+            VInt3[] B = new VInt3[4];
+            simplexSolver.getSimplex(A, B, Q);
+
+            int size = simplexSolver.numVertices();
+
             VFixedPoint upper_bound = VFixedPoint.MaxValue;
             VFixedPoint lower_bound = VFixedPoint.MinValue;
 
@@ -47,7 +56,7 @@ namespace MobaGame.Collision
             Facet f3 = addFacet(1, 3, 2, lower_bound, upper_bound);
 
             if ((f0 == null) || (f1 == null) || (f2 == null) || (f3 == null) || heap.IsEmpty())
-                return 4;
+                return false;
 
             f0.link(0, f1, 2);
             f0.link(1, f3, 2);
@@ -88,7 +97,7 @@ namespace MobaGame.Collision
                     if(con0)
                     {
                         calculateContactInformation(aBuf, bBuf, facet, a, b, ref pa, ref pb, ref normal, ref penDepth);
-                        return 6;
+                        return true;
                     }
 
                     VFixedPoint dif = dist - planeDist;
@@ -97,7 +106,7 @@ namespace MobaGame.Collision
                     if(degeneratedCondition)
                     {
                         calculateContactInformation(aBuf, bBuf, facet, a, b, ref pa, ref pb, ref normal, ref penDepth);
-                        return 5;
+                        return false;
                     }
 
                     aBuf[numVertsLocal] = tempa;
@@ -113,7 +122,7 @@ namespace MobaGame.Collision
                     if(bufferSize > facetManager.getNumRemainingIDs())
                     {
                         calculateContactInformation(aBuf, bBuf, facet, a, b, ref pa, ref pb, ref normal, ref penDepth);
-                        return 5;
+                        return false;
                     }
 
                     Facet firstFacet = addFacet(edge.getTarget(), edge.getSource(), index, lower_bound, upper_bound);
@@ -134,7 +143,7 @@ namespace MobaGame.Collision
                     if (degenerate)
                     {
                         calculateContactInformation(aBuf, bBuf, facet, a, b, ref pa, ref pb, ref normal, ref penDepth);
-                        return 5;
+                        return false;
                     }
                     firstFacet.link(2, lastFacet, 1);
                 }
@@ -145,13 +154,13 @@ namespace MobaGame.Collision
                 if (hasMoreFacets && heap.peak().getPlaneDist() > upper_bound)
                 {
                     calculateContactInformation(aBuf, bBuf, bestFacet, a, b, ref pa, ref pb, ref normal, ref penDepth);
-                    return 6;
+                    return true;
                 }
 
             } while (hasMoreFacets && numVertsLocal != MaxSupportPoints);
 
             calculateContactInformation(aBuf, bBuf, facet, a, b, ref pa, ref pb, ref normal, ref penDepth);
-            return 5;
+            return false;
         }
 
         void calculateContactInformation(VInt3[] aBuf, VInt3[] bBuf, Facet facet, ConvexShape a, ConvexShape b, ref VInt3 pa, ref VInt3 pb, ref VInt3 normal, ref VFixedPoint penDepth)
