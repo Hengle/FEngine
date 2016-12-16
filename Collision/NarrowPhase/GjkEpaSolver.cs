@@ -12,6 +12,7 @@ namespace MobaGame.Collision
         Heap<Facet> heap = new Heap<Facet>();
         VInt3[] aBuf = new VInt3[MaxSupportPoints];
         VInt3[] bBuf = new VInt3[MaxSupportPoints];
+        VInt3[] Q = new VInt3[MaxSupportPoints];
         Facet[] facetBuf = new Facet[MaxFacets];
         EdgeBuffer edgeBuffer = new EdgeBuffer();
         DeferredIDPoolBase facetManager = new DeferredIDPoolBase(MaxFacets);
@@ -20,18 +21,10 @@ namespace MobaGame.Collision
             ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, 
             ref VInt3 pa, ref VInt3 pb, ref VInt3 normal, ref VFixedPoint penDepth)
         {
-            VInt3[] Q = new VInt3[4];
-            VInt3[] A = new VInt3[4];
-            VInt3[] B = new VInt3[4];
-            simplexSolver.getSimplex(A, B, Q);
-
-            int size = simplexSolver.numVertices();
+            simplexSolver.getSimplex(aBuf, bBuf, Q);
 
             VFixedPoint upper_bound = VFixedPoint.MaxValue;
             VFixedPoint lower_bound = VFixedPoint.MinValue;
-
-            aBuf[0] = A[0]; aBuf[1] = A[1]; aBuf[2] = A[2]; aBuf[3] = A[3];
-            bBuf[0] = B[0]; bBuf[1] = B[1]; bBuf[2] = B[2]; bBuf[3] = B[3];
 
             int numVertsLocal = 0;
             heap.Clear();
