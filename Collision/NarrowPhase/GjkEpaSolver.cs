@@ -64,9 +64,9 @@ namespace MobaGame.Collision
             Facet bestFacet = null;
 
             bool hasMoreFacets = false;
-            VInt3 tempa = new VInt3();
-            VInt3 tempb = new VInt3();
-            VInt3 q = new VInt3();
+            VInt3 tempa;
+            VInt3 tempb;
+            VInt3 q;
 
             do
             {
@@ -80,7 +80,7 @@ namespace MobaGame.Collision
                     VInt3 planeNormal = facet.getPlaneNormal();
                     VFixedPoint planeDist = facet.getPlaneDist();
 
-                    doSupport(a, b, transformA, transformB, -planeNormal, ref tempa, ref tempb, ref q);
+                    doSupport(a, b, transformA, transformB, -planeNormal, out tempa, out tempb, out q);
 
                     VFixedPoint dist = VInt3.Dot(q, planeNormal);
                     upper_bound = dist >= VFixedPoint.Zero ? FMath.Min(upper_bound, dist) : upper_bound;
@@ -229,7 +229,8 @@ namespace MobaGame.Collision
             return a == 0 && b == 0 && c == 0 && d == 0;
         }
 
-        static void doSupport(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, VInt3 dir, ref VInt3 supportA, ref VInt3 supportB, ref VInt3 support)
+        static void doSupport(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, VInt3 dir
+            , out VInt3 supportA, out VInt3 supportB, out VInt3 support)
 	    {
             VInt3 dirInA = dir * -1;
             dirInA = transformA.InverseTransformVector(dirInA);
