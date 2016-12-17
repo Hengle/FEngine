@@ -24,4 +24,10 @@ public class FBox : MonoBehaviour
     {
         _box.setWorldTransform(new VIntTransform(transform));
     }
+
+	void OnDrawGizmos()
+	{
+		Gizmos.color = Color.yellow;
+		Gizmos.DrawWireCube (transform.position, new Vector3(1, 1, 1));//sphere.getRadius().ToFloat);
+	}
 }

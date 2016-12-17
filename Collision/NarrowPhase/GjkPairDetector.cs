@@ -59,21 +59,16 @@ namespace MobaGame.Collision
             VFixedPoint marginB = minkowskiB.getMargin();
             cachedSeparatingAxis = getInitialDirection(localTransA, localTransB);
 
-
-            VFixedPoint sDist = VFixedPoint.MaxValue;
-            VFixedPoint minDist;
-
-            VFixedPoint margin = marginA + marginB;
+            //VFixedPoint margin = marginA + marginB;
 
             simplexSolver.reset();
             int iterations = 0;
 
             while (iterations < maxIterations)
             {
-                minDist = sDist;
 
-                VInt3 seperatingAxisInA = input.transformA.InverseTransformVector(-cachedSeparatingAxis);
-                VInt3 seperatingAxisInB = input.transformB.InverseTransformVector(cachedSeparatingAxis);
+                VInt3 seperatingAxisInA = input.transformA.InverseTransformVector(cachedSeparatingAxis);
+                VInt3 seperatingAxisInB = input.transformB.InverseTransformVector(-cachedSeparatingAxis);
 
                 VInt3 pInA = minkowskiA.localGetSupportingVertexWithoutMargin(seperatingAxisInA);
                 VInt3 qInB = minkowskiB.localGetSupportingVertexWithoutMargin(seperatingAxisInB);
@@ -90,9 +85,7 @@ namespace MobaGame.Collision
                 }
 
                 SimplexSolverInterface.COMPUTE_POINTS_RESULT result = simplexSolver.compute_points(out pointOnA, out pointOnB);
-                normalInB = (pointOnA - pointOnB).Normalize();
-                sDist = normalInB.magnitude;
-                normalInB = normalInB / sDist;
+                normalInB = (pointOnA - pointOnB);
                 if (result != SimplexSolverInterface.COMPUTE_POINTS_RESULT.NOT_CONTACT)
                 {
                     if(result == SimplexSolverInterface.COMPUTE_POINTS_RESULT.CONTACT)
@@ -103,11 +96,12 @@ namespace MobaGame.Collision
                     }
                     else if(result == SimplexSolverInterface.COMPUTE_POINTS_RESULT.DEGENERATED)
                     {
-                        output.addContactPoint(normalInB, pointOnB, VFixedPoint.Zero);
+						output.addContactPoint(normalInB.Normalize(), pointOnB, VFixedPoint.Zero);
                     }
                     
                     return;
                 }
+                cachedSeparatingAxis = -normalInB;
                 iterations++;
             }
         }
@@ -116,7 +110,7 @@ namespace MobaGame.Collision
         {
             VInt3 c1 = transform1.position;
             VInt3 c2 = transform2.position;
-            VInt3 c = c2 - c1;
+            VInt3 c = c1 - c2;
             return c.sqrMagnitude > Globals.EPS2 ? c : VInt3.forward;
         }
     }

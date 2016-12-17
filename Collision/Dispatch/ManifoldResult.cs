@@ -1,4 +1,5 @@
 ﻿using MobaGame.FixedMath;
+using UnityEngine;
 
 namespace MobaGame.Collision
 {
@@ -56,6 +57,9 @@ namespace MobaGame.Collision
         public override void addContactPoint(VInt3 normalOnBInWorld, VInt3 pointInWorld, VFixedPoint depth)
         {
             //order in manifold needs to match
+			Debug.Log("normalOnBInWorld: " + normalOnBInWorld);
+			Debug.Log("pointInWorld: " + pointInWorld);
+			Debug.Log("depth: " + depth);
 
             if (depth > manifoldPtr.getContactBreakingThreshold())
             {

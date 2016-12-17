@@ -19,9 +19,9 @@ namespace MobaGame.Collision
 	    public  VInt3[] simplexPointsP = new VInt3[VORONOI_SIMPLEX_MAX_VERTS];
 	    public  VInt3[] simplexPointsQ = new VInt3[VORONOI_SIMPLEX_MAX_VERTS];
 
-	    public  VInt3 cachedP1 = new VInt3();
-        public  VInt3 cachedP2 = new VInt3();
-        public  VInt3 cachedV = new VInt3();
+	    public  VInt3 cachedP1;
+        public  VInt3 cachedP2;
+        public  VInt3 cachedV;
 
         public  SubSimplexClosestResult cachedBC = new SubSimplexClosestResult();
 
@@ -72,13 +72,15 @@ namespace MobaGame.Collision
                 {
                     case 0:
                         return COMPUTE_POINTS_RESULT.NOT_CONTACT;
-                    case 1:
+				    case 1:
                         {
-                            cachedP1 = simplexPointsP[0];
-                            cachedP2 = simplexPointsQ[0];
-                            cachedV = cachedP1 - cachedP2; //== m_simplexVectorW[0]
-                            cachedBC.reset();
-                            cachedBC.setBarycentricCoordinates(VFixedPoint.One, VFixedPoint.Zero, VFixedPoint.Zero, VFixedPoint.Zero);
+                            cachedP1 = simplexPointsP [0];
+                            cachedP2 = simplexPointsQ [0];
+                            cachedV = cachedP1 - cachedP2;
+                            cachedBC.reset ();
+                            cachedBC.setBarycentricCoordinates (VFixedPoint.One, VFixedPoint.Zero, VFixedPoint.Zero, VFixedPoint.Zero);
+                            if (cachedV == VInt3.zero)
+                                return COMPUTE_POINTS_RESULT.DEGENERATED;
                             return COMPUTE_POINTS_RESULT.NOT_CONTACT;
                         }
                     case 2:
@@ -88,7 +90,6 @@ namespace MobaGame.Collision
                             //closest point origin from line segment
                             VInt3 from = simplexVectorW[0];
                             VInt3 to = simplexVectorW[1];
-                            VInt3 nearest =new VInt3();
 
                             VInt3 p = VInt3.zero;
                             VInt3 diff = p - from;
@@ -100,13 +101,10 @@ namespace MobaGame.Collision
 						        VFixedPoint dotVV = v.sqrMagnitude;
 						        if (t<dotVV) {
 							        t /= dotVV;
-							        tmp = v * t;
-							        diff -= tmp;
 							        cachedBC.usedVertices.usedVertexA = true;
 							        cachedBC.usedVertices.usedVertexB = true;
 						        } else {
 							        t = VFixedPoint.One;
-							        diff -= v;
 							        // reduce to 1 point
 							        cachedBC.usedVertices.usedVertexB = true;
 						        }
@@ -117,9 +115,7 @@ namespace MobaGame.Collision
 						        cachedBC.usedVertices.usedVertexA = true;
 					        }
 					        cachedBC.setBarycentricCoordinates(VFixedPoint.One-t, t, VFixedPoint.Zero, VFixedPoint.Zero);
-					
-					        tmp = v * t;
-					        nearest = from + tmp;
+
 
 					        tmp = simplexPointsP[1] - simplexPointsP[0];
 					        tmp *= t;
@@ -134,6 +130,8 @@ namespace MobaGame.Collision
 
                             reduceVertices(cachedBC.usedVertices);
 
+                            if(cachedV == VInt3.zero)
+                                return COMPUTE_POINTS_RESULT.DEGENERATED;
                             return COMPUTE_POINTS_RESULT.NOT_CONTACT;
 				        }
 			        case 3: 
@@ -150,7 +148,9 @@ namespace MobaGame.Collision
                             cachedP2 = simplexPointsQ[0] * cachedBC.barycentricCoords[0] + simplexPointsQ[1] * cachedBC.barycentricCoords[1] + simplexPointsQ[2] * cachedBC.barycentricCoords[2];
                             cachedV = cachedP1 - cachedP2;
                             reduceVertices(cachedBC.usedVertices);
-                            return COMPUTE_POINTS_RESULT.NOT_CONTACT; 
+				            if(cachedV == VInt3.zero)
+				                return COMPUTE_POINTS_RESULT.DEGENERATED;
+				            return COMPUTE_POINTS_RESULT.NOT_CONTACT;
 				        }
 			        case 4:
 				        {				

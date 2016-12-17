@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MobaGame.Collision
 {
@@ -7,10 +8,11 @@ namespace MobaGame.Collision
         private CollisionWorld collisionWorld;
         private BroadphaseInterface broadPhase;
         private Dispatcher dispatcher;
+		private HashedOverlappingPairCache pbp;
 
         public FEngine()
         {
-            HashedOverlappingPairCache pbp = new HashedOverlappingPairCache();
+            pbp = new HashedOverlappingPairCache();
             broadPhase = new DbvtBroadphase(pbp);
             dispatcher = new CollisionDispatcher(new DefaultCollisionConfiguration());
             collisionWorld = new CollisionWorld(dispatcher, broadPhase);
