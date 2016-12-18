@@ -84,21 +84,18 @@ namespace MobaGame.Collision
                     return;
                 }
 
-                SimplexSolverInterface.COMPUTE_POINTS_RESULT result = simplexSolver.compute_points(out pointOnA, out pointOnB);
+                bool result = simplexSolver.compute_points(out pointOnA, out pointOnB);
                 normalInB = (pointOnA - pointOnB);
-                if (result != SimplexSolverInterface.COMPUTE_POINTS_RESULT.NOT_CONTACT)
+				if (result)
                 {
-                    if(result == SimplexSolverInterface.COMPUTE_POINTS_RESULT.CONTACT)
-                    {
-                        VFixedPoint depth = VFixedPoint.Zero;
-                        penetrationDepthSolver.calcPenDepth(simplexSolver, minkowskiA, minkowskiB, localTransA, localTransB, ref pointOnA, ref pointOnB, ref normalInB, ref depth);
-                        output.addContactPoint(normalInB.Normalize(), pointOnB, depth);
-                    }
-                    else if(result == SimplexSolverInterface.COMPUTE_POINTS_RESULT.DEGENERATED)
-                    {
-						output.addContactPoint(normalInB.Normalize(), pointOnB, VFixedPoint.Zero);
-                    }
-                    
+					VInt3[] aBuf = new VInt3[4];
+					VInt3[] bBuf = new VInt3[4];
+					VInt3[] Q = new VInt3[4];
+					simplexSolver.getSimplex(aBuf, bBuf, Q);
+					normalInB = VInt3.Cross (Q [1] - Q [0], Q [2] - Q [0]);
+					if (VInt3.Dot (normalInB, localTransA.position - localTransB.position) < VFixedPoint.Zero)
+						normalInB *= -1;
+					output.addContactPoint(normalInB.Normalize(), pointOnB, VFixedPoint.Zero);
                     return;
                 }
                 cachedSeparatingAxis = -normalInB;

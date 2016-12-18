@@ -6,9 +6,7 @@ namespace MobaGame.Collision
     {
         public BoxShape(VInt3 boxHalfExtends)
         {
-            VInt3 margin = new VInt3(getMargin(), getMargin(), getMargin());
             implicitShapeDimensions = boxHalfExtends * localScaling;
-            implicitShapeDimensions -= margin;
         }
 
         public VInt3 getHalfExtentsWithMargin()
@@ -71,14 +69,9 @@ namespace MobaGame.Collision
 
         public override void setLocalScaling(VInt3 scaling)
         {
-            VInt3 oldMargin = new VInt3(getMargin(), getMargin(), getMargin());
-		    VInt3 implicitShapeDimensionsWithMargin = implicitShapeDimensions + oldMargin;
-		    VInt3 unScaledImplicitShapeDimensionsWithMargin = implicitShapeDimensionsWithMargin / localScaling;
-
 		    base.setLocalScaling(scaling);
 
-		    implicitShapeDimensions = unScaledImplicitShapeDimensionsWithMargin * localScaling;
-		    implicitShapeDimensions -= oldMargin;
+		    implicitShapeDimensions *= localScaling;
         }
 
         public override void getAabb(VIntTransform trans, out VInt3 aabbMin, out VInt3 aabbMax)

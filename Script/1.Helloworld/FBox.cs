@@ -11,7 +11,7 @@ public class FBox : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        CollisionShape box = new BoxShape(VInt3.one);
+		CollisionShape box = new BoxShape(VInt3.one * VFixedPoint.Half);
         _box = new CollisionObject();
         _box.setCollisionFlags(MobaGame.Collision.CollisionFlags.NORMAL_OBJECT);
         _box.setCollisionShape(box);

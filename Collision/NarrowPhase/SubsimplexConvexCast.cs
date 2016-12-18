@@ -94,9 +94,9 @@ namespace MobaGame.Collision
                 }
                 simplexSolver.addVertex(w, supVertexA , supVertexB);
                 VInt3 pointOnA, pointOnB;
-                SimplexSolverInterface.COMPUTE_POINTS_RESULT success = simplexSolver.compute_points(out pointOnA, out pointOnB);
+                bool success = simplexSolver.compute_points(out pointOnA, out pointOnB);
                 v = pointOnA - pointOnB;
-                if (success == SimplexSolverInterface.COMPUTE_POINTS_RESULT.NOT_CONTACT)
+                if (!success)
                 {
 				    dist2 = v.sqrMagnitude;
 			    }
