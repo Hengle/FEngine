@@ -82,8 +82,7 @@ namespace MobaGame.Collision
                 VInt3 w = pWorld - qWorld;
                 VFixedPoint signDist = VInt3.Dot(w, cachedSeparatingAxis);
 
-                //no more progress, return
-                if (sDist - signDist <= sDist * Globals.EPS)
+                if (VInt3.Dot(cachedSeparatingAxis, w) <= VFixedPoint.Zero)
                 {
                     return;
                 }
@@ -95,7 +94,7 @@ namespace MobaGame.Collision
                 {
                     if(normalInB.sqrMagnitude < Globals.EPS2)
                     {
-                        output.addContactPoint(prevClosest.Normalize(), pointOnB, VFixedPoint.Zero);
+                        output.addContactPoint(prevClosest.Normalize(), pointOnB, -signDist);
                     }
 					else
                     {
