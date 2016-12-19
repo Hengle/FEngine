@@ -23,7 +23,7 @@ namespace MobaGame.Collision
 
             //#define USE_EPA 1
             //#ifdef USE_EPA
-            pdSolver = new GjkEpaSolver();
+            pdSolver = new EpaSolver();
             //#else
             //pdSolver = new MinkowskiPenetrationDepthSolver();
             //#endif//USE_EPA

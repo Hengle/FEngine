@@ -21,7 +21,7 @@ namespace MobaGame.Collision
         public void init(ConvexShape objectA, ConvexShape objectB, SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver penetrationDepthSolver)
         {
             this.cachedSeparatingAxis = VInt3.zero;
-            //this.penetrationDepthSolver = penetrationDepthSolver;
+            this.penetrationDepthSolver = penetrationDepthSolver;
             this.simplexSolver = simplexSolver;
             minkowskiA = objectA;
             minkowskiB = objectB;
@@ -88,14 +88,21 @@ namespace MobaGame.Collision
                 normalInB = (pointOnA - pointOnB);
 				if (result)
                 {
-					VInt3[] aBuf = new VInt3[4];
-					VInt3[] bBuf = new VInt3[4];
-					VInt3[] Q = new VInt3[4];
-					simplexSolver.getSimplex(aBuf, bBuf, Q);
-					normalInB = VInt3.Cross (Q [1] - Q [0], Q [2] - Q [0]);
-					if (VInt3.Dot (normalInB, localTransA.position - localTransB.position) < VFixedPoint.Zero)
-						normalInB *= -1;
-					output.addContactPoint(normalInB.Normalize(), pointOnB, VFixedPoint.Zero);
+                    if(normalInB.sqrMagnitude < Globals.EPS2 && simplexSolver.numVertices() == 3)
+                    {
+                        VInt3[] aBuf = new VInt3[4];
+                        VInt3[] bBuf = new VInt3[4];
+                        VInt3[] Q = new VInt3[4];
+                        simplexSolver.getSimplex(aBuf, bBuf, Q);
+                        normalInB = VInt3.Cross(Q[1] - Q[0], Q[2] - Q[0]);
+                        if (VInt3.Dot(normalInB, localTransA.position - localTransB.position) < VFixedPoint.Zero)
+                            normalInB *= -1;
+                        output.addContactPoint(normalInB.Normalize(), pointOnB, VFixedPoint.Zero);
+                    }
+					else
+                    {
+
+                    }
                     return;
                 }
                 cachedSeparatingAxis = -normalInB;
