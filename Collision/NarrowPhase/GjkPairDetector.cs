@@ -63,9 +63,12 @@ namespace MobaGame.Collision
 
             simplexSolver.reset();
             int iterations = 0;
+            VFixedPoint sDist = VFixedPoint.MaxValue;
+            VInt3 prevClosest;
 
             while (iterations < maxIterations)
             {
+                prevClosest = cachedSeparatingAxis;
 
                 VInt3 seperatingAxisInA = input.transformA.InverseTransformVector(cachedSeparatingAxis);
                 VInt3 seperatingAxisInB = input.transformB.InverseTransformVector(-cachedSeparatingAxis);
@@ -77,35 +80,34 @@ namespace MobaGame.Collision
                 VInt3 qWorld = localTransB.TransformPoint(qInB);
 
                 VInt3 w = pWorld - qWorld;
-                simplexSolver.addVertex(w, pWorld, qWorld);
+                VFixedPoint signDist = VInt3.Dot(w, cachedSeparatingAxis);
 
-                if(VInt3.Dot(w, cachedSeparatingAxis) <= VFixedPoint.Zero)
+                //no more progress, return
+                if (sDist - signDist <= sDist * Globals.EPS)
                 {
                     return;
                 }
 
+                simplexSolver.addVertex(w, pWorld, qWorld);
                 bool result = simplexSolver.compute_points(out pointOnA, out pointOnB);
                 normalInB = (pointOnA - pointOnB);
 				if (result)
                 {
-                    if(normalInB.sqrMagnitude < Globals.EPS2 && simplexSolver.numVertices() == 3)
+                    if(normalInB.sqrMagnitude < Globals.EPS2)
                     {
-                        VInt3[] aBuf = new VInt3[4];
-                        VInt3[] bBuf = new VInt3[4];
-                        VInt3[] Q = new VInt3[4];
-                        simplexSolver.getSimplex(aBuf, bBuf, Q);
-                        normalInB = VInt3.Cross(Q[1] - Q[0], Q[2] - Q[0]);
-                        if (VInt3.Dot(normalInB, localTransA.position - localTransB.position) < VFixedPoint.Zero)
-                            normalInB *= -1;
-                        output.addContactPoint(normalInB.Normalize(), pointOnB, VFixedPoint.Zero);
+                        output.addContactPoint(prevClosest.Normalize(), pointOnB, VFixedPoint.Zero);
                     }
 					else
                     {
-
+                        VFixedPoint depth = VFixedPoint.Zero;
+                        penetrationDepthSolver.calcPenDepth(simplexSolver, minkowskiA, minkowskiB,
+                            localTransA, localTransB, ref pointOnA, ref pointOnB, ref normalInB, ref depth);
+                        output.addContactPoint((pointOnA - pointOnB).Normalize(), pointOnB, depth);
                     }
                     return;
                 }
                 cachedSeparatingAxis = -normalInB;
+                sDist = normalInB.sqrMagnitude;
                 iterations++;
             }
         }
