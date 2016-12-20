@@ -92,17 +92,12 @@ namespace MobaGame.Collision
                 normalInB = (pointOnA - pointOnB);
 				if (result)
                 {
-                    if(normalInB.sqrMagnitude < Globals.EPS2)
-                    {
-                        output.addContactPoint(prevClosest.Normalize(), pointOnB, -signDist);
-                    }
-					else
-                    {
-                        VFixedPoint depth = VFixedPoint.Zero;
-                        penetrationDepthSolver.calcPenDepth(simplexSolver, minkowskiA, minkowskiB,
-                            localTransA, localTransB, ref pointOnA, ref pointOnB, ref normalInB, ref depth);
-                        output.addContactPoint((pointOnA - pointOnB).Normalize(), pointOnB, depth);
-                    }
+
+                    VFixedPoint depth = VFixedPoint.Zero;
+                    penetrationDepthSolver.calcPenDepth(simplexSolver, minkowskiA, minkowskiB,
+                        localTransA, localTransB, ref pointOnA, ref pointOnB, ref normalInB, ref depth);
+                    output.addContactPoint((pointOnA - pointOnB).Normalize(), pointOnB, depth);
+                    
                     return;
                 }
                 cachedSeparatingAxis = -normalInB;
