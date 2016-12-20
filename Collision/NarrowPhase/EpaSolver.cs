@@ -40,41 +40,41 @@ namespace MobaGame.Collision
 					return false;
 				break;
 			case 3:
-				if (!expandTriangle (ref numVertsLocal, lower_bound, upper_bound))
+				if (!expandTriangle (a, b, transformA, transformB, ref numVertsLocal, lower_bound, upper_bound))
 					return false;
-				break;
-			case 4:
-				//check for input face normal. All face normals in this tetrahedron should be all pointing either inwards or outwards. If all face normals are pointing outward, we are good to go. Otherwise, we need to 
-				//shuffle the input vertexes and make sure all face normals are pointing outward
-				VFixedPoint planeDist0 = calculatePlaneDist (0, 1, 2, aBuf, bBuf);
-				if (planeDist0 < VFixedPoint.Zero) {
-					//shuffle the input vertexes
-					VInt3 tempA = aBuf [2];
-					VInt3 tempB = bBuf [2];
-					aBuf [2] = aBuf [1];
-					bBuf [2] = bBuf [1];
-					aBuf [1] = tempA;
-					bBuf [1] = tempB;
-				}
-
-				Facet f0 = addFacet (0, 1, 2, lower_bound, upper_bound);
-				Facet f1 = addFacet (0, 3, 1, lower_bound, upper_bound);
-				Facet f2 = addFacet (0, 2, 3, lower_bound, upper_bound);
-				Facet f3 = addFacet (1, 3, 2, lower_bound, upper_bound);
-
-				if ((f0 == null) || (f1 == null) || (f2 == null) || (f3 == null) || heap.IsEmpty ())
-					return false;
-
-				f0.link (0, f1, 2);
-				f0.link (1, f3, 2);
-				f0.link (2, f2, 0);
-				f1.link (0, f2, 2);
-				f1.link (1, f3, 0);
-				f2.link (1, f3, 1);
-				numVertsLocal = 4;
 				break;
 			}
-            
+
+            //check for input face normal. All face normals in this tetrahedron should be all pointing either inwards or outwards. If all face normals are pointing outward, we are good to go. Otherwise, we need to 
+            //shuffle the input vertexes and make sure all face normals are pointing outward
+            VFixedPoint planeDist0 = calculatePlaneDist(0, 1, 2, aBuf, bBuf);
+            if (planeDist0 < VFixedPoint.Zero)
+            {
+                //shuffle the input vertexes
+                VInt3 tempA = aBuf[2];
+                VInt3 tempB = bBuf[2];
+                aBuf[2] = aBuf[1];
+                bBuf[2] = bBuf[1];
+                aBuf[1] = tempA;
+                bBuf[1] = tempB;
+            }
+
+            Facet f0 = addFacet(0, 1, 2, lower_bound, upper_bound);
+            Facet f1 = addFacet(0, 3, 1, lower_bound, upper_bound);
+            Facet f2 = addFacet(0, 2, 3, lower_bound, upper_bound);
+            Facet f3 = addFacet(1, 3, 2, lower_bound, upper_bound);
+
+            if ((f0 == null) || (f1 == null) || (f2 == null) || (f3 == null) || heap.IsEmpty())
+                return false;
+
+            f0.link(0, f1, 2);
+            f0.link(1, f3, 2);
+            f0.link(2, f2, 0);
+            f1.link(0, f2, 2);
+            f1.link(1, f3, 0);
+            f2.link(1, f3, 1);
+            numVertsLocal = 4;
+
             Facet facet = null;
             Facet bestFacet = null;
 
@@ -171,58 +171,74 @@ namespace MobaGame.Collision
             return false;
         }
 
-		bool expandPoint(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, ref int numVerts, VFixedPoint lowerBound, VFixedPoint upperBound)
-		{
-			VInt3 x = VInt3.right;
+        VInt3[] pointSearchDirs = new VInt3[] {
+                VInt3.right,
+                -VInt3.right,
+                VInt3.up,
+                -VInt3.up,
+                VInt3.forward,
+                -VInt3.forward
+                };
 
-			VInt3 q0 = new VInt3();
-			doSupport(a, b, transformA, transformB, x, out aBuf[1], out bBuf[1], out q0);
-			return expandSegment(a, b, transformA, transformB, ref numVerts, lowerBound, upperBound);
+        bool expandPoint(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, ref int numVerts, VFixedPoint lowerBound, VFixedPoint upperBound)
+        {
+            VInt3 q0;
+            for (int i = 0; i < pointSearchDirs.Length; i++)
+            {
+                doSupport(a, b, transformA, transformB, pointSearchDirs[i], out aBuf[1], out bBuf[1], out q0);
+                if(q0.sqrMagnitude > Globals.EPS2)
+                {
+                    break;
+                }
+            }
+            numVerts = 2;
+            return expandSegment(a, b, transformA, transformB, ref numVerts, lowerBound, upperBound);
 		}
 
-		bool expandSegment(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, ref int numVerts, VFixedPoint lowerBound, VFixedPoint upperBound)
+        VInt3[] segmentAxis = new VInt3[] {
+                VInt3.right,
+                VInt3.up,
+                VInt3.forward,
+                };
+        bool expandSegment(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, ref int numVerts, VFixedPoint lowerBound, VFixedPoint upperBound)
 		{
 			VInt3 q3 = aBuf[0] - bBuf[0];
 			VInt3 q4 = aBuf[1] - bBuf[1];
 
-			VInt3 dir = (q3 - q4).Normalize();
+			VInt3 dir = q4 - q3;
+			VInt3 temp = segmentAxis[dir.LeastSignificantComponent()];
+			
+			VInt3 aux1 = VInt3.Cross(dir, temp);
+            VIntQuaternion qua0 = VIntQuaternion.AngleAxis(FMath.Pi / 3, dir);
 
-			VFixedPoint sDir = VFixedPoint.One;
-			VInt3 temp2 = new VInt3(sDir, sDir, sDir);
-			VInt3 t1 = VInt3.Cross(temp2, dir).Normalize();
-			VInt3 aux1 = VInt3.Cross(dir, t1);
-
-			VInt3 q0 = new VInt3();
-			doSupport(a, b, transformA, transformB, aux1, out aBuf[0], out bBuf[0], out q0);
-
-			VIntQuaternion qua0 = VIntQuaternion.AngleAxis(FMath.Pi * 2 / 3, dir);
-			VInt3 aux2 = (qua0 * aux1).Normalize();
-
-			VInt3 q1 = new VInt3();
-			doSupport(a, b, transformA, transformB, aux2, out aBuf[1], out bBuf[1], out q1);
-
-			VInt3 aux3 = (qua0 * aux2).Normalize();//(aux2 * qua0);
-
-			VInt3 q2 = new VInt3();
-			doSupport(a, b, transformA, transformB, aux3, out aBuf[2], out bBuf[2], out q2);
-
-			return expandTriangle(ref numVerts, lowerBound, upperBound);
+            for (int i = 0; i < 6; i++)
+            {
+                VInt3 q0 = new VInt3();
+                doSupport(a, b, transformA, transformB, aux1, out aBuf[2], out bBuf[2], out q0);
+                if (q0.sqrMagnitude > Globals.EPS2)
+                {
+                    break;
+                }
+                aux1 = qua0 * aux1;
+            }
+            numVerts = 3;
+            return expandTriangle(a, b, transformA, transformB, ref numVerts, lowerBound, upperBound);
 		}
 
-		bool expandTriangle(ref int numVerts, VFixedPoint lowerBound, VFixedPoint upperBound)
+		bool expandTriangle(ConvexShape a, ConvexShape b, VIntTransform transformA, VIntTransform transformB, ref int numVerts, VFixedPoint lowerBound, VFixedPoint upperBound)
 		{
-			numVerts = 3;
+            VInt3 v01 = (aBuf[1] - bBuf[1]) - (aBuf[0] - bBuf[0]);
+            VInt3 v02 = (aBuf[2] - bBuf[2]) - (aBuf[0] - bBuf[0]);
+            VInt3 searchDir = VInt3.Cross(v01, v02);
 
-			Facet f0 = addFacet(0, 1, 2, lowerBound, upperBound);
-			Facet f1 = addFacet(1, 0, 2, lowerBound, upperBound);
+            VInt3 q0;
+            doSupport(a, b, transformA, transformB, searchDir, out aBuf[3], out bBuf[3], out q0);
+            if (q0.sqrMagnitude <= Globals.EPS2)
+            {
+                doSupport(a, b, transformA, transformB, -searchDir, out aBuf[3], out bBuf[3], out q0);
+            }
 
-			if(f0 == null || f1 == null || heap.IsEmpty())
-				return false;
-
-			f0.link(0, f1, 0);
-			f0.link(1, f1, 2);
-			f0.link(2, f1, 1);
-
+            numVerts = 4;
 			return true;
 		}
 

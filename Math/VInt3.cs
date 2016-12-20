@@ -114,6 +114,25 @@ namespace MobaGame
                 return new VInt3(x, y, value);
             }
 
+            public int LeastSignificantComponent()
+            {
+                int minIndex = 0;
+                VFixedPoint minVal = x;
+                if(y < x)
+                {
+                    minIndex = 1;
+                    minVal = y;
+                }
+
+                if(z < minVal)
+                {
+                    minIndex = 2;
+                    minVal = z;
+                }
+
+                return minIndex;
+            }
+
             public VFixedPoint this[int index]
             {
                 get
