@@ -2,6 +2,6 @@
 {
     public abstract class NearCallback
     {
-        public abstract ManifoldResult handleCollision(BroadphasePair collisionPair, CollisionDispatcher dispatcher, DispatcherInfo dispatchInfo);
+        public abstract bool handleCollision(BroadphasePair collisionPair, CollisionDispatcher dispatcher, DispatcherInfo dispatchInfo);
     }
 }

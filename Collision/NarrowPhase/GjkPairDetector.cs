@@ -5,8 +5,6 @@ namespace MobaGame.Collision
     public class GjkPairDetector : DiscreteCollisionDetectorInterface
     {
         // must be above the machine epsilon
-        private static readonly VFixedPoint REL_ERROR2 = Globals.EPS2;
-
         public static readonly int DEFAULT_MAX_ITERATIONS = 30;
         protected int maxIterations = DEFAULT_MAX_ITERATIONS;
 

@@ -4,9 +4,7 @@ using System.Collections.Generic;
 namespace MobaGame.Collision
 {
     public class HashedOverlappingPairCache: OverlappingPairCache
-    {
-        private ObjectPool<BroadphasePair> pairsPool = new ObjectPool<BroadphasePair>();
-	
+    {	
         private List<BroadphasePair> overlappingPairArray = new List<BroadphasePair>(16);
         private OverlapFilterCallback overlapFilterCallback;
 
@@ -18,15 +16,12 @@ namespace MobaGame.Collision
             {
                 return null;
             }
-
-            base.addOverlappingPair(proxy0, proxy1);
+				
             return internalAddPair(proxy0, proxy1);
         }
 
         public override void removeOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1, Dispatcher dispatcher)
         {
-            base.removeOverlappingPair(proxy0, proxy1, dispatcher);
-
             if (proxy0.getUid() > proxy1.getUid())
             {
                 BroadphaseProxy tmp = proxy0;
@@ -72,10 +67,6 @@ namespace MobaGame.Collision
 
             int lastHash = getHash(last.pProxy0.getUid(), last.pProxy1.getUid());
             hashTable[lastHash] = pairIndex;
-
-            
-
-            return;
         }
 
         public bool needsBroadphaseCollision(BroadphaseProxy proxy0, BroadphaseProxy proxy1)
