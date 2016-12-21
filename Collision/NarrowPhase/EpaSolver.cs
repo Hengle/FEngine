@@ -97,17 +97,23 @@ namespace MobaGame.Collision
 
                     doSupport(a, b, transformA, transformB, -planeNormal, out tempa, out tempb, out q);
 
+                    //calculate the distance from support point to the origin along the plane normal. Because the support point is search along
+                    //the plane normal, which means the distance should be positive. However, if the origin isn't contained in the polytope, dist
+                    //might be negative
                     VFixedPoint dist = VInt3.Dot(q, planeNormal);
+                    //update the upper bound to the minimum between exisiting upper bound and the distance if distance is positive
                     upper_bound = dist >= VFixedPoint.Zero ? FMath.Min(upper_bound, dist) : upper_bound;
+                    //lower bound is the plane distance, which will be the smallest among all the facets in the prority queue
                     lower_bound = planeDist;
-
+                    //if the plane distance and the upper bound is within a small tolerance, which means we found the MTD
                     bool con0 = (upper_bound - lower_bound) <= Globals.EPS2;
                     if(con0)
                     {
                         calculateContactInformation(aBuf, bBuf, facet, a, b, ref pa, ref pb, ref normal, ref penDepth);
                         return true;
                     }
-
+                    //if planeDist is the same as dist, which means the support point we get out from the Mincowsky sum is one of the point
+                    //in the triangle facet, we should exist because we can't progress further.
                     VFixedPoint dif = dist - planeDist;
                     bool degeneratedCondition = dif < Globals.EPS;
 
@@ -121,13 +127,18 @@ namespace MobaGame.Collision
                     bBuf[numVertsLocal] = tempb;
 
                     int index = numVertsLocal++;
-                    edgeBuffer.MakeEmpty();
 
+                    // Compute the silhouette cast by the new vertex
+                    // Note that the new vertex is on the positive side
+                    // of the current facet, so the current facet will
+                    // not be in the polytope. Start local search
+                    // from this facet.
+                    edgeBuffer.MakeEmpty();
                     facet.silhouette(q, aBuf, bBuf, edgeBuffer, facetManager);
                     Edge edge = edgeBuffer.Get(0);
                     int bufferSize = edgeBuffer.Size();
-
-                    if(bufferSize > facetManager.getNumRemainingIDs())
+                    //check to see whether we have enough space in the facet manager to create new facets
+                    if (bufferSize > facetManager.getNumRemainingIDs())
                     {
                         calculateContactInformation(aBuf, bBuf, facet, a, b, ref pa, ref pb, ref normal, ref penDepth);
                         return false;
