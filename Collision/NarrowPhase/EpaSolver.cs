@@ -40,7 +40,7 @@ namespace MobaGame.Collision
 					return false;
 				break;
 			case 3:
-				if (!expandTriangle (a, b, transformA, transformB, ref numVertsLocal, lower_bound, upper_bound))
+				if (!expandTriangle (a, b, transformA, transformB,ref numVertsLocal, lower_bound, upper_bound))
 					return false;
 				break;
 			}
