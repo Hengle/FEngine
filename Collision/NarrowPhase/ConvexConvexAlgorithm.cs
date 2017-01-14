@@ -10,28 +10,19 @@ namespace MobaGame.Collision
         GjkPairDetector gjkPairDetector = new GjkPairDetector();
 
         public bool ownManifold;
-        public PersistentManifold manifoldPtr;
         public bool lowLevelOfDetail;
 
-        public void init(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver pdSolver)
+        public void init(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver pdSolver)
         {
             base.init(ci);
             gjkPairDetector.init(null, null, simplexSolver, pdSolver);
-            manifoldPtr = mf;
             ownManifold = false;
             lowLevelOfDetail = false;
         }
 
         public override void destroy()
         {
-            if (ownManifold)
-            {
-                if (manifoldPtr != null)
-                {
-                    dispatcher.releaseManifold(manifoldPtr);
-                }
-                manifoldPtr = null;
-            }
+
         }
 
         public void setLowLevelOfDetail(bool useLowLevel)
@@ -41,14 +32,6 @@ namespace MobaGame.Collision
 
         public override void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
-            if (manifoldPtr == null)
-            {
-                manifoldPtr = dispatcher.getNewManifold(body0, body1);
-                ownManifold = true;
-            }
-
-            resultOut.setPersistentManifold(manifoldPtr);
-
             ConvexShape min0 = (ConvexShape)body0.getCollisionShape();
             ConvexShape min1 = (ConvexShape)body1.getCollisionShape();
 
@@ -57,7 +40,7 @@ namespace MobaGame.Collision
 
             gjkPairDetector.setMinkowskiA(min0);
             gjkPairDetector.setMinkowskiB(min1);
-            input.maximumDistanceSquared = min0.getMargin() + min1.getMargin() + manifoldPtr.getContactBreakingThreshold();
+            input.maximumDistanceSquared = min0.getMargin() + min1.getMargin();
             input.maximumDistanceSquared *= input.maximumDistanceSquared;
 
             input.transformA = body0.getWorldTransform();
@@ -66,30 +49,6 @@ namespace MobaGame.Collision
             gjkPairDetector.getClosestPoints(input, resultOut);
 
             pointInputsPool.Release(input);
-
-            if (ownManifold)
-            {
-                resultOut.refreshContactPoints();
-            }
-        }
-
-        public override VFixedPoint calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
-        {
-            return VFixedPoint.One;
-        }
-
-        public override void getAllContactManifolds(List<PersistentManifold> manifoldArray)
-        {
-            // should we use ownManifold to avoid adding duplicates?
-            if (manifoldPtr != null && ownManifold)
-            {
-                manifoldArray.Add(manifoldPtr);
-            }
-        }
-
-        public PersistentManifold getManifold()
-        {
-            return manifoldPtr;
         }
 
         public class CreateFunc : CollisionAlgorithmCreateFunc
@@ -108,7 +67,7 @@ namespace MobaGame.Collision
             public override CollisionAlgorithm createCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
             {
                 ConvexConvexAlgorithm algo = pool.Get();
-                algo.init(ci.manifold, ci, body0, body1, simplexSolver, pdSolver);
+                algo.init(ci, body0, body1, simplexSolver, pdSolver);
                 return algo;
             }
 

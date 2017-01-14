@@ -13,13 +13,6 @@ namespace MobaGame.Collision
         public override void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut) {
         }
 
-        public override VFixedPoint calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut) {
-            return VFixedPoint.One;
-        }
-
-        public override void getAllContactManifolds(List<PersistentManifold> manifoldArray) {
-        }
-
         ////////////////////////////////////////////////////////////////////////////
 
         public class CreateFunc: CollisionAlgorithmCreateFunc

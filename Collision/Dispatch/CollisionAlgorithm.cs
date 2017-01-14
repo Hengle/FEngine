@@ -22,10 +22,6 @@ namespace MobaGame.Collision
 
         public abstract void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
 
-        public abstract VFixedPoint calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
-
-        public abstract void getAllContactManifolds(List<PersistentManifold> manifoldArray);
-
         public void internalSetCreateFunc(CollisionAlgorithmCreateFunc func)
         {
             createFunc = func;

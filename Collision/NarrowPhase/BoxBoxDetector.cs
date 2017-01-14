@@ -57,7 +57,7 @@ namespace MobaGame.Collision
             }
             VFixedPoint ra, rb, T;
             VFixedPoint depth, maxDepth = VFixedPoint.MinValue;
-            VInt3 normal = VInt3.zero, worldNormal = VInt3.zero;
+            VInt3 worldNormal = VInt3.zero;
 
             int code = 0;
             // Test axes L = A0, L = A1, L = A2
@@ -114,7 +114,7 @@ namespace MobaGame.Collision
             else if (depth > maxDepth)
             {
                 maxDepth = depth;
-                normal = new VInt3(VFixedPoint.Zero,-R[3, 1], R[2, 1]) * (T < VFixedPoint.Zero ? -1 : 1);
+                worldNormal = VInt3.Cross(au[0], bu[0]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 7;
             }
 
@@ -130,7 +130,7 @@ namespace MobaGame.Collision
             else if (depth > maxDepth)
             {
                 maxDepth = depth;
-                normal = new VInt3(VFixedPoint.Zero,-R[3, 2], R[2, 2]) * (T < VFixedPoint.Zero ? -1 : 1);
+                worldNormal = VInt3.Cross(au[0], bu[1]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 8;
             }
 
@@ -146,7 +146,7 @@ namespace MobaGame.Collision
             else if (depth > maxDepth)
             {
                 maxDepth = depth;
-                normal = new VInt3(VFixedPoint.Zero,-R[3, 3], R[2, 3]) * (T < VFixedPoint.Zero ? -1 : 1);
+                worldNormal = VInt3.Cross(au[0], bu[2]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 9;
             }
 
@@ -162,7 +162,7 @@ namespace MobaGame.Collision
             else if (depth > maxDepth)
             {
                 maxDepth = depth;
-                normal = new VInt3(R[3, 1], VFixedPoint.Zero, -R[1, 1]) * (T < VFixedPoint.Zero ? -1 : 1);
+                worldNormal = VInt3.Cross(au[1], bu[0]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 10;
             }
 
@@ -178,7 +178,7 @@ namespace MobaGame.Collision
             else if (depth > maxDepth)
             {
                 maxDepth = depth;
-                normal = new VInt3(R[3, 2], VFixedPoint.Zero, -R[1, 2]) * (T < VFixedPoint.Zero ? -1 : 1);
+                worldNormal = VInt3.Cross(au[1], bu[1]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 11;
             }
 
@@ -194,7 +194,7 @@ namespace MobaGame.Collision
             else if (depth > maxDepth)
             {
                 maxDepth = depth;
-                normal = new VInt3(R[3, 3], VFixedPoint.Zero, -R[1, 3]) * (T < VFixedPoint.Zero ? -1 : 1);
+                worldNormal = VInt3.Cross(au[1], bu[2]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 12;
             }
 
@@ -210,7 +210,7 @@ namespace MobaGame.Collision
             else if (depth > maxDepth)
             {
                 maxDepth = depth;
-                normal = new VInt3(-R[2, 1], R[1, 1], VFixedPoint.Zero) * (T < VFixedPoint.Zero ? -1 : 1);
+                worldNormal = VInt3.Cross(au[2], bu[0]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 13;
             }
 
@@ -226,7 +226,7 @@ namespace MobaGame.Collision
             else if (depth > maxDepth)
             {
                 maxDepth = depth;
-                normal = new VInt3(-R[2, 2], R[1, 2], VFixedPoint.Zero) * (T < VFixedPoint.Zero ? -1 : 1);
+                worldNormal = VInt3.Cross(au[2], bu[1]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 14;
             }
 
@@ -242,79 +242,10 @@ namespace MobaGame.Collision
             else if (depth > maxDepth)
             {
                 maxDepth = depth;
-                normal = new VInt3(-R[2, 3], R[1, 3], VFixedPoint.Zero) * (T < VFixedPoint.Zero ? -1 : 1);
+                worldNormal = VInt3.Cross(au[2], bu[2]) * (T < VFixedPoint.Zero ? -1 : 1);
                 code = 15;
             }
-
-            // compute contact point(s)
-            if (code > 6)
-            {
-                //transform normal to world coordinate
-                worldNormal = transformA.TransformDirection(normal);
-
-                // an edge from box 1 touches an edge from box 2.
-                // find a point pa on the intersecting edge of box 1
-                VInt3 pa = transformA.position;
-                int sign;
-                for (int j = 0; j < 3; j++)
-                {
-                    sign = normal[j] > VFixedPoint.Zero ? 1 : -1;
-                    pa += au[j] * A[j] * sign;
-                }
-
-                // find a point pb on the intersecting edge of box 2
-                VInt3 pb = transformB.position;
-                for (int j = 0; j < 3; j++)
-                {
-                    sign = normal[j] > VFixedPoint.Zero ? -1 : 1;
-                    pb = bu[j] * B[j] * sign;
-                }
-
-                VFixedPoint alpha, beta;
-                VInt3 ua = au[(code - 7) / 3];
-                VInt3 ub = bu[(code - 7) % 3];
-
-                dLineClosestApproach(pa, ua, pb, ub, out alpha, out beta);
-                for (int i = 0; i < 3; i++)
-                    pa[i] += ua[i] * alpha;
-                for (int i = 0; i < 3; i++)
-                    pb[i] += ub[i] * beta;
-
-                VInt3 pointInWorld = VInt3.zero;
-                for (int i = 0; i < 3; i++)
-                    pointInWorld[i] = (pa[i] + pb[i]) * VFixedPoint.Half;
-                output.addContactPoint(-worldNormal, pointInWorld, maxDepth);                
-                return;
-            }
-            else
-            {
-                // okay, we have a face-something intersection (because the separating
-                // axis is perpendicular to a face). define face 'a' to be the reference
-                // face (i.e. the normal vector is perpendicular to this) and face 'b' to be
-                // the incident face (the closest face of the other box).
-                
-            }
-        }
-
-        void dLineClosestApproach(VInt3 pa, VInt3 ua, VInt3 pb, VInt3 ub, out VFixedPoint alpha, out VFixedPoint beta)
-        {
-            VInt3 p = pb - pa;
-            VFixedPoint uaub = VInt3.Dot(ua, ub);
-            VFixedPoint q1 = VInt3.Dot(ua, p);
-            VFixedPoint q2 = -VInt3.Dot(ub, p);
-            VFixedPoint d = VFixedPoint.One - uaub * uaub;
-            if (d <= Globals.EPS)
-            {
-                // @@@ this needs to be made more robust
-                alpha = VFixedPoint.Zero;
-                beta  = VFixedPoint.Zero;
-            }
-            else
-            {
-                d = VFixedPoint.One/d;
-                alpha = (q1 + uaub * q2) * d;
-                beta = (uaub * q1 + q2) * d;
-            }
+            output.addContactPoint(worldNormal, maxDepth);
         }
     }
 }

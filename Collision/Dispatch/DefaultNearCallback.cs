@@ -1,6 +1,4 @@
-﻿using MobaGame.FixedMath;
-
-namespace MobaGame.Collision
+﻿namespace MobaGame.Collision
 {
     public class DefaultNearCallback: NearCallback
     {
@@ -24,7 +22,7 @@ namespace MobaGame.Collision
                 }
             }
 
-            return contactPointResult.getPersistentManifold().getNumContacts() > 0;
+            return contactPointResult.manifoldPoint != null;
         }
     }
 }

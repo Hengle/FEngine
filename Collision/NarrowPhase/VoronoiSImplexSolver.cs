@@ -11,7 +11,6 @@ namespace MobaGame.Collision
         private static  int VERTA = 0;
         private static  int VERTB = 1;
         private static  int VERTC = 2;
-        private static  int VERTD = 3;
 
         public int _numVertices;
 

@@ -20,7 +20,6 @@ namespace MobaGame.Collision
         {
             VIntTransform predictedTransform = VIntTransform.Identity;
             predictedTransform.position += linvel * timeStep;
-            VInt3 axis;
             VFixedPoint fAngle = angvel.magnitude;
 
             // limit the angular motion

@@ -4,10 +4,7 @@ namespace MobaGame.Collision
 {
     public class CollisionDispatcher:Dispatcher
     {
-        protected readonly ObjectPool<PersistentManifold> manifoldsPool = new ObjectPool<PersistentManifold>();
-
 	    private static readonly int MAX_BROADPHASE_COLLISION_TYPES = (int)BroadphaseNativeType.MAX_BROADPHASE_COLLISION_TYPES;
-        private readonly List<PersistentManifold> manifoldsPtr = new List<PersistentManifold>();
         private NearCallback nearCallback;
         private readonly CollisionAlgorithmCreateFunc[,] doubleDispatch = new CollisionAlgorithmCreateFunc[MAX_BROADPHASE_COLLISION_TYPES,MAX_BROADPHASE_COLLISION_TYPES];
 	    private CollisionConfiguration collisionConfiguration;
@@ -57,11 +54,10 @@ namespace MobaGame.Collision
             this.collisionConfiguration = collisionConfiguration;
         }
 
-        public override CollisionAlgorithm findAlgorithm(CollisionObject body0, CollisionObject body1, PersistentManifold sharedManifold)
+        public override CollisionAlgorithm findAlgorithm(CollisionObject body0, CollisionObject body1)
         {
             CollisionAlgorithmConstructionInfo ci = tmpCI;
             ci.dispatcher1 = this;
-            ci.manifold = sharedManifold;
             CollisionAlgorithmCreateFunc createFunc = doubleDispatch[(int)body0.getCollisionShape().getShapeType(), (int)body1.getCollisionShape().getShapeType()];
             CollisionAlgorithm algo = createFunc.createCollisionAlgorithm(ci, body0, body1);
             algo.internalSetCreateFunc(createFunc);
@@ -75,35 +71,6 @@ namespace MobaGame.Collision
             algo.internalSetCreateFunc(null);
             createFunc.releaseCollisionAlgorithm(algo);
             algo.destroy();
-        }
-
-        public override PersistentManifold getNewManifold(CollisionObject body0, CollisionObject body1)
-        {
-            PersistentManifold manifold = manifoldsPool.Get();
-            manifold.init(body0, body1);
-
-            manifold.index1a = manifoldsPtr.Count;
-            manifoldsPtr.Add(manifold);
-
-            return manifold;
-        }
-
-        public override void releaseManifold(PersistentManifold manifold)
-        {
-            clearManifold(manifold);
-
-            // TODO: optimize
-            int findIndex = manifold.index1a;
-            manifoldsPtr[findIndex] = manifoldsPtr[manifoldsPtr.Count - 1];
-            manifoldsPtr[findIndex].index1a = findIndex;
-            manifoldsPtr.RemoveAt(manifoldsPtr.Count - 1);
-
-            manifoldsPool.Release(manifold);
-        }
-
-        public override void clearManifold(PersistentManifold manifold)
-        {
-            manifold.clearManifold();
         }
 
         public override bool needsCollision(CollisionObject body0, CollisionObject body1)
@@ -155,21 +122,6 @@ namespace MobaGame.Collision
         {
             collisionPairCallback.init(dispatchInfo, this);
             pairCache.processAllOverlappingPairs(collisionPairCallback, dispatcher);
-        }
-
-        public override int getNumManifolds()
-        {
-            return manifoldsPtr.Count;
-        }
-
-        public override PersistentManifold getManifoldByIndexInternal(int index)
-        {
-            return manifoldsPtr[index];
-        }
-
-        public override List<PersistentManifold> getInternalManifoldPointer()
-        {
-            return manifoldsPtr;
         }
     }
 }

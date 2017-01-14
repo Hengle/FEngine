@@ -11,13 +11,12 @@ namespace MobaGame.Collision
 
         public bool hasResult = false;
 
-        public override void addContactPoint(VInt3 normalOnBInWorld, VInt3 pointInWorld, VFixedPoint depth)
+        public override void addContactPoint(VInt3 normalOnBInWorld, VFixedPoint depth)
         {
             if (depth < distance)
             {
                 hasResult = true;
                 this.normalOnBInWorld = normalOnBInWorld;
-                this.pointInWorld = pointInWorld;
                 // negative means penetration
                 distance = depth;
             }

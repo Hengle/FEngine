@@ -45,8 +45,6 @@ namespace MobaGame.Collision
 
             VInt3 n = VInt3.zero;
 
-		    VFixedPoint lastLambda = lambda;
-
             VFixedPoint dist2 = v.sqrMagnitude;
             VFixedPoint epsilon = Globals.EPS;
 
@@ -88,7 +86,6 @@ namespace MobaGame.Collision
                         interpolatedTransA.position = fromA.position * (VFixedPoint.One - lambda) + toA.position * lambda;
                         interpolatedTransB.position = fromB.position * (VFixedPoint.One - lambda) + toB.position * lambda;
                         w = supVertexA - supVertexB;
-					    lastLambda = lambda;
 					    n = v;
 				    }
                 }

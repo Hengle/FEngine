@@ -481,10 +481,10 @@ namespace MobaGame.Collision
             m_hitFraction = hitFraction;
         }
 
-        CollisionObject m_hitCollisionObject;
-        LocalShapeInfo m_localShapeInfo;
-        VInt3 m_hitNormalLocal;
-        VInt3 m_hitPointLocal;
-        VFixedPoint m_hitFraction;
+        public CollisionObject m_hitCollisionObject;
+        public LocalShapeInfo m_localShapeInfo;
+        public VInt3 m_hitNormalLocal;
+        public VInt3 m_hitPointLocal;
+        public VFixedPoint m_hitFraction;
     }
 }

@@ -13,20 +13,14 @@ namespace MobaGame.Collision
         protected CollisionAlgorithmCreateFunc sphereSphereCF;
         protected CollisionAlgorithmCreateFunc sphereBoxCF;
         protected CollisionAlgorithmCreateFunc boxSphereCF;
-        //protected CollisionAlgorithmCreateFunc boxBoxCF;
+        protected CollisionAlgorithmCreateFunc boxBoxCF;
         //protected CollisionAlgorithmCreateFunc planeConvexCF;
         //protected CollisionAlgorithmCreateFunc convexPlaneCF;
 
         public DefaultCollisionConfiguration()
         {
             simplexSolver = new VoronoiSimplexSolver();
-
-            //#define USE_EPA 1
-            //#ifdef USE_EPA
             pdSolver = new EpaSolver();
-            //#else
-            //pdSolver = new MinkowskiPenetrationDepthSolver();
-            //#endif//USE_EPA
 
             /*
             //default CreationFunctions, filling the m_doubleDispatch table
@@ -43,7 +37,7 @@ namespace MobaGame.Collision
             m_triangleSphereCF = new (mem)btSphereTriangleCollisionAlgorithm::CreateFunc;
             m_triangleSphereCF->m_swapped = true;
             */
-            //boxBoxCF = new BoxBoxCollisionAlgorithm.CreateFunc();
+            boxBoxCF = new BoxBoxCollisionAlgorithm.CreateFunc();
 
             // convex versus plane
             //convexPlaneCF = new ConvexPlaneCollisionAlgorithm.CreateFunc();
@@ -69,6 +63,10 @@ namespace MobaGame.Collision
                 return	boxSphereCF;
             }
 
+            if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE)) {
+                return boxBoxCF;
+            }
+
             /*if ((proxyType0 == SPHERE_SHAPE_PROXYTYPE ) && (proxyType1==TRIANGLE_SHAPE_PROXYTYPE))
             {
                 return	m_sphereTriangleCF;
@@ -79,9 +77,7 @@ namespace MobaGame.Collision
                 return	m_triangleSphereCF;
             }
 
-            if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE)) {
-                return boxBoxCF;
-            }
+
 
 
             if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && (proxyType1 == BroadphaseNativeType.STATIC_PLANE_PROXYTYPE))

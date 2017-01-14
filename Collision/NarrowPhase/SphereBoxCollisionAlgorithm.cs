@@ -6,87 +6,43 @@ namespace MobaGame.Collision
     public class SphereBoxCollisionAlgorithm: CollisionAlgorithm
     {
         bool ownManifold;
-        PersistentManifold manifoldPtr;
         bool isSwapped;
 
-        public void init(PersistentManifold mf, CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
+        public void init(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
         {
             base.init(ci);
             ownManifold = false;
-            manifoldPtr = mf;
             this.isSwapped = isSwapped;
 
             CollisionObject sphereObj = isSwapped ? body1 : body0;
             CollisionObject boxObj = isSwapped ? body0 : body1;
 
-            if(manifoldPtr == null && dispatcher.needsCollision(sphereObj, boxObj))
-            {
-                manifoldPtr = dispatcher.getNewManifold(sphereObj, boxObj);
-                ownManifold = true;
-            }
         }
 
         public override void destroy()
         {
-            if (ownManifold)
-            {
-                if (manifoldPtr != null)
-                {
-                    dispatcher.releaseManifold(manifoldPtr);
-                }
-                manifoldPtr = null;
-            }
+
         }
 
         public override void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
-            if(manifoldPtr == null)
-            {
-                return;
-            }
-
             CollisionObject sphereObj = isSwapped ? body1 : body0;
             CollisionObject boxObj = isSwapped ? body0 : body1;
-
-            VInt3 pOnBox;
 
             VInt3 normalOnSurfaceB;
             VFixedPoint penetrationDepth;
             VInt3 sphereCenter = sphereObj.getWorldTransform().position;
             SphereShape sphere0  = (SphereShape)sphereObj.getCollisionShape();
             VFixedPoint radius = sphere0.getRadius();
-            VFixedPoint maxContactDistance = manifoldPtr.getContactBreakingThreshold();
+            VFixedPoint maxContactDistance = Globals.getContactBreakingThreshold();
 
-            resultOut.setPersistentManifold(manifoldPtr);
-
-            if(getSphereDistance(boxObj, out pOnBox, out normalOnSurfaceB, out penetrationDepth, sphereCenter, radius, maxContactDistance))
+            if(getSphereDistance(boxObj, out normalOnSurfaceB, out penetrationDepth, sphereCenter, radius, maxContactDistance))
             {
-                resultOut.addContactPoint(normalOnSurfaceB, pOnBox, penetrationDepth);
-            }
-
-            if(ownManifold)
-            {
-                if(manifoldPtr.getNumContacts() != 0)
-                {
-                    resultOut.refreshContactPoints();
-                }
+                resultOut.addContactPoint(normalOnSurfaceB, penetrationDepth);
             }
         }
 
-        public override VFixedPoint calculateTimeOfImpact(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
-        {
-            return VFixedPoint.One;
-        }
-
-        public override void getAllContactManifolds(List<PersistentManifold> manifoldArray)
-        {
-            if(manifoldPtr != null && ownManifold)
-            {
-                manifoldArray.Add(manifoldPtr);
-            }
-        }
-
-        public bool getSphereDistance(CollisionObject boxObj, out VInt3 pointOnBox, out VInt3 normal, out VFixedPoint penetrationDepth, VInt3 sphereCenter, VFixedPoint radius, VFixedPoint maxContactDistance)
+        public bool getSphereDistance(CollisionObject boxObj, out VInt3 normal, out VFixedPoint penetrationDepth, VInt3 sphereCenter, VFixedPoint radius, VFixedPoint maxContactDistance)
         {
             BoxShape boxShape = (BoxShape)boxObj.getCollisionShape();
             VInt3 boxHalfExtent = boxShape.getHalfExtentsWithoutMargin();
@@ -114,7 +70,6 @@ namespace MobaGame.Collision
             VFixedPoint dist2 = normal.sqrMagnitude;
             if (dist2 > contactDist * contactDist)
             {
-                pointOnBox = VInt3.zero;
                 return false;
             }
 
@@ -131,16 +86,10 @@ namespace MobaGame.Collision
                 normal /= distance;
             }
 
-            pointOnBox = closestPoint + normal * boxMargin;
             //	v3PointOnSphere = sphereRelPos - (normal * fRadius);	
             penetrationDepth = distance - intersectionDist;
 
-            // transform back in world space
-            VInt3 tmp = m44T.TransformPoint(pointOnBox);
-            pointOnBox = tmp;
-            //	tmp = m44T(v3PointOnSphere);
-            //	v3PointOnSphere = tmp;
-            tmp = m44T.TransformVector(normal);
+            VInt3 tmp = m44T.TransformVector(normal);
             normal = tmp;
 
             return true;
@@ -209,7 +158,7 @@ namespace MobaGame.Collision
             public override CollisionAlgorithm createCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
             {
                 SphereBoxCollisionAlgorithm algo = pool.Get();
-                algo.init(null, ci, body0, body1, swapped);
+                algo.init(ci, body0, body1, swapped);
                 return algo;
             }
 
