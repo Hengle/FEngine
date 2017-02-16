@@ -7,7 +7,7 @@ namespace MobaGame.Collision
     {
         private bool ownManifold;
 
-        public void init(CollisionAlgorithmConstructionInfo ci, CollisionObject col0, CollisionObject col1)
+        public override void init(CollisionAlgorithmConstructionInfo ci)
         {
             base.init(ci);
         }
@@ -44,20 +44,5 @@ namespace MobaGame.Collision
             // report a contact. internally this will be kept persistent, and contact reduction is done
             resultOut.addContactPoint(normalOnSurfaceB, dist);
         }
-
-        public class CreateFunc: CollisionAlgorithmCreateFunc
-        {
-            private ObjectPool<SphereSphereCollisionAlgorithm> pool = new ObjectPool<SphereSphereCollisionAlgorithm>();
-
-            public override CollisionAlgorithm createCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1) {
-                SphereSphereCollisionAlgorithm algo = pool.Get();
-                algo.init(ci, body0, body1);
-                return algo;
-            }
-
-            public override void releaseCollisionAlgorithm(CollisionAlgorithm algo) {
-                pool.Release((SphereSphereCollisionAlgorithm)algo);
-            }
-        };
     }
 }

@@ -13,13 +13,9 @@
 
             if (dispatcher.needsCollision(colObj0, colObj1))
             {
-                // dispatcher will keep algorithms persistent in the collision pair
-                if (collisionPair.algorithm == null)
-                {
-                    collisionPair.algorithm = dispatcher.findAlgorithm(colObj0, colObj1);
-                    // discrete collision detection query
-                    collisionPair.algorithm.processCollision(colObj0, colObj1, dispatchInfo, contactPointResult);
-                }
+                CollisionAlgorithm algorithm = dispatcher.findAlgorithm(colObj0, colObj1);
+                // discrete collision detection query
+                algorithm.processCollision(colObj0, colObj1, dispatchInfo, contactPointResult);
             }
 
             return contactPointResult.manifoldPoint != null;

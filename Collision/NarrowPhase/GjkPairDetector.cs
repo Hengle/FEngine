@@ -16,13 +16,11 @@ namespace MobaGame.Collision
         private ConvexPenetrationDepthSolver penetrationDepthSolver;
 
 
-        public void init(ConvexShape objectA, ConvexShape objectB, SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver penetrationDepthSolver)
+        public void init(SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver penetrationDepthSolver)
         {
             this.cachedSeparatingAxis = VInt3.zero;
             this.penetrationDepthSolver = penetrationDepthSolver;
             this.simplexSolver = simplexSolver;
-            minkowskiA = objectA;
-            minkowskiB = objectB;
             this.penetrationDepthSolver = penetrationDepthSolver;
         }
 

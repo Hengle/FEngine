@@ -7,15 +7,20 @@ namespace MobaGame.Collision
     {
         protected ObjectPool<ClosestPointInput> pointInputsPool = new ObjectPool<ClosestPointInput>();
 
-        GjkPairDetector gjkPairDetector = new GjkPairDetector();
+        GjkPairDetector gjkPairDetector;
 
         public bool ownManifold;
         public bool lowLevelOfDetail;
 
-        public void init(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver pdSolver)
+        public ConvexConvexAlgorithm(SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver pdSolver):base()
+        {
+            gjkPairDetector = new GjkPairDetector();
+            gjkPairDetector.init(simplexSolver, pdSolver);
+        }
+
+        public override void init(CollisionAlgorithmConstructionInfo ci)
         {
             base.init(ci);
-            gjkPairDetector.init(null, null, simplexSolver, pdSolver);
             ownManifold = false;
             lowLevelOfDetail = false;
         }
@@ -50,31 +55,5 @@ namespace MobaGame.Collision
 
             pointInputsPool.Release(input);
         }
-
-        public class CreateFunc : CollisionAlgorithmCreateFunc
-        {
-            private ObjectPool<ConvexConvexAlgorithm> pool = new ObjectPool<ConvexConvexAlgorithm>();
-
-            public ConvexPenetrationDepthSolver pdSolver;
-            public SimplexSolverInterface simplexSolver;
-
-            public CreateFunc(SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver pdSolver)
-            {
-                this.simplexSolver = simplexSolver;
-                this.pdSolver = pdSolver;
-            }
-
-            public override CollisionAlgorithm createCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
-            {
-                ConvexConvexAlgorithm algo = pool.Get();
-                algo.init(ci, body0, body1, simplexSolver, pdSolver);
-                return algo;
-            }
-
-            public override void releaseCollisionAlgorithm(CollisionAlgorithm algo)
-            {
-                pool.Release((ConvexConvexAlgorithm)algo);
-            }
-        };
     }
 }

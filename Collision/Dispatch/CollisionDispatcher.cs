@@ -6,7 +6,7 @@ namespace MobaGame.Collision
     {
 	    private static readonly int MAX_BROADPHASE_COLLISION_TYPES = (int)BroadphaseNativeType.MAX_BROADPHASE_COLLISION_TYPES;
         private NearCallback nearCallback;
-        private readonly CollisionAlgorithmCreateFunc[,] doubleDispatch = new CollisionAlgorithmCreateFunc[MAX_BROADPHASE_COLLISION_TYPES,MAX_BROADPHASE_COLLISION_TYPES];
+        private readonly CollisionAlgorithm[,] doubleDispatch = new CollisionAlgorithm[MAX_BROADPHASE_COLLISION_TYPES,MAX_BROADPHASE_COLLISION_TYPES];
 	    private CollisionConfiguration collisionConfiguration;
 
         private CollisionAlgorithmConstructionInfo tmpCI = new CollisionAlgorithmConstructionInfo();
@@ -29,7 +29,7 @@ namespace MobaGame.Collision
             }
         }
 
-        public void registerCollisionCreateFunc(int proxyType0, int proxyType1, CollisionAlgorithmCreateFunc createFunc)
+        public void registerCollisionCreateFunc(int proxyType0, int proxyType1, CollisionAlgorithm createFunc)
         {
             doubleDispatch[proxyType0,proxyType1] = createFunc;
         }
@@ -58,19 +58,8 @@ namespace MobaGame.Collision
         {
             CollisionAlgorithmConstructionInfo ci = tmpCI;
             ci.dispatcher1 = this;
-            CollisionAlgorithmCreateFunc createFunc = doubleDispatch[(int)body0.getCollisionShape().getShapeType(), (int)body1.getCollisionShape().getShapeType()];
-            CollisionAlgorithm algo = createFunc.createCollisionAlgorithm(ci, body0, body1);
-            algo.internalSetCreateFunc(createFunc);
-
+            CollisionAlgorithm algo = doubleDispatch[(int)body0.getCollisionShape().getShapeType(), (int)body1.getCollisionShape().getShapeType()];
             return algo;
-        }
-
-        public override void freeCollisionAlgorithm(CollisionAlgorithm algo)
-        {
-            CollisionAlgorithmCreateFunc createFunc = algo.internalGetCreateFunc();
-            algo.internalSetCreateFunc(null);
-            createFunc.releaseCollisionAlgorithm(algo);
-            algo.destroy();
         }
 
         public override bool needsCollision(CollisionObject body0, CollisionObject body1)

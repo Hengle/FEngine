@@ -40,8 +40,6 @@ namespace MobaGame.Collision
                 return;
             }
 
-            cleanOverlappingPair(pair, dispatcher);
-
             int pairIndex = hashTable[hash];
 
             // Remove the pair from the hash table.
@@ -102,24 +100,9 @@ namespace MobaGame.Collision
             processAllOverlappingPairs(new RemovePairCallback(proxy), dispatcher);
         }
 
-        public override void cleanProxyFromPairs(BroadphaseProxy proxy, Dispatcher dispatcher)
-        {
-            processAllOverlappingPairs(new CleanPairCallback(proxy, this, dispatcher), dispatcher);
-        }
-
         public override List<BroadphasePair> getOverlappingPairArray()
         {
             return overlappingPairArray;
-        }
-
-        public override void cleanOverlappingPair(BroadphasePair pair, Dispatcher dispatcher)
-        {
-            if (pair.algorithm != null)
-            {
-                //pair.algorithm.destroy();
-                dispatcher.freeCollisionAlgorithm(pair.algorithm);
-                pair.algorithm = null;
-            }
         }
 
         public override BroadphasePair findPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1)
@@ -195,7 +178,6 @@ namespace MobaGame.Collision
             hash = getHash(proxyId1, proxyId2);
 
             pair = new BroadphasePair(proxy0, proxy1);
-            pair.algorithm = null;
 
             overlappingPairArray.Add(pair);
             hashTable[hash] = overlappingPairArray.Count - 1;
@@ -250,30 +232,6 @@ namespace MobaGame.Collision
             {
                 return ((pair.pProxy0 == obsoleteProxy) ||
                         (pair.pProxy1 == obsoleteProxy));
-            }
-        }
-
-        private class CleanPairCallback : OverlapCallback
-        {
-            private BroadphaseProxy cleanProxy;
-            private OverlappingPairCache pairCache;
-            private Dispatcher dispatcher;
-
-            public CleanPairCallback(BroadphaseProxy cleanProxy, OverlappingPairCache pairCache, Dispatcher dispatcher)
-            {
-                this.cleanProxy = cleanProxy;
-                this.pairCache = pairCache;
-                this.dispatcher = dispatcher;
-            }
-
-            public override bool processOverlap(BroadphasePair pair)
-            {
-                if ((pair.pProxy0 == cleanProxy) ||
-                        (pair.pProxy1 == cleanProxy))
-                {
-                    pairCache.cleanOverlappingPair(pair, dispatcher);
-                }
-                return false;
             }
         }
     }

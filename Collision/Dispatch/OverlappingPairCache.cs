@@ -7,11 +7,7 @@ namespace MobaGame.Collision
     {
         public abstract List<BroadphasePair> getOverlappingPairArray();
 
-        public abstract void cleanOverlappingPair(BroadphasePair pair, Dispatcher dispatcher);
-
         public abstract int getNumOverlappingPairs();
-
-        public abstract void cleanProxyFromPairs(BroadphaseProxy proxy, Dispatcher dispatcher);
 
         public abstract void setOverlapFilterCallback(OverlapFilterCallback overlapFilterCallback);
 

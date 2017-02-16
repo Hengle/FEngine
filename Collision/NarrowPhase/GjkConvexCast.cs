@@ -40,7 +40,7 @@ namespace MobaGame.Collision
 
             PointCollector pointCollector = new PointCollector();
 
-            gjk.init(convexA, convexB, simplexSolver, null);
+            gjk.init(simplexSolver, null);
             ClosestPointInput input = pointInputsPool.Get();
             input.init();
             try

@@ -5,8 +5,6 @@ namespace MobaGame.Collision
 {
     public abstract class CollisionAlgorithm 
     {
-        private CollisionAlgorithmCreateFunc createFunc;
-
         protected Dispatcher dispatcher;
 
         public virtual void init()
@@ -21,15 +19,5 @@ namespace MobaGame.Collision
         public abstract void destroy();
 
         public abstract void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut);
-
-        public void internalSetCreateFunc(CollisionAlgorithmCreateFunc func)
-        {
-            createFunc = func;
-        }
-
-        public CollisionAlgorithmCreateFunc internalGetCreateFunc()
-        {
-            return createFunc;
-        }
     }
 }

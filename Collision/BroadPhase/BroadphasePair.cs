@@ -6,7 +6,6 @@ namespace MobaGame.Collision
     {
         public BroadphaseProxy pProxy0;
         public BroadphaseProxy pProxy1;
-        public CollisionAlgorithm algorithm;
 
         public BroadphasePair()
         {
@@ -17,14 +16,12 @@ namespace MobaGame.Collision
         {
             this.pProxy0 = pProxy0;
             this.pProxy1 = pProxy1;
-            this.algorithm = null;
         }
 
         public BroadphasePair(BroadphasePair p)
         {
             pProxy0 = p.pProxy0;
             pProxy1 = p.pProxy1;
-            algorithm = p.algorithm;
         }
 
         public bool Equals(BroadphasePair obj)

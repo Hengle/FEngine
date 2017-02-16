@@ -8,12 +8,12 @@ namespace MobaGame.Collision
         protected ConvexPenetrationDepthSolver pdSolver;
 
         //default CreationFunctions, filling the m_doubleDispatch table
-        protected CollisionAlgorithmCreateFunc emptyCreateFunc;
-        protected CollisionAlgorithmCreateFunc convexConvexCreateFunc;
-        protected CollisionAlgorithmCreateFunc sphereSphereCF;
-        protected CollisionAlgorithmCreateFunc sphereBoxCF;
-        protected CollisionAlgorithmCreateFunc boxSphereCF;
-        protected CollisionAlgorithmCreateFunc boxBoxCF;
+        protected CollisionAlgorithm emptyCreateFunc;
+        protected CollisionAlgorithm convexConvexCreateFunc;
+        protected CollisionAlgorithm sphereSphereCF;
+        protected CollisionAlgorithm sphereBoxCF;
+        protected CollisionAlgorithm boxSphereCF;
+        protected CollisionAlgorithm boxBoxCF;
         //protected CollisionAlgorithmCreateFunc planeConvexCF;
         //protected CollisionAlgorithmCreateFunc convexPlaneCF;
 
@@ -25,19 +25,18 @@ namespace MobaGame.Collision
             /*
             //default CreationFunctions, filling the m_doubleDispatch table
             */
-            convexConvexCreateFunc = new ConvexConvexAlgorithm.CreateFunc(simplexSolver, pdSolver);
-            emptyCreateFunc = new EmptyAlgorithm.CreateFunc();
+            convexConvexCreateFunc = new ConvexConvexAlgorithm(simplexSolver, pdSolver);
+            emptyCreateFunc = new EmptyAlgorithm();
 
-            sphereSphereCF = new SphereSphereCollisionAlgorithm.CreateFunc();
+            sphereSphereCF = new SphereSphereCollisionAlgorithm();
 
-            sphereBoxCF = new SphereBoxCollisionAlgorithm.CreateFunc();
-            boxSphereCF = new SphereBoxCollisionAlgorithm.CreateFunc();
-            boxSphereCF.swapped = true;
+            sphereBoxCF = new SphereBoxCollisionAlgorithm();
+            boxSphereCF = new SphereBoxCollisionAlgorithm();
             /*m_sphereTriangleCF = new (mem)btSphereTriangleCollisionAlgorithm::CreateFunc;
             m_triangleSphereCF = new (mem)btSphereTriangleCollisionAlgorithm::CreateFunc;
             m_triangleSphereCF->m_swapped = true;
             */
-            boxBoxCF = new BoxBoxCollisionAlgorithm.CreateFunc();
+            boxBoxCF = new BoxBoxCollisionAlgorithm();
 
             // convex versus plane
             //convexPlaneCF = new ConvexPlaneCollisionAlgorithm.CreateFunc();
@@ -45,7 +44,7 @@ namespace MobaGame.Collision
             //planeConvexCF.swapped = true;
         }
 
-        public override CollisionAlgorithmCreateFunc getCollisionAlgorithmCreateFunc(BroadphaseNativeType proxyType0, BroadphaseNativeType proxyType1)
+        public override CollisionAlgorithm getCollisionAlgorithmCreateFunc(BroadphaseNativeType proxyType0, BroadphaseNativeType proxyType1)
         {
             if ((proxyType0 == BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE))
             {

@@ -6,17 +6,11 @@ namespace MobaGame.Collision
     public class SphereBoxCollisionAlgorithm: CollisionAlgorithm
     {
         bool ownManifold;
-        bool isSwapped;
 
-        public void init(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1, bool isSwapped)
+        public override void init(CollisionAlgorithmConstructionInfo ci)
         {
             base.init(ci);
             ownManifold = false;
-            this.isSwapped = isSwapped;
-
-            CollisionObject sphereObj = isSwapped ? body1 : body0;
-            CollisionObject boxObj = isSwapped ? body0 : body1;
-
         }
 
         public override void destroy()
@@ -26,6 +20,7 @@ namespace MobaGame.Collision
 
         public override void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
+            bool isSwapped = body0.getCollisionShape() is SphereShape;
             CollisionObject sphereObj = isSwapped ? body1 : body0;
             CollisionObject boxObj = isSwapped ? body0 : body1;
 
@@ -150,22 +145,5 @@ namespace MobaGame.Collision
 
             return minDist;
         }
-
-        public class CreateFunc : CollisionAlgorithmCreateFunc
-        {
-            private ObjectPool<SphereBoxCollisionAlgorithm> pool = new ObjectPool<SphereBoxCollisionAlgorithm>();
-
-            public override CollisionAlgorithm createCollisionAlgorithm(CollisionAlgorithmConstructionInfo ci, CollisionObject body0, CollisionObject body1)
-            {
-                SphereBoxCollisionAlgorithm algo = pool.Get();
-                algo.init(ci, body0, body1, swapped);
-                return algo;
-            }
-
-            public override void releaseCollisionAlgorithm(CollisionAlgorithm algo)
-            {
-                pool.Release((SphereBoxCollisionAlgorithm)algo);
-            }
-        };
     }
 }

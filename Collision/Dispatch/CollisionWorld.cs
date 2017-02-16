@@ -25,10 +25,6 @@ namespace MobaGame.Collision
                 BroadphaseProxy bp = collisionObject.getBroadphaseHandle();
                 if (bp != null)
                 {
-                    //
-                    // only clear the cached algorithms
-                    //
-                    getBroadphase().getOverlappingPairCache().cleanProxyFromPairs(bp, dispatcher1);
                     getBroadphase().destroyProxy(bp, dispatcher1);
                 }
             }
@@ -88,7 +84,6 @@ namespace MobaGame.Collision
                 //
                 // only clear the cached algorithms
                 //
-                getBroadphase().getOverlappingPairCache().cleanProxyFromPairs(bp, dispatcher1);
                 getBroadphase().destroyProxy(bp, dispatcher1);
                 collisionObject.setBroadphaseHandle(null);
             }
