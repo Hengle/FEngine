@@ -48,16 +48,6 @@ namespace MobaGame.Collision
             this.nearCallback = nearCallback;
         }
 
-        public CollisionConfiguration getCollisionConfiguration()
-        {
-            return collisionConfiguration;
-        }
-
-        public void setCollisionConfiguration(CollisionConfiguration collisionConfiguration)
-        {
-            this.collisionConfiguration = collisionConfiguration;
-        }
-
         public override CollisionAlgorithm findAlgorithm(CollisionObject body0, CollisionObject body1)
         {
             CollisionAlgorithm algo = doubleDispatch[(int)body0.getCollisionShape().getShapeType(), (int)body1.getCollisionShape().getShapeType()];
@@ -103,7 +93,20 @@ namespace MobaGame.Collision
 
             public override bool processOverlap(BroadphasePair pair)
             {
-                dispatcher.getNearCallback().handleCollision(pair, dispatcher, dispatchInfo);
+                if(dispatcher.getNearCallback().handleCollision(pair, dispatcher, dispatchInfo))
+                {
+                    if(dispatcher.ghostPairCallback != null)
+                    {
+                        dispatcher.ghostPairCallback.addOverlappingPair(pair.pProxy0, pair.pProxy1);
+                    }
+                }
+                else
+                {
+                    if (dispatcher.ghostPairCallback != null)
+                    {
+                        dispatcher.ghostPairCallback.removeOverlappingPair(pair.pProxy0, pair.pProxy1);
+                    }
+                }
                 return false;
             }
         }
@@ -114,7 +117,7 @@ namespace MobaGame.Collision
         {
             releaseAllManifold();
             collisionPairCallback.init(dispatchInfo, this);
-            pairCache.processAllOverlappingPairs(collisionPairCallback, dispatcher);
+            pairCache.processAllOverlappingPairs(collisionPairCallback);
         }
 
         public override ManifoldResult applyManifold()

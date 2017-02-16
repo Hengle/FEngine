@@ -20,11 +20,6 @@ namespace MobaGame.Collision
         public int dupdates;                                           // % of dynamic updates per frame
         public bool releasepaircache;                               // Release pair cache on delete
 
-        public DbvtBroadphase():this(null)
-        {
-
-        }
-
         public DbvtBroadphase(OverlappingPairCache paircache)
         {
             releasepaircache = (paircache != null? false : true);
@@ -88,7 +83,11 @@ namespace MobaGame.Collision
                                 pa = pb;
                                 pb = tmp;
                             }
-                            paircache.removeOverlappingPair(pa, pb, dispatcher);
+                            paircache.removeOverlappingPair(pa, pb);
+                            if(dispatcher.ghostPairCallback != null)
+                            {
+                                dispatcher.ghostPairCallback.removeOverlappingPair(pa, pb);
+                            }
                             ni--;
                             i--;
                         }
@@ -134,7 +133,7 @@ namespace MobaGame.Collision
             sets[proxy.stage].remove(proxy.leaf);
             
             stageRoots[proxy.stage] = listremove(proxy, stageRoots[proxy.stage]);
-            paircache.removeOverlappingPairsContainingProxy(proxy, dispatcher);
+            paircache.removeOverlappingPairsContainingProxy(proxy);
         }
 
         public override void setAabb(BroadphaseProxy absproxy, VInt3 aabbMin, VInt3 aabbMax, Dispatcher dispatcher) {

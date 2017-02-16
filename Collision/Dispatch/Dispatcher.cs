@@ -19,5 +19,7 @@ namespace MobaGame.Collision
         public abstract void releaseAllManifold();
 
         public abstract List<ManifoldResult> getAllManifolds();
+
+        public OverlappingPairCallback ghostPairCallback;
     }
 }

@@ -15,7 +15,6 @@
             DbvtProxy pb = nb.data;
             if (DbvtAabbMm.Intersect(pa.aabb, pb.aabb))
             {
-                //if(pa>pb) btSwap(pa,pb);
                 if (pa.getUid() > pb.getUid())
                 {
                     DbvtProxy tmp = pa;

@@ -20,7 +20,7 @@
             return null;
         }
 
-        public override void removeOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1, Dispatcher dispatcher)
+        public override void removeOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1)
         {
             CollisionObject colObj0 = proxy0.clientObject;
             CollisionObject colObj1 = proxy1.clientObject;
@@ -29,15 +29,15 @@
 
             if (ghost0 != null)
             {
-                ghost0.removeOverlappingObjectInternal(proxy1, dispatcher, proxy0);
+                ghost0.removeOverlappingObjectInternal(proxy1);
             }
             if (ghost1 != null)
             {
-                ghost1.removeOverlappingObjectInternal(proxy0, dispatcher, proxy1);
+                ghost1.removeOverlappingObjectInternal(proxy0);
             }
         }
 
-        public override void removeOverlappingPairsContainingProxy(BroadphaseProxy proxy0, Dispatcher dispatcher)
+        public override void removeOverlappingPairsContainingProxy(BroadphaseProxy proxy0)
         {
 
         }

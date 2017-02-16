@@ -31,7 +31,7 @@ namespace MobaGame.Collision
         /**
          * This method is mainly for expert/internal use only.
          */
-        public void removeOverlappingObjectInternal(BroadphaseProxy otherProxy, Dispatcher dispatcher, BroadphaseProxy thisProxy)
+        public void removeOverlappingObjectInternal(BroadphaseProxy otherProxy)
         {
             CollisionObject otherObject = otherProxy.clientObject;
 

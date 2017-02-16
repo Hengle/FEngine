@@ -11,10 +11,8 @@ namespace MobaGame.Collision
 
         public abstract void setOverlapFilterCallback(OverlapFilterCallback overlapFilterCallback);
 
-        public abstract void processAllOverlappingPairs(OverlapCallback callback, Dispatcher dispatcher);
+        public abstract void processAllOverlappingPairs(OverlapCallback callback);
 
         public abstract BroadphasePair findPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1);
-
-        public abstract bool hasDeferredRemoval();
     }
 }

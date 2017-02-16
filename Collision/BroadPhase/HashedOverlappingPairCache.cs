@@ -20,7 +20,7 @@ namespace MobaGame.Collision
             return internalAddPair(proxy0, proxy1);
         }
 
-        public override void removeOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1, Dispatcher dispatcher)
+        public override void removeOverlappingPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1)
         {
             if (proxy0.getUid() > proxy1.getUid())
             {
@@ -80,24 +80,25 @@ namespace MobaGame.Collision
             return collides;
         }
 
-        public override void processAllOverlappingPairs(OverlapCallback callback, Dispatcher dispatcher)
+        public override void processAllOverlappingPairs(OverlapCallback callback)
         {
             for (int i = 0; i < overlappingPairArray.Count;)
             {
                 BroadphasePair pair = overlappingPairArray[i];
                 if (callback.processOverlap(pair))
                 {
-                    removeOverlappingPair(pair.pProxy0, pair.pProxy1, dispatcher);
+                    removeOverlappingPair(pair.pProxy0, pair.pProxy1);
                 }
-                else {
+                else
+                {
                     i++;
                 }
             }
         }
 
-        public override void removeOverlappingPairsContainingProxy(BroadphaseProxy proxy, Dispatcher dispatcher)
+        public override void removeOverlappingPairsContainingProxy(BroadphaseProxy proxy)
         {
-            processAllOverlappingPairs(new RemovePairCallback(proxy), dispatcher);
+            processAllOverlappingPairs(new RemovePairCallback(proxy));
         }
 
         public override List<BroadphasePair> getOverlappingPairArray()
@@ -148,11 +149,6 @@ namespace MobaGame.Collision
         public override int getNumOverlappingPairs()
         {
             return overlappingPairArray.Count;
-        }
-
-        public override bool hasDeferredRemoval()
-        {
-            return false;
         }
 
         private BroadphasePair internalAddPair(BroadphaseProxy proxy0, BroadphaseProxy proxy1)
