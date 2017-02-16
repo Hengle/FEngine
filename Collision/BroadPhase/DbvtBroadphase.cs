@@ -9,13 +9,16 @@ namespace MobaGame.Collision
         public static readonly VFixedPoint DBVT_BP_MARGIN = VFixedPoint.One / VFixedPoint.Create(20);
 
         public static readonly int DYNAMIC_SET = 0; // Dynamic set index
+        public static readonly int FIXED_SET = 1;
+        public static readonly int STAGECOUNT = 2;
 
-        public readonly Dbvt sets;                        // Dbvt sets
-        public DbvtProxy stageRoots; // Stages list
+        public readonly Dbvt[] sets = new Dbvt[STAGECOUNT];                        // Dbvt sets
+        public DbvtProxy[] stageRoots = new DbvtProxy[STAGECOUNT + 1]; // Stages list
         public OverlappingPairCache paircache;                         // Pair cache
         public VFixedPoint predictedframes;                                  // Frames predicted
         public int stageCurrent;                                       // Current stage
-        public int updates;                                           // % of dynamic updates per frame
+        public int fupdates;                                           // % of fixed updates per frame
+        public int dupdates;                                           // % of dynamic updates per frame
         public bool releasepaircache;                               // Release pair cache on delete
 
         public DbvtBroadphase():this(null)
@@ -25,16 +28,52 @@ namespace MobaGame.Collision
 
         public DbvtBroadphase(OverlappingPairCache paircache)
         {
-            sets = new Dbvt();
+            sets[0] = new Dbvt();
+            sets[1] = new Dbvt();
             releasepaircache = (paircache != null? false : true);
             predictedframes = VFixedPoint.Two;
             stageCurrent = 0;
-            updates = 1;
+            fupdates = 1;
+            dupdates = 1;
             this.paircache = paircache != null ? paircache : new HashedOverlappingPairCache();
+            for (int i = 0; i < STAGECOUNT + 1; i++)
+            {
+                stageRoots[i] = null;
+            }
         }
 
         public void collide(Dispatcher dispatcher)
         {
+            //optimize
+            sets[0].optimizeIncremental(1 + (sets[0].leaves * dupdates) / 100);
+            sets[1].optimizeIncremental(1 + (sets[1].leaves * fupdates) / 100);
+
+            DbvtTreeCollider collider = new DbvtTreeCollider(this);
+            //dynamic -> fixed set:
+            stageCurrent = (stageCurrent + 1) % STAGECOUNT;
+            DbvtProxy current = stageRoots[stageCurrent];
+            if(current != null)
+            {
+                do
+                {
+                    DbvtProxy next = current.links[1];
+                    stageRoots[current.stage] = listremove(current, stageRoots[current.stage]);
+                    stageRoots[STAGECOUNT] = listappend(current, stageRoots[STAGECOUNT]);
+                    Dbvt.collideTT(sets[1].root, current.leaf, collider);
+                    sets[0].remove(current.leaf);
+                    current.leaf = sets[1].insert(current.aabb, current);
+                    current.stage = STAGECOUNT;
+                    current = next;
+                }
+                while (current != null);
+            }
+
+            //collide dynamics:
+            {
+                Dbvt.collideTT(sets[0].root, sets[1].root, collider);
+                Dbvt.collideTT(sets[0].root, sets[0].root, collider);
+            }
+
             // clean up:
             {
                 List<BroadphasePair> pairs = paircache.getOverlappingPairArray();
@@ -59,15 +98,6 @@ namespace MobaGame.Collision
                         }
                     }
                 }
-            }
-
-            // optimize:
-            sets.optimizeIncremental(1 + (sets.leaves * updates) / 100);
-
-            // collide dynamics:
-            {
-                DbvtTreeCollider collider = new DbvtTreeCollider(this);
-                Dbvt.collideTT(sets.root, sets.root, collider);
             }
         }
 
@@ -96,17 +126,25 @@ namespace MobaGame.Collision
         public override BroadphaseProxy createProxy(VInt3 aabbMin, VInt3 aabbMax, BroadphaseNativeType shapeType, CollisionObject collisionObject, short collisionFilterGroup, short collisionFilterMask, Dispatcher dispatcher) {
             DbvtProxy proxy = new DbvtProxy(collisionObject, collisionFilterGroup, collisionFilterMask);
             DbvtAabbMm.FromMM(aabbMin, aabbMax, proxy.aabb);
-            proxy.leaf = sets.insert(proxy.aabb, proxy);
+            proxy.leaf = sets[0].insert(proxy.aabb, proxy);
+            proxy.stage = stageCurrent;
             proxy.uniqueId = UUID.GetNextUUID();
-            stageRoots = listappend(proxy, stageRoots);
+            stageRoots[stageCurrent] = listappend(proxy, stageRoots[stageCurrent]);
             return (proxy);
         }
 
         public override void destroyProxy(BroadphaseProxy absproxy, Dispatcher dispatcher) {
             DbvtProxy proxy = (DbvtProxy)absproxy;
-            sets.remove(proxy.leaf);
+            if(proxy.stage == STAGECOUNT)
+            {
+                sets[1].remove(proxy.leaf);
+            }
+            else
+            {
+                sets[0].remove(proxy.leaf);
+            }
             
-            stageRoots = listremove(proxy, stageRoots);
+            stageRoots[proxy.stage] = listremove(proxy, stageRoots[proxy.stage]);
             paircache.removeOverlappingPairsContainingProxy(proxy, dispatcher);
         }
 
@@ -114,21 +152,31 @@ namespace MobaGame.Collision
             DbvtProxy proxy = (DbvtProxy)absproxy;
             DbvtAabbMm aabb = DbvtAabbMm.FromMM(aabbMin, aabbMax, new DbvtAabbMm());
             
-            if (DbvtAabbMm.Intersect(proxy.leaf.volume, aabb))
-            {   
-                // Moving	
-                VInt3 delta = (aabbMin + aabbMax) * VFixedPoint.Half;
-                delta -= proxy.aabb.Center();
-                delta *= predictedframes;
-                sets.update(proxy.leaf, aabb, delta, DBVT_BP_MARGIN);
-            }
-            else
+            if(aabb != proxy.leaf.volume)
             {
-                // teleporting:
-                sets.update(proxy.leaf, aabb);
+                if (proxy.stage == STAGECOUNT)
+                {
+                    sets[1].remove(proxy.leaf);
+                    proxy.leaf = sets[0].insert(aabb, proxy);
+                }
+                else if (DbvtAabbMm.Intersect(proxy.leaf.volume, aabb))
+                {
+                    // Moving	
+                    VInt3 delta = (aabbMin + aabbMax) * VFixedPoint.Half;
+                    delta -= proxy.aabb.Center();
+                    delta *= predictedframes;
+                    sets[0].update(proxy.leaf, aabb, delta, DBVT_BP_MARGIN);
+                }
+                else
+                {
+                    // teleporting:
+                    sets[0].update(proxy.leaf, aabb);
+                }
+                listremove(proxy, stageRoots[proxy.stage]);
+                proxy.aabb.set(aabb);
+                proxy.stage = stageCurrent;
+                listappend(proxy, stageRoots[stageCurrent]);
             }
-            
-            proxy.aabb.set(aabb);
         }
 
         public override void calculateOverlappingPairs(Dispatcher dispatcher)
@@ -144,9 +192,20 @@ namespace MobaGame.Collision
         public override void getBroadphaseAabb(out VInt3 aabbMin, out VInt3 aabbMax)
         {
             DbvtAabbMm bounds = new DbvtAabbMm();
-            if (!sets.empty())
+            if (!sets[0].empty())
             {
-                bounds.set(sets.root.volume);
+                if(!sets[1].empty())
+                {
+                    DbvtAabbMm.Merge(sets[0].root.volume, sets[1].root.volume, bounds);
+                }
+                else
+                {
+                    bounds.set(sets[0].root.volume);
+                }
+            }
+            else if(!sets[1].empty())
+            {
+                bounds.set(sets[1].root.volume);
             }
             else
             {
@@ -175,7 +234,17 @@ namespace MobaGame.Collision
         {
             BroadphaseRayTester callback = new BroadphaseRayTester(rayCallback);
 
-            sets.rayTestInternal(sets.root,
+            sets[0].rayTestInternal(sets[0].root,
+                rayFrom,
+                rayTo,
+                rayCallback.rayDirectionInverse,
+                rayCallback.signs,
+                rayCallback.lambdaMax,
+                aabbMin,
+                aabbMax,
+                callback);
+
+            sets[1].rayTestInternal(sets[1].root,
                 rayFrom,
                 rayTo,
                 rayCallback.rayDirectionInverse,
@@ -209,7 +278,8 @@ namespace MobaGame.Collision
             DbvtAabbMm bounds = new DbvtAabbMm();
             DbvtAabbMm.FromMM(aabbMin, aabbMax, bounds);
             //process all children, that overlap with  the given AABB bounds
-            sets.collideTV(sets.root, bounds, callback);
+            sets[0].collideTV(sets[0].root, bounds, callback);
+            sets[1].collideTV(sets[1].root, bounds, callback);
         }
     }
 }
