@@ -9,30 +9,15 @@ namespace MobaGame.Collision
 
         GjkPairDetector gjkPairDetector;
 
-        public bool ownManifold;
-        public bool lowLevelOfDetail;
-
         public ConvexConvexAlgorithm(SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver pdSolver):base()
         {
             gjkPairDetector = new GjkPairDetector();
             gjkPairDetector.init(simplexSolver, pdSolver);
         }
 
-        public override void init(CollisionAlgorithmConstructionInfo ci)
-        {
-            base.init(ci);
-            ownManifold = false;
-            lowLevelOfDetail = false;
-        }
-
         public override void destroy()
         {
 
-        }
-
-        public void setLowLevelOfDetail(bool useLowLevel)
-        {
-            this.lowLevelOfDetail = useLowLevel;
         }
 
         public override void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)

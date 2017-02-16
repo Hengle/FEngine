@@ -9,10 +9,14 @@ namespace MobaGame.Collision
         private readonly CollisionAlgorithm[,] doubleDispatch = new CollisionAlgorithm[MAX_BROADPHASE_COLLISION_TYPES,MAX_BROADPHASE_COLLISION_TYPES];
 	    private CollisionConfiguration collisionConfiguration;
 
-        private CollisionAlgorithmConstructionInfo tmpCI = new CollisionAlgorithmConstructionInfo();
+        private ObjectPool<ManifoldResult> manifoldPool;
+        private List<ManifoldResult> manifolds;
 
         public CollisionDispatcher(CollisionConfiguration collisionConfiguration)
         {
+            manifoldPool = new ObjectPool<ManifoldResult>();
+            manifolds = new List<ManifoldResult>();
+
             this.collisionConfiguration = collisionConfiguration;
 
             setNearCallback(new DefaultNearCallback());
@@ -56,8 +60,6 @@ namespace MobaGame.Collision
 
         public override CollisionAlgorithm findAlgorithm(CollisionObject body0, CollisionObject body1)
         {
-            CollisionAlgorithmConstructionInfo ci = tmpCI;
-            ci.dispatcher1 = this;
             CollisionAlgorithm algo = doubleDispatch[(int)body0.getCollisionShape().getShapeType(), (int)body1.getCollisionShape().getShapeType()];
             return algo;
         }
@@ -101,7 +103,8 @@ namespace MobaGame.Collision
 
             public override bool processOverlap(BroadphasePair pair)
             {
-                return !dispatcher.getNearCallback().handleCollision(pair, dispatcher, dispatchInfo);
+                dispatcher.getNearCallback().handleCollision(pair, dispatcher, dispatchInfo);
+                return false;
             }
         }
 
@@ -109,8 +112,39 @@ namespace MobaGame.Collision
 
         public override void dispatchAllCollisionPairs(OverlappingPairCache pairCache, DispatcherInfo dispatchInfo, Dispatcher dispatcher)
         {
+            releaseAllManifold();
             collisionPairCallback.init(dispatchInfo, this);
             pairCache.processAllOverlappingPairs(collisionPairCallback, dispatcher);
+        }
+
+        public override ManifoldResult applyManifold()
+        {
+            ManifoldResult newManifold = manifoldPool.Get();
+            manifolds.Add(newManifold);
+            return newManifold;
+        }
+
+        public override void releaseManifold(ManifoldResult result)
+        {
+            if(manifolds.Contains(result))
+            {
+                manifolds.Remove(result);
+            }
+            manifoldPool.Release(result);
+        }
+
+        public override void releaseAllManifold()
+        {
+            for(int i = 0; i < manifolds.Count; i++)
+            {
+                manifoldPool.Release(manifolds[i]);
+            }
+            manifolds.Clear();
+        }
+
+        public override List<ManifoldResult> getAllManifolds()
+        {
+            return manifolds;
         }
     }
 }

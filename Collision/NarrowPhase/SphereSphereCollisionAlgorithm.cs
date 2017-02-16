@@ -5,12 +5,6 @@ namespace MobaGame.Collision
 {
     public class SphereSphereCollisionAlgorithm: CollisionAlgorithm
     {
-        private bool ownManifold;
-
-        public override void init(CollisionAlgorithmConstructionInfo ci)
-        {
-            base.init(ci);
-        }
 
         public override void destroy()
         {

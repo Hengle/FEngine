@@ -8,12 +8,6 @@ namespace MobaGame.Collision
     {
         BoxBoxDetector detector = new BoxBoxDetector();
 
-        public override void init(CollisionAlgorithmConstructionInfo ci)
-        {
-            base.init(ci);
-            
-        }
-
         public override void destroy()
         {
 
