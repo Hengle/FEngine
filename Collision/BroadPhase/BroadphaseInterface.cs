@@ -20,7 +20,7 @@ namespace MobaGame.Collision
         ///will add some transform later
         public abstract void getBroadphaseAabb(out VInt3 aabbMin, out VInt3 aabbMax);
 
-        public abstract void rayTest(VInt3 rayFrom, VInt3 rayTo, BroadphaseRayCallback rayCallback, VInt3 aabbMin, VInt3 aabbMax);
+        public abstract void rayTest(BroadphaseRayCallback rayCallback, VInt3 aabbMin, VInt3 aabbMax);
 
 	    public abstract void aabbTest(VInt3 aabbMin, VInt3 aabbMax, BroadphaseAabbCallback callback);
     }
@@ -32,6 +32,8 @@ namespace MobaGame.Collision
 
     public abstract class BroadphaseRayCallback: BroadphaseAabbCallback
     {
+        public VIntTransform rayFromTrans;
+        public VIntTransform rayToTrans;
         public VInt3 rayDirectionInverse;
         public uint[] signs = new uint[3];
         public VFixedPoint lambdaMax;

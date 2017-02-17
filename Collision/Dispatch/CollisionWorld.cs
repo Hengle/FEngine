@@ -301,60 +301,18 @@ namespace MobaGame.Collision
         }
     }
 
-    public class ClosestRayResultCallback: RayResultCallback
-    {
-
-        public VInt3 rayFromWorld; //used to calculate hitPointWorld from hitFraction
-        public VInt3 rayToWorld;
-
-        public VInt3 hitNormalWorld;
-        public VInt3 hitPointWorld;
-
-        public ClosestRayResultCallback(VInt3 rayFromWorld, VInt3 rayToWorld)
-        {
-            this.rayFromWorld = rayFromWorld;
-            this.rayToWorld = rayToWorld;
-        }
-
-        public override VFixedPoint addSingleResult(LocalRayResult rayResult, bool normalInWorldSpace)
-        {
-            closestHitFraction = rayResult.hitFraction;
-            collisionObject = rayResult.collisionObject;
-            if (normalInWorldSpace)
-            {
-                hitNormalWorld = rayResult.hitNormalLocal;
-            }
-            else
-            {
-                // need to transform normal into worldspace
-                hitNormalWorld = rayResult.hitNormalLocal;
-                collisionObject.getWorldTransform().TransformVector(hitNormalWorld);
-			}
-
-                hitPointWorld = rayFromWorld * (VFixedPoint.One - rayResult.hitFraction) + rayToWorld * rayResult.hitFraction;
-			    return rayResult.hitFraction;
-		}
-	}
-
     public class SingleRayCallback : BroadphaseRayCallback
     {
-        VInt3 m_rayFromWorld;
-        VInt3 m_rayToWorld;
-        VIntTransform m_rayFromTrans;
-        VIntTransform m_rayToTrans;
         VInt3 m_hitNormal;
 
         RayResultCallback m_resultCallback;
 
         public SingleRayCallback(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
         {
-            m_rayFromWorld = rayFromWorld;
-            m_rayToWorld = rayToWorld;
-
-            m_rayFromTrans = VIntTransform.Identity;
-            m_rayFromTrans.position = m_rayFromWorld;
-            m_rayToTrans = VIntTransform.Identity;
-            m_rayToTrans.position = m_rayToWorld;
+            rayFromTrans = VIntTransform.Identity;
+            rayFromTrans.position = rayFromWorld;
+            rayToTrans = VIntTransform.Identity;
+            rayToTrans.position = rayToWorld;
 
             VInt3 rayDir = (rayToWorld - rayFromWorld).Normalize();
 
@@ -366,7 +324,8 @@ namespace MobaGame.Collision
             signs[1] = rayDirectionInverse.y < VFixedPoint.Zero ? 1u : 0;
             signs[2] = rayDirectionInverse.z < VFixedPoint.Zero ? 1u : 0;
 
-            lambdaMax = VInt3.Dot(rayDir, (m_rayToWorld - m_rayFromWorld));
+            lambdaMax = VInt3.Dot(rayDir, (rayToWorld - rayFromWorld));
+            m_resultCallback = resultCallback;
         }
 
         public override bool process(BroadphaseProxy proxy)
@@ -381,7 +340,7 @@ namespace MobaGame.Collision
 		    if(m_resultCallback.needsCollision(collisionObject.getBroadphaseHandle())) 
 		    {
 
-				    CollisionWorld.rayTestSingle(m_rayFromTrans, m_rayToTrans,
+				    CollisionWorld.rayTestSingle(rayFromTrans, rayToTrans,
                         collisionObject,
                         collisionObject.getCollisionShape(),
 					    collisionObject.getWorldTransform(),
@@ -393,8 +352,6 @@ namespace MobaGame.Collision
 
     public class SingleSweepCallback: BroadphaseRayCallback
     {
-        public VIntTransform m_convexFromTrans;
-        public VIntTransform m_convexToTrans;
         public VInt3 m_hitNormal;
         public ConvexResultCallback m_resultCallback;
         public VFixedPoint m_allowedCcdPenetration;
@@ -403,12 +360,12 @@ namespace MobaGame.Collision
         public SingleSweepCallback(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans, ConvexResultCallback resultCallback, VFixedPoint allowedPenetration)
         {
             m_castShape = castShape;
-            m_convexFromTrans = convexFromTrans;
-            m_convexToTrans = convexToTrans;
+            rayFromTrans = convexFromTrans;
+            rayToTrans = convexToTrans;
             m_resultCallback = resultCallback;
             m_allowedCcdPenetration = allowedPenetration;
 
-            VInt3 unnormalizedRayDir = m_convexToTrans.position - m_convexFromTrans.position;
+            VInt3 unnormalizedRayDir = rayToTrans.position - rayFromTrans.position;
             VInt3 rayDir = unnormalizedRayDir.Normalize();
 
             rayDirectionInverse.x = rayDir.x == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir.x;
@@ -428,7 +385,7 @@ namespace MobaGame.Collision
 
             if(m_resultCallback.needsCollision(collisionObject.getBroadphaseHandle()))
             {
-                CollisionWorld.objectQuerySingle(m_castShape, m_convexFromTrans, m_convexToTrans,
+                CollisionWorld.objectQuerySingle(m_castShape, rayFromTrans, rayToTrans,
                 collisionObject,
                 collisionObject.getCollisionShape(),
                 collisionObject.getWorldTransform(),

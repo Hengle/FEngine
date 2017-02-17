@@ -218,13 +218,13 @@ namespace MobaGame.Collision
             }
         }
 
-        public override void rayTest(VInt3 rayFrom, VInt3 rayTo, BroadphaseRayCallback rayCallback, VInt3 aabbMin, VInt3 aabbMax)
+        public override void rayTest(BroadphaseRayCallback rayCallback, VInt3 aabbMin, VInt3 aabbMax)
         {
             BroadphaseRayTester callback = new BroadphaseRayTester(rayCallback);
 
             sets[DYNAMIC_SET].rayTestInternal(sets[DYNAMIC_SET].root,
-                rayFrom,
-                rayTo,
+                rayCallback.rayFromTrans.position,
+                rayCallback.rayToTrans.position,
                 rayCallback.rayDirectionInverse,
                 rayCallback.signs,
                 rayCallback.lambdaMax,
@@ -233,8 +233,8 @@ namespace MobaGame.Collision
                 callback);
 
             sets[FIXED_SET].rayTestInternal(sets[FIXED_SET].root,
-                rayFrom,
-                rayTo,
+                rayCallback.rayFromTrans.position,
+                rayCallback.rayToTrans.position,
                 rayCallback.rayDirectionInverse,
                 rayCallback.signs,
                 rayCallback.lambdaMax,
