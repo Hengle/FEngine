@@ -18,6 +18,7 @@ namespace MobaGame.Collision
 
         protected RaytestAlgorithm emptyRaytestFunc;
         protected RaytestAlgorithm convexRaytestFunc;
+        protected RaytestAlgorithm sphereRaytestFunc;
 
         protected ObjectQueryAlgorithm emptyOjbectQueryFunc;
         protected ObjectQueryAlgorithm convexObjectQueryFunc;
@@ -44,6 +45,7 @@ namespace MobaGame.Collision
 
             emptyRaytestFunc = new EmptyRaytestAlgorithm();
             convexRaytestFunc = new ConvexRaytestAlgorithm();
+            sphereRaytestFunc = new SphereRaytestAlgorithm();
 
             emptyOjbectQueryFunc = new EmptyObjectQueryFunc();
             convexObjectQueryFunc = new ConvexObjectQueryAlgorithm();
@@ -82,6 +84,11 @@ namespace MobaGame.Collision
 
         public override RaytestAlgorithm getRaytestAlgorithm(BroadphaseNativeType proxyType)
         {
+            if(proxyType == BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE)
+            {
+                return sphereRaytestFunc;
+            }
+
             if (proxyType < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
             {
                 return convexRaytestFunc;

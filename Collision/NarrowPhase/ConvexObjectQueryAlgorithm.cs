@@ -35,16 +35,10 @@ namespace MobaGame.Collision
                     if (castResult.fraction < resultCallback.m_closestHitFraction)
                     {
                         castResult.normal = castResult.normal.Normalize();
-                        LocalConvexResult localConvexResult = new LocalConvexResult
-                            (
-                            collisionObject,
+                        resultCallback.addSingleResult(collisionObject,
                             castResult.normal,
                             castResult.hitPoint,
-                            castResult.fraction
-                            );
-
-                        bool normalInWorldSpace = true;
-                        resultCallback.addSingleResult(localConvexResult, normalInWorldSpace);
+                            castResult.fraction);
 
                     }
                 }

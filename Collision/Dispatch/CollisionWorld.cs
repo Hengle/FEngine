@@ -200,21 +200,7 @@ namespace MobaGame.Collision
             return collides;
         }
 
-        public abstract VFixedPoint addSingleResult(LocalRayResult rayResult, bool normalInWorldSpace);
-    }
-
-    public class LocalRayResult
-    {
-        public CollisionObject collisionObject;
-        public VInt3 hitNormalLocal;
-        public VFixedPoint hitFraction;
-
-        public LocalRayResult(CollisionObject collisionObject, VInt3 hitNormalLocal, VFixedPoint hitFraction)
-        {
-            this.collisionObject = collisionObject;
-            this.hitNormalLocal = hitNormalLocal;
-            this.hitFraction = hitFraction;
-        }
+        public abstract VFixedPoint addSingleResult(CollisionObject collisionObject, VInt3 hitNormalLocal, VFixedPoint hitFraction);
     }
 
     public class SingleRayCallback : BroadphaseRayCallback
@@ -285,12 +271,13 @@ namespace MobaGame.Collision
     public abstract class ConvexResultCallback
     {
         public VFixedPoint m_closestHitFraction = VFixedPoint.One;
+        public CollisionObject collisionObject;
         public short m_collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER;
         public short m_collisionFilterMask = CollisionFilterGroups.ALL_FILTER;
 
         public bool hasHit()
 		{
-			return m_closestHitFraction < VFixedPoint.One;
+			return collisionObject != null;
 		}
 
         public virtual bool needsCollision(BroadphaseProxy proxy0)
@@ -300,26 +287,9 @@ namespace MobaGame.Collision
 			return collides;
 		}
 
-        public abstract VFixedPoint addSingleResult(LocalConvexResult convexResult, bool normalInWorldSpace);
-    };
-
-    public class LocalConvexResult
-    {
-        public LocalConvexResult(CollisionObject hitCollisionObject,
-			VInt3		hitNormalLocal,
+        public abstract VFixedPoint addSingleResult(CollisionObject hitCollisionObject,
+            VInt3 hitNormalLocal,
             VInt3 hitPointLocal,
-			VFixedPoint hitFraction
-			)
-        {
-            m_hitCollisionObject = hitCollisionObject;
-            m_hitNormalLocal = hitNormalLocal;
-            m_hitPointLocal = hitPointLocal;
-            m_hitFraction = hitFraction;
-        }
-
-        public CollisionObject m_hitCollisionObject;
-        public VInt3 m_hitNormalLocal;
-        public VInt3 m_hitPointLocal;
-        public VFixedPoint m_hitFraction;
-    }
+            VFixedPoint hitFraction);
+    };
 }

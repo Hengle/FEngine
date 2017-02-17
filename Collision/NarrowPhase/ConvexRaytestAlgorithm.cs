@@ -30,8 +30,6 @@ namespace MobaGame.Collision
             convexCaster.convexA = castShape;
             convexCaster.convexB = convexShape;
 
-            simplexSolver.reset();
-
             if (convexCaster.calcTimeOfImpact(rayFromTrans, rayToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
             {
                 //add hit
@@ -43,13 +41,10 @@ namespace MobaGame.Collision
                         rayFromTrans.TransformVector(castResult.normal);
 
                         castResult.normal = castResult.normal.Normalize();
-                        LocalRayResult localRayResult = new LocalRayResult(
-                                collisionObject,
+
+                        resultCallback.addSingleResult(collisionObject,
                                 castResult.normal,
                                 castResult.fraction);
-
-                        bool normalInWorldSpace = true;
-                        resultCallback.addSingleResult(localRayResult, normalInWorldSpace);
                     }
                 }
             }
