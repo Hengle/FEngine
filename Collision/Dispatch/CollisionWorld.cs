@@ -153,10 +153,10 @@ namespace MobaGame.Collision
 
         public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans,
             CollisionObject collisionObject,
-            CollisionShape collisionShape,
-            VIntTransform colObjWorldTransform,
             RayResultCallback resultCallback)
         {
+            CollisionShape collisionShape = collisionObject.getCollisionShape();
+            VIntTransform colObjWorldTransform = collisionObject.getWorldTransform();
             SphereShape pointShape = new SphereShape(VFixedPoint.Zero);
             pointShape.setMargin(VFixedPoint.Zero);
             ConvexShape castShape = pointShape;
@@ -182,7 +182,6 @@ namespace MobaGame.Collision
                         castResult.normal = castResult.normal.Normalize();
                         LocalRayResult localRayResult = new LocalRayResult(
                                 collisionObject,
-                                null,
                                 castResult.normal,
                                 castResult.fraction);
 
@@ -196,17 +195,16 @@ namespace MobaGame.Collision
         public void rayTest(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
         {
             SingleRayCallback rayCB = new SingleRayCallback(rayFromWorld, rayToWorld, resultCallback);
-            broadphasePairCache.rayTest(rayFromWorld, rayToWorld, rayCB, VInt3.zero, VInt3.zero);
+            broadphasePairCache.rayTest(rayCB, VInt3.zero, VInt3.zero);
         }
 
 
         public static void objectQuerySingle(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans,
 					  CollisionObject collisionObject,
-                      CollisionShape collisionShape,
-                      VIntTransform colObjWorldTransform,
 					  ConvexResultCallback resultCallback, VFixedPoint allowedPenetration)
         {
-            //BT_PROFILE("convexSweepConvex");
+            CollisionShape collisionShape = collisionObject.getCollisionShape();
+            VIntTransform colObjWorldTransform = collisionObject.getWorldTransform();
             CastResult castResult = new CastResult();
             castResult.allowedPenetration = allowedPenetration;
             castResult.fraction = resultCallback.m_closestHitFraction;//btScalar(1.);//??
@@ -225,7 +223,6 @@ namespace MobaGame.Collision
                         LocalConvexResult localConvexResult = new LocalConvexResult
                             (
                             collisionObject,
-                            null,
                             castResult.normal,
                             castResult.hitPoint,
                             castResult.fraction
@@ -253,7 +250,7 @@ namespace MobaGame.Collision
 
             SingleSweepCallback convexCB = new SingleSweepCallback(castShape, convexFromWorld, convexToWorld, resultCallback, allowedCcdPenetration);
 
-            broadphasePairCache.rayTest(convexFromWorld.position, convexToWorld.position, convexCB, castShapeAabbMin, castShapeAabbMax);
+            broadphasePairCache.rayTest(convexCB, castShapeAabbMin, castShapeAabbMax);
         }
     }
 
@@ -279,23 +276,15 @@ namespace MobaGame.Collision
         public abstract VFixedPoint addSingleResult(LocalRayResult rayResult, bool normalInWorldSpace);
     }
 
-    public class LocalShapeInfo
-    {
-        public int shapePart;
-        public int triangleIndex;
-    }
-
     public class LocalRayResult
     {
         public CollisionObject collisionObject;
-        public LocalShapeInfo localShapeInfo;
         public VInt3 hitNormalLocal;
         public VFixedPoint hitFraction;
 
-        public LocalRayResult(CollisionObject collisionObject, LocalShapeInfo localShapeInfo, VInt3 hitNormalLocal, VFixedPoint hitFraction)
+        public LocalRayResult(CollisionObject collisionObject, VInt3 hitNormalLocal, VFixedPoint hitFraction)
         {
             this.collisionObject = collisionObject;
-            this.localShapeInfo = localShapeInfo;
             this.hitNormalLocal = hitNormalLocal;
             this.hitFraction = hitFraction;
         }
@@ -303,8 +292,6 @@ namespace MobaGame.Collision
 
     public class SingleRayCallback : BroadphaseRayCallback
     {
-        VInt3 m_hitNormal;
-
         RayResultCallback m_resultCallback;
 
         public SingleRayCallback(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
@@ -342,8 +329,6 @@ namespace MobaGame.Collision
 
 				    CollisionWorld.rayTestSingle(rayFromTrans, rayToTrans,
                         collisionObject,
-                        collisionObject.getCollisionShape(),
-					    collisionObject.getWorldTransform(),
 					    m_resultCallback);
 			}
 		    return true;
@@ -387,8 +372,6 @@ namespace MobaGame.Collision
             {
                 CollisionWorld.objectQuerySingle(m_castShape, rayFromTrans, rayToTrans,
                 collisionObject,
-                collisionObject.getCollisionShape(),
-                collisionObject.getWorldTransform(),
                 m_resultCallback,
                 m_allowedCcdPenetration);
             }
@@ -420,21 +403,18 @@ namespace MobaGame.Collision
     public class LocalConvexResult
     {
         public LocalConvexResult(CollisionObject hitCollisionObject,
-            LocalShapeInfo	localShapeInfo,
 			VInt3		hitNormalLocal,
             VInt3 hitPointLocal,
 			VFixedPoint hitFraction
 			)
         {
             m_hitCollisionObject = hitCollisionObject;
-            m_localShapeInfo = localShapeInfo;
             m_hitNormalLocal = hitNormalLocal;
             m_hitPointLocal = hitPointLocal;
             m_hitFraction = hitFraction;
         }
 
         public CollisionObject m_hitCollisionObject;
-        public LocalShapeInfo m_localShapeInfo;
         public VInt3 m_hitNormalLocal;
         public VInt3 m_hitPointLocal;
         public VFixedPoint m_hitFraction;

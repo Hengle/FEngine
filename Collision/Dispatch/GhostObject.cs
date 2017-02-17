@@ -12,9 +12,6 @@ namespace MobaGame.Collision
             this.internalType = CollisionObjectType.GHOST_OBJECT;
         }
 
-        /**
-         * This method is mainly for expert/internal use only.
-         */
         public void addOverlappingObjectInternal(BroadphaseProxy otherProxy, BroadphaseProxy thisProxy)
         {
             CollisionObject otherObject = otherProxy.clientObject;
@@ -66,7 +63,6 @@ namespace MobaGame.Collision
 			    // only perform raycast if filterMask matches
 			    if (resultCallback.needsCollision(collisionObject.getBroadphaseHandle()))
                 {
-				    //RigidcollisionObject* collisionObject = ctrl->GetRigidcollisionObject();
 				    VInt3 collisionObjectAabbMin = VInt3.zero;
 				    VInt3 collisionObjectAabbMax = VInt3.zero;
 				    collisionObject.getCollisionShape().getAabb(collisionObject.getWorldTransform(), out collisionObjectAabbMin, out collisionObjectAabbMax);
@@ -76,8 +72,6 @@ namespace MobaGame.Collision
                     {
 					    CollisionWorld.objectQuerySingle(castShape, convexFromWorld, convexToWorld,
 					                                     collisionObject,
-					                                     collisionObject.getCollisionShape(),
-					                                     collisionObject.getWorldTransform(),
 					                                     resultCallback,
 					                                     allowedCcdPenetration);
 				    }
@@ -101,8 +95,6 @@ namespace MobaGame.Collision
                 {
 				    CollisionWorld.rayTestSingle(rayFromTrans, rayToTrans,
 				                                 collisionObject,
-				                                 collisionObject.getCollisionShape(),
-				                                 collisionObject.getWorldTransform(),
 				                                 resultCallback);
 			    }
             }
