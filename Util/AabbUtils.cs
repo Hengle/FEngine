@@ -86,12 +86,12 @@ namespace MobaGame.Collision
 						        hitNormal = VInt3.zero;
 						        hitNormal[i] = normSign;
 					        }
-        }
+                        }
 				        else if ((targetOutcode & bit) != 0) 
 				        {
 					        VFixedPoint lambda = (-source[i] - aabbHalfExtent[i] * normSign) / r[i];
 
-                            lambda_exit = lambda_exit < lambda ? lambda_exit : lambda_exit;
+                            lambda_exit = lambda_exit < lambda ? lambda_exit : lambda;
 				        }
 				        bit<<=1;
 			        }

@@ -12,7 +12,7 @@ namespace MobaGame.Collision
 
             BoxShape boxShape = (BoxShape)collisionObject.getCollisionShape();
 
-            VFixedPoint t = VFixedPoint.Zero;
+            VFixedPoint t = VFixedPoint.One;
             VInt3 normalInLocal = VInt3.zero;
 
             if(AabbUtils.RayAabb(rayFromPointLocal, rayToPointLocal, -boxShape.getHalfExtentsWithoutMargin(), boxShape.getHalfExtentsWithoutMargin(), ref t, ref normalInLocal))
