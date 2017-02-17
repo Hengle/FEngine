@@ -151,50 +151,13 @@ namespace MobaGame.Collision
             }
         }
 
-        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans,
-            CollisionObject collisionObject,
-            RayResultCallback resultCallback)
-        {
-            CollisionShape collisionShape = collisionObject.getCollisionShape();
-            VIntTransform colObjWorldTransform = collisionObject.getWorldTransform();
-            SphereShape pointShape = new SphereShape(VFixedPoint.Zero);
-            pointShape.setMargin(VFixedPoint.Zero);
-            ConvexShape castShape = pointShape;
-
-
-            CastResult castResult = new CastResult();
-            castResult.fraction = resultCallback.closestHitFraction;
-
-            ConvexShape convexShape = (ConvexShape)collisionShape;
-            VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
-
-            SubsimplexConvexCast convexCaster = new SubsimplexConvexCast(castShape, convexShape, simplexSolver);
-            if (convexCaster.calcTimeOfImpact(rayFromTrans, rayToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
-            {
-                //add hit
-                if (castResult.normal.sqrMagnitude > VFixedPoint.Zero)
-                {
-                    if (castResult.fraction < resultCallback.closestHitFraction)
-                    {
-                        //rotate normal into worldspace
-                        rayFromTrans.TransformVector(castResult.normal);
-
-                        castResult.normal = castResult.normal.Normalize();
-                        LocalRayResult localRayResult = new LocalRayResult(
-                                collisionObject,
-                                castResult.normal,
-                                castResult.fraction);
-
-                        bool normalInWorldSpace = true;
-                        resultCallback.addSingleResult(localRayResult, normalInWorldSpace);
-                    }
-                }
-            }
-        }
-
         public void rayTest(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
         {
-            SingleRayCallback rayCB = new SingleRayCallback(rayFromWorld, rayToWorld, resultCallback);
+            VIntTransform rayFromTrans = VIntTransform.Identity;
+            rayFromTrans.position = rayFromWorld;
+            VIntTransform rayToTrans = VIntTransform.Identity;
+            rayToTrans.position = rayToWorld;
+            SingleRayCallback rayCB = new SingleRayCallback(rayFromTrans, rayToTrans, dispatcher1, resultCallback);
             broadphasePairCache.rayTest(rayCB, VInt3.zero, VInt3.zero);
         }
 
@@ -293,25 +256,11 @@ namespace MobaGame.Collision
     public class SingleRayCallback : BroadphaseRayCallback
     {
         RayResultCallback m_resultCallback;
+        Dispatcher dispatcher;
 
-        public SingleRayCallback(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
+        public SingleRayCallback(VIntTransform rayFromWorld, VIntTransform rayToWorld, Dispatcher dispatcher, RayResultCallback resultCallback):base(rayFromWorld, rayToWorld)
         {
-            rayFromTrans = VIntTransform.Identity;
-            rayFromTrans.position = rayFromWorld;
-            rayToTrans = VIntTransform.Identity;
-            rayToTrans.position = rayToWorld;
-
-            VInt3 rayDir = (rayToWorld - rayFromWorld).Normalize();
-
-            ///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
-            rayDirectionInverse.x = rayDir[0] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[0];
-            rayDirectionInverse.y = rayDir[1] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[1];
-            rayDirectionInverse.z = rayDir[2] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[2];
-            signs[0] = rayDirectionInverse.x < VFixedPoint.Zero ? 1u : 0 ;
-            signs[1] = rayDirectionInverse.y < VFixedPoint.Zero ? 1u : 0;
-            signs[2] = rayDirectionInverse.z < VFixedPoint.Zero ? 1u : 0;
-
-            lambdaMax = VInt3.Dot(rayDir, (rayToWorld - rayFromWorld));
+            this.dispatcher = dispatcher;
             m_resultCallback = resultCallback;
         }
 
@@ -326,8 +275,8 @@ namespace MobaGame.Collision
 		    //only perform raycast if filterMask matches
 		    if(m_resultCallback.needsCollision(collisionObject.getBroadphaseHandle())) 
 		    {
-
-				    CollisionWorld.rayTestSingle(rayFromTrans, rayToTrans,
+                RaytestAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject);
+                algorithm.rayTestSingle(rayFromTrans, rayToTrans,
                         collisionObject,
 					    m_resultCallback);
 			}
@@ -337,29 +286,17 @@ namespace MobaGame.Collision
 
     public class SingleSweepCallback: BroadphaseRayCallback
     {
-        public VInt3 m_hitNormal;
         public ConvexResultCallback m_resultCallback;
         public VFixedPoint m_allowedCcdPenetration;
         public ConvexShape m_castShape;
 
-        public SingleSweepCallback(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans, ConvexResultCallback resultCallback, VFixedPoint allowedPenetration)
+        public SingleSweepCallback(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans, 
+            ConvexResultCallback resultCallback, VFixedPoint allowedPenetration):
+            base(convexFromTrans, convexToTrans)
         {
             m_castShape = castShape;
-            rayFromTrans = convexFromTrans;
-            rayToTrans = convexToTrans;
             m_resultCallback = resultCallback;
             m_allowedCcdPenetration = allowedPenetration;
-
-            VInt3 unnormalizedRayDir = rayToTrans.position - rayFromTrans.position;
-            VInt3 rayDir = unnormalizedRayDir.Normalize();
-
-            rayDirectionInverse.x = rayDir.x == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir.x;
-            rayDirectionInverse.y = rayDir.y == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir.y;
-            rayDirectionInverse.z = rayDir.z == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir.z;
-            signs[0] = rayDirectionInverse.x < VFixedPoint.Zero ? 1u : 0;
-            signs[1] = rayDirectionInverse.y < VFixedPoint.Zero ? 1u : 0;
-            signs[2] = rayDirectionInverse.z < VFixedPoint.Zero ? 1u : 0;
-            lambdaMax = VInt3.Dot(rayDir, unnormalizedRayDir);
         }
 
         public override bool process(BroadphaseProxy proxy)

@@ -1,4 +1,5 @@
-﻿using MobaGame.FixedMath;
+﻿using System;
+using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
@@ -14,9 +15,9 @@ namespace MobaGame.Collision
         protected CollisionAlgorithm sphereBoxCF;
         protected CollisionAlgorithm boxSphereCF;
         protected CollisionAlgorithm boxBoxCF;
-        //protected CollisionAlgorithmCreateFunc planeConvexCF;
-        //protected CollisionAlgorithmCreateFunc convexPlaneCF;
 
+        protected RaytestAlgorithm emptyRaytestFunc;
+        protected RaytestAlgorithm convexRaytestFunc;
         public DefaultCollisionConfiguration()
         {
             simplexSolver = new VoronoiSimplexSolver();
@@ -66,29 +67,6 @@ namespace MobaGame.Collision
                 return boxBoxCF;
             }
 
-            /*if ((proxyType0 == SPHERE_SHAPE_PROXYTYPE ) && (proxyType1==TRIANGLE_SHAPE_PROXYTYPE))
-            {
-                return	m_sphereTriangleCF;
-            }
-
-            if ((proxyType0 == TRIANGLE_SHAPE_PROXYTYPE  ) && (proxyType1==SPHERE_SHAPE_PROXYTYPE))
-            {
-                return	m_triangleSphereCF;
-            }
-
-
-
-
-            if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && (proxyType1 == BroadphaseNativeType.STATIC_PLANE_PROXYTYPE))
-            {
-                return convexPlaneCF;
-            }
-
-            if (proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && (proxyType0 == BroadphaseNativeType.STATIC_PLANE_PROXYTYPE))
-            {
-                return planeConvexCF;
-            }*/
-
             if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
             {
                 return convexConvexCreateFunc;
@@ -96,6 +74,16 @@ namespace MobaGame.Collision
 
             // failed to find an algorithm
             return emptyCreateFunc;
+        }
+
+        public override RaytestAlgorithm getRaytestAlgorithm(BroadphaseNativeType proxyType)
+        {
+            if (proxyType < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
+            {
+                return convexRaytestFunc;
+            }
+
+            return emptyRaytestFunc;
         }
     }
 }

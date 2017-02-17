@@ -7,7 +7,7 @@ namespace MobaGame.Collision
 	    private static readonly int MAX_BROADPHASE_COLLISION_TYPES = (int)BroadphaseNativeType.MAX_BROADPHASE_COLLISION_TYPES;
         private NearCallback nearCallback;
         private readonly CollisionAlgorithm[,] doubleDispatch = new CollisionAlgorithm[MAX_BROADPHASE_COLLISION_TYPES,MAX_BROADPHASE_COLLISION_TYPES];
-	    private CollisionConfiguration collisionConfiguration;
+        private readonly RaytestAlgorithm[] raytestDispatch = new RaytestAlgorithm[MAX_BROADPHASE_COLLISION_TYPES];
 
         private ObjectPool<ManifoldResult> manifoldPool;
         private List<ManifoldResult> manifolds;
@@ -17,7 +17,6 @@ namespace MobaGame.Collision
             manifoldPool = new ObjectPool<ManifoldResult>();
             manifolds = new List<ManifoldResult>();
 
-            this.collisionConfiguration = collisionConfiguration;
 
             setNearCallback(new DefaultNearCallback());
 
@@ -30,12 +29,9 @@ namespace MobaGame.Collision
                         (BroadphaseNativeType)j
                     );
                 }
-            }
-        }
 
-        public void registerCollisionCreateFunc(int proxyType0, int proxyType1, CollisionAlgorithm createFunc)
-        {
-            doubleDispatch[proxyType0,proxyType1] = createFunc;
+                raytestDispatch[i] = collisionConfiguration.getRaytestAlgorithm((BroadphaseNativeType)i);
+            }
         }
 
         public NearCallback getNearCallback()
@@ -51,6 +47,12 @@ namespace MobaGame.Collision
         public override CollisionAlgorithm findAlgorithm(CollisionObject body0, CollisionObject body1)
         {
             CollisionAlgorithm algo = doubleDispatch[(int)body0.getCollisionShape().getShapeType(), (int)body1.getCollisionShape().getShapeType()];
+            return algo;
+        }
+
+        public override RaytestAlgorithm findAlgorithm(CollisionObject body)
+        {
+            RaytestAlgorithm algo = raytestDispatch[(int)body.getCollisionShape().getShapeType()];
             return algo;
         }
 

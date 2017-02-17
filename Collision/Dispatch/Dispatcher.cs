@@ -6,6 +6,8 @@ namespace MobaGame.Collision
     {
         public abstract CollisionAlgorithm findAlgorithm(CollisionObject body0, CollisionObject body1);
 
+        public abstract RaytestAlgorithm findAlgorithm(CollisionObject body);
+
         public abstract bool needsCollision(CollisionObject body0, CollisionObject body1);
 
         public abstract bool needsResponse(CollisionObject body0, CollisionObject body1);
