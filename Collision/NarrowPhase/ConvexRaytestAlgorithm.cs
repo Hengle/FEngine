@@ -10,9 +10,9 @@ namespace MobaGame.Collision
 
         public ConvexRaytestAlgorithm()
         {
-            VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
+            simplexSolver = new VoronoiSimplexSolver();
 
-            SubsimplexConvexCast convexCaster = new SubsimplexConvexCast(simplexSolver);
+            convexCaster = new SubsimplexConvexCast(simplexSolver);
         }
 
         public override void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)

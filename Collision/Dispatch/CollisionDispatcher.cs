@@ -8,6 +8,7 @@ namespace MobaGame.Collision
         private NearCallback nearCallback;
         private readonly CollisionAlgorithm[,] doubleDispatch = new CollisionAlgorithm[MAX_BROADPHASE_COLLISION_TYPES,MAX_BROADPHASE_COLLISION_TYPES];
         private readonly RaytestAlgorithm[] raytestDispatch = new RaytestAlgorithm[MAX_BROADPHASE_COLLISION_TYPES];
+        private readonly ObjectQueryAlgorithm[, ] objectQueryDispatch = new ObjectQueryAlgorithm[MAX_BROADPHASE_COLLISION_TYPES, MAX_BROADPHASE_COLLISION_TYPES];
 
         private ObjectPool<ManifoldResult> manifoldPool;
         private List<ManifoldResult> manifolds;
@@ -28,6 +29,8 @@ namespace MobaGame.Collision
                         (BroadphaseNativeType)i,
                         (BroadphaseNativeType)j
                     );
+
+                    objectQueryDispatch[i, j] = collisionConfiguration.getObjectQueryAlgorithm((BroadphaseNativeType)i, (BroadphaseNativeType)j);
                 }
 
                 raytestDispatch[i] = collisionConfiguration.getRaytestAlgorithm((BroadphaseNativeType)i);
@@ -53,6 +56,12 @@ namespace MobaGame.Collision
         public override RaytestAlgorithm findAlgorithm(CollisionObject body)
         {
             RaytestAlgorithm algo = raytestDispatch[(int)body.getCollisionShape().getShapeType()];
+            return algo;
+        }
+
+        public override ObjectQueryAlgorithm findObjectQueryAlgorithm(CollisionObject body0, CollisionObject body1)
+        {
+            ObjectQueryAlgorithm algo = objectQueryDispatch[(int)body0.getCollisionShape().getShapeType(), (int)body1.getCollisionShape().getShapeType()];
             return algo;
         }
 

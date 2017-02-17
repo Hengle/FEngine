@@ -4,9 +4,8 @@ namespace MobaGame.Collision
 {
     public abstract class ConvexCast
     {
-        /**
-	     * Cast a convex against another convex object.
-	     */
+        public ConvexShape convexA;
+        public ConvexShape convexB;
         public abstract bool calcTimeOfImpact(VIntTransform fromA, VIntTransform toA, VIntTransform fromB, VIntTransform toB, CastResult result);        
     }
 

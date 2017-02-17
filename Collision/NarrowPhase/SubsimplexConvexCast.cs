@@ -7,8 +7,6 @@ namespace MobaGame.Collision
         private static readonly int MAX_ITERATIONS = 32;
 
         private SimplexSolverInterface simplexSolver;
-        public ConvexShape convexA;
-        public ConvexShape convexB;
 
         public SubsimplexConvexCast(SimplexSolverInterface simplexSolver)
         {

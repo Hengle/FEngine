@@ -161,47 +161,11 @@ namespace MobaGame.Collision
             broadphasePairCache.rayTest(rayCB, VInt3.zero, VInt3.zero);
         }
 
-
-        public static void objectQuerySingle(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans,
-					  CollisionObject collisionObject,
-					  ConvexResultCallback resultCallback, VFixedPoint allowedPenetration)
-        {
-            CollisionShape collisionShape = collisionObject.getCollisionShape();
-            VIntTransform colObjWorldTransform = collisionObject.getWorldTransform();
-            CastResult castResult = new CastResult();
-            castResult.allowedPenetration = allowedPenetration;
-            castResult.fraction = resultCallback.m_closestHitFraction;//btScalar(1.);//??
-
-            VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
-            ConvexCast castPtr = new GjkConvexCast(castShape, (ConvexShape)collisionShape,simplexSolver);
-
-            if (castPtr.calcTimeOfImpact(convexFromTrans, convexToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
-            {
-                //add hit
-                if (castResult.normal.sqrMagnitude > Globals.EPS)
-                {
-                    if (castResult.fraction < resultCallback.m_closestHitFraction)
-                    {
-                        castResult.normal = castResult.normal.Normalize();
-                        LocalConvexResult localConvexResult = new LocalConvexResult
-                            (
-                            collisionObject,
-                            castResult.normal,
-                            castResult.hitPoint,
-                            castResult.fraction
-        					);
-
-                        bool normalInWorldSpace = true;
-                        resultCallback.addSingleResult(localConvexResult, normalInWorldSpace);
-
-                    }
-                }
-            }
-        }
-
-        public void convexSweepTest(ConvexShape castShape, VIntTransform convexFromWorld, VIntTransform convexToWorld, ConvexResultCallback resultCallback, VFixedPoint allowedCcdPenetration)
+        public void convexSweepTest(CollisionObject castObject, VIntTransform convexFromWorld, VIntTransform convexToWorld, ConvexResultCallback resultCallback, VFixedPoint allowedCcdPenetration)
         {
             VInt3 castShapeAabbMin, castShapeAabbMax;
+
+            CollisionShape castShape = castObject.getCollisionShape(); 
 
             // Compute AABB that encompasses angular movement
             VInt3 linVel = new VInt3();
@@ -211,7 +175,7 @@ namespace MobaGame.Collision
             R.rotation = convexFromWorld.rotation;
             castShape.calculateTemporalAabb(R, linVel, angVel, VFixedPoint.One, out castShapeAabbMin, out castShapeAabbMax);
 
-            SingleSweepCallback convexCB = new SingleSweepCallback(castShape, convexFromWorld, convexToWorld, resultCallback, allowedCcdPenetration);
+            SingleSweepCallback convexCB = new SingleSweepCallback(castObject, convexFromWorld, convexToWorld, resultCallback, allowedCcdPenetration, dispatcher1);
 
             broadphasePairCache.rayTest(convexCB, castShapeAabbMin, castShapeAabbMax);
         }
@@ -288,15 +252,17 @@ namespace MobaGame.Collision
     {
         public ConvexResultCallback m_resultCallback;
         public VFixedPoint m_allowedCcdPenetration;
-        public ConvexShape m_castShape;
+        public CollisionObject m_castObject;
+        public Dispatcher dispatcher;
 
-        public SingleSweepCallback(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans, 
-            ConvexResultCallback resultCallback, VFixedPoint allowedPenetration):
+        public SingleSweepCallback(CollisionObject castObject, VIntTransform convexFromTrans, VIntTransform convexToTrans, 
+            ConvexResultCallback resultCallback, VFixedPoint allowedPenetration, Dispatcher dispatcher):
             base(convexFromTrans, convexToTrans)
         {
-            m_castShape = castShape;
+            m_castObject = castObject;
             m_resultCallback = resultCallback;
             m_allowedCcdPenetration = allowedPenetration;
+            this.dispatcher = dispatcher;
         }
 
         public override bool process(BroadphaseProxy proxy)
@@ -307,7 +273,7 @@ namespace MobaGame.Collision
 
             if(m_resultCallback.needsCollision(collisionObject.getBroadphaseHandle()))
             {
-                CollisionWorld.objectQuerySingle(m_castShape, rayFromTrans, rayToTrans,
+                dispatcher.findObjectQueryAlgorithm(m_castObject, collisionObject).objectQuerySingle((ConvexShape)m_castObject.getCollisionShape(), rayFromTrans, rayToTrans,
                 collisionObject,
                 m_resultCallback,
                 m_allowedCcdPenetration);

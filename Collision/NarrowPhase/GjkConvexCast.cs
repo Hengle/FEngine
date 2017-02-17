@@ -7,17 +7,14 @@ namespace MobaGame.Collision
         protected readonly ObjectPool<ClosestPointInput> pointInputsPool = new ObjectPool<ClosestPointInput>();
 
         private readonly SimplexSolverInterface simplexSolver;
-        private ConvexShape convexA;
-        private ConvexShape convexB;
+
         private readonly GjkPairDetector gjk = new GjkPairDetector();
 
         private static readonly int MAX_ITERATIONS = 32;
 
-        public GjkConvexCast(ConvexShape convexA, ConvexShape convexB, SimplexSolverInterface simplexSolver)
+        public GjkConvexCast(SimplexSolverInterface simplexSolver)
         {
             this.simplexSolver = simplexSolver;
-            this.convexA = convexA;
-            this.convexB = convexB;
         }
 
         public override bool calcTimeOfImpact(VIntTransform fromA, VIntTransform toA, VIntTransform fromB, VIntTransform toB, CastResult result)

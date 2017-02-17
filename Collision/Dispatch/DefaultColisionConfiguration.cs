@@ -18,6 +18,9 @@ namespace MobaGame.Collision
 
         protected RaytestAlgorithm emptyRaytestFunc;
         protected RaytestAlgorithm convexRaytestFunc;
+
+        protected ObjectQueryAlgorithm emptyOjbectQueryFunc;
+        protected ObjectQueryAlgorithm convexObjectQueryFunc;
         public DefaultCollisionConfiguration()
         {
             simplexSolver = new VoronoiSimplexSolver();
@@ -39,10 +42,11 @@ namespace MobaGame.Collision
             */
             boxBoxCF = new BoxBoxCollisionAlgorithm();
 
-            // convex versus plane
-            //convexPlaneCF = new ConvexPlaneCollisionAlgorithm.CreateFunc();
-            //planeConvexCF = new ConvexPlaneCollisionAlgorithm.CreateFunc();
-            //planeConvexCF.swapped = true;
+            emptyRaytestFunc = new EmptyRaytestAlgorithm();
+            convexRaytestFunc = new ConvexRaytestAlgorithm();
+
+            emptyOjbectQueryFunc = new EmptyObjectQueryFunc();
+            convexObjectQueryFunc = new ConvexObjectQueryAlgorithm();
         }
 
         public override CollisionAlgorithm getCollisionAlgorithmCreateFunc(BroadphaseNativeType proxyType0, BroadphaseNativeType proxyType1)
@@ -84,6 +88,16 @@ namespace MobaGame.Collision
             }
 
             return emptyRaytestFunc;
+        }
+
+        public override ObjectQueryAlgorithm getObjectQueryAlgorithm(BroadphaseNativeType proxyType0, BroadphaseNativeType proxyType1)
+        {
+            if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
+            {
+                return convexObjectQueryFunc;
+            }
+
+            return emptyOjbectQueryFunc;
         }
     }
 }
