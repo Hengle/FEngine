@@ -69,15 +69,6 @@ namespace MobaGame.Collision
 		    return supVec;
 	    }
 
-        public override void batchedUnitVectorGetSupportingVertexWithoutMargin(VInt3[] vectors, out VInt3[] supportVerticesOut)
-        {
-            supportVerticesOut = new VInt3[vectors.Length];
-            for(int i = 0; i < vectors.Length; i++)
-            {
-                supportVerticesOut[i] = localGetSupportingVertexWithoutMargin(vectors[i]);
-            }
-        }
-
         public override VInt3 localGetSupportingVertex(VInt3 vec)
         {
             VInt3 supVertex = localGetSupportingVertexWithoutMargin(vec);

@@ -25,7 +25,7 @@ namespace MobaGame.Collision
 
             if(getSphereDistance(boxObj, out normalOnSurfaceB, out penetrationDepth, sphereCenter, radius, maxContactDistance))
             {
-                resultOut.addContactPoint(normalOnSurfaceB, penetrationDepth);
+                resultOut.addContactPoint(normalOnSurfaceB * (isSwapped ? -1 : 1), penetrationDepth);
             }
         }
 

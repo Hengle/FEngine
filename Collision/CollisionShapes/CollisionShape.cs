@@ -89,8 +89,6 @@ namespace MobaGame.Collision
 
         public abstract VInt3 getLocalScaling();
 
-        public abstract void calculateLocalInertia(VFixedPoint mass, out VInt3 inertia);
-
         public abstract BroadphaseNativeType getShapeType();
 
         public abstract void setMargin(VFixedPoint margin);

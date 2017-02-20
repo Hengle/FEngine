@@ -42,21 +42,6 @@ namespace MobaGame.Collision
             return result;
         }
 
-        public override void batchedUnitVectorGetSupportingVertexWithoutMargin(VInt3[] vectors, out VInt3[] supportVerticesOut)
-        {
-            int numVectors = vectors.Length;
-            supportVerticesOut = new VInt3[numVectors];
-            VInt3 halfExtents = getHalfExtentsWithoutMargin();
-
-		    for (int i = 0; i<numVectors; i++) 
-            {
-			    VInt3 vec = vectors[i];
-                supportVerticesOut[i] = new VInt3(vec.x >= VFixedPoint.Zero ? halfExtents.x : -halfExtents.x,
-                vec.y >= VFixedPoint.Zero ? halfExtents.y : -halfExtents.y,
-                vec.z >= VFixedPoint.Zero ? halfExtents.z : -halfExtents.z);
-		    }
-        }
-
         public override void setMargin(VFixedPoint margin)
         {
             VInt3 oldMargin = new VInt3(getMargin(), getMargin(), getMargin());
@@ -77,18 +62,6 @@ namespace MobaGame.Collision
         public override void getAabb(VIntTransform trans, out VInt3 aabbMin, out VInt3 aabbMax)
         {
             AabbUtils.transformAabb(getHalfExtentsWithoutMargin(), getMargin(), trans, out aabbMin, out aabbMax);
-        }
-
-        public override void calculateLocalInertia(VFixedPoint mass, out VInt3 inertia)
-        {
-            VInt3 halfExtents = getHalfExtentsWithMargin();
-            VFixedPoint lx = VFixedPoint.Two * halfExtents.x;
-            VFixedPoint ly = VFixedPoint.Two * halfExtents.y;
-            VFixedPoint lz = VFixedPoint.Two * halfExtents.z;
-
-            inertia = new VInt3(ly * ly + lz * lz,
-                    lx * lx + lz * lz,
-                    lx * lx + ly * ly) * mass / VFixedPoint.Create(12);
         }
 
         public override int getNumVertices()

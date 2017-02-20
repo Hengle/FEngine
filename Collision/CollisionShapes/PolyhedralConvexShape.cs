@@ -61,60 +61,6 @@ namespace MobaGame.Collision
             return supVec;
         }
 
-        public override void batchedUnitVectorGetSupportingVertexWithoutMargin(VInt3[] vectors, out VInt3[] supportVerticesOut)
-        {
-            int i;
-
-            VInt3 vtx;
-            VFixedPoint newDot;
-
-            supportVerticesOut = new VInt3[vectors.Length];
-
-            VFixedPoint[] wcoords = new VFixedPoint[vectors.Length];
-
-            for (i = 0; i < vectors.Length; i++)
-            {
-                wcoords[i] = VFixedPoint.MinValue;
-            }
-
-            for (int j = 0; j < vectors.Length; j++)
-            {
-                VInt3 vec = vectors[j];
-
-                for (i = 0; i < getNumVertices(); i++)
-                {
-                    vtx = getVertex(i);
-                    newDot = VInt3.Dot(vec, vtx);
-                    if (newDot > wcoords[j])
-                    {
-                        supportVerticesOut[j] = vtx;
-                        wcoords[j] = newDot;
-                    }
-                }
-            }
-        }
-
-        public override void calculateLocalInertia(VFixedPoint mass, out VInt3 inertia)
-        {
-            VFixedPoint margin = getMargin();
-
-            VIntTransform ident = VIntTransform.Identity;
-            VInt3 aabbMin, aabbMax;
-            getAabb(ident, out aabbMin, out aabbMax);
-
-            VInt3 halfExtents = (aabbMax - aabbMin) * VFixedPoint.Half;
-
-            VFixedPoint lx = VFixedPoint.Two * (halfExtents.x + margin);
-            VFixedPoint ly = VFixedPoint.Two * (halfExtents.y + margin);
-            VFixedPoint lz = VFixedPoint.Two * (halfExtents.z + margin);
-            VFixedPoint x2 = lx * lx;
-            VFixedPoint y2 = ly * ly;
-            VFixedPoint z2 = lz * lz;
-            VFixedPoint scaledmass = mass / VFixedPoint.Create(12);
-
-            inertia = new VInt3(y2 + z2, x2 + z2, x2 + y2) * scaledmass;
-        }
-
         public override void getAabb(VIntTransform trans, out VInt3 aabbMin, out VInt3 aabbMax)
         {
             AabbUtils.transformAabb(localAabbMin, localAabbMax, getMargin(), trans, out aabbMin, out aabbMax);
@@ -128,7 +74,10 @@ namespace MobaGame.Collision
         public void recalcLocalAabb() {
             isLocalAabbValid = true;
 
-            batchedUnitVectorGetSupportingVertexWithoutMargin(_directions, out _supporting);
+            for(int i = 0; i < _directions.Length; i++)
+            {
+                _supporting[i] = localGetSupportingVertexWithoutMargin(_directions[i]);
+            }
 
             for (int i=0; i<3; i++) {
                 localAabbMax[i] = _supporting[i][i] + collisionMargin;

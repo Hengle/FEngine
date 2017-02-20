@@ -55,35 +55,6 @@ namespace MobaGame.Collision
             return supVec;
         }
 
-        public override void batchedUnitVectorGetSupportingVertexWithoutMargin(VInt3[] vectors, out VInt3[] supportVerticesOut) {
-            throw new NotImplementedException();
-        }
-
-        public override void calculateLocalInertia(VFixedPoint mass, out VInt3 inertia) {
-            // as an approximation, take the inertia of the box that bounds the spheres
-
-            VIntTransform ident = VIntTransform.Identity;
-
-            VFixedPoint radius = getRadius();
-
-            VInt3 halfExtents = new VInt3(radius, radius, radius);
-            halfExtents[getUpAxis()] = radius + getHalfHeight();
-
-            VFixedPoint margin = Globals.CONVEX_DISTANCE_MARGIN;
-
-            VFixedPoint lx = VFixedPoint.Two * (halfExtents.x + margin);
-            VFixedPoint ly = VFixedPoint.Two * (halfExtents.y + margin);
-            VFixedPoint lz = VFixedPoint.Two * (halfExtents.z + margin);
-            VFixedPoint x2 = lx * lx;
-            VFixedPoint y2 = ly * ly;
-            VFixedPoint z2 = lz * lz;
-            VFixedPoint scaledmass = mass / VFixedPoint.Create(12);
-
-            inertia.x = scaledmass * (y2 + z2);
-            inertia.y = scaledmass * (x2 + z2);
-            inertia.z = scaledmass * (x2 + y2);
-        }
-
         public override BroadphaseNativeType getShapeType() {
             return BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE;
         }
@@ -108,8 +79,10 @@ namespace MobaGame.Collision
             aabbMax = center + extent;
         }
 
-        public int getUpAxis() {
-            return upAxis;
+        public VInt3 getUpAxis() {
+            VInt3 upAxisVector = VInt3.zero;
+            upAxisVector[upAxis] = VFixedPoint.One;
+            return upAxisVector;
         }
 
         public VFixedPoint getRadius() {
@@ -120,7 +93,5 @@ namespace MobaGame.Collision
         public VFixedPoint getHalfHeight() {
             return implicitShapeDimensions[upAxis];
         }
-
-
     }
 }

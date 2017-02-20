@@ -10,10 +10,6 @@ namespace MobaGame.Collision
 
         public abstract VInt3 localGetSupportingVertexWithoutMargin(VInt3 vec);
 
-        //notice that the vectors should be unit length
-        public abstract void batchedUnitVectorGetSupportingVertexWithoutMargin(VInt3[] vectors,
-            out VInt3[] supportVerticesOut);
-
         public abstract void getAabbSlow(VIntTransform t, out VInt3 aabbMin, out VInt3 aabbMax);
     }
 }

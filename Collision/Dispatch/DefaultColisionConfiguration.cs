@@ -15,6 +15,7 @@ namespace MobaGame.Collision
         protected CollisionAlgorithm sphereBoxCF;
         protected CollisionAlgorithm boxSphereCF;
         protected CollisionAlgorithm boxBoxCF;
+        protected CollisionAlgorithm boxCapsultCF;
 
         protected RaytestAlgorithm emptyRaytestFunc;
         protected RaytestAlgorithm convexRaytestFunc;
@@ -34,13 +35,9 @@ namespace MobaGame.Collision
             emptyCreateFunc = new EmptyAlgorithm();
 
             sphereSphereCF = new SphereSphereCollisionAlgorithm();
-
             sphereBoxCF = new SphereBoxCollisionAlgorithm();
             boxSphereCF = new SphereBoxCollisionAlgorithm();
-            /*m_sphereTriangleCF = new (mem)btSphereTriangleCollisionAlgorithm::CreateFunc;
-            m_triangleSphereCF = new (mem)btSphereTriangleCollisionAlgorithm::CreateFunc;
-            m_triangleSphereCF->m_swapped = true;
-            */
+            boxCapsultCF = new BoxCapsuleCollisionAlgorithm();
             boxBoxCF = new BoxBoxCollisionAlgorithm();
 
             emptyRaytestFunc = new EmptyRaytestAlgorithm();
@@ -58,7 +55,6 @@ namespace MobaGame.Collision
                 return sphereSphereCF;
             }
 
-
             if ((proxyType0 == BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE) && (proxyType1==BroadphaseNativeType.BOX_SHAPE_PROXYTYPE))
             {
                 return	sphereBoxCF;
@@ -71,6 +67,16 @@ namespace MobaGame.Collision
 
             if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE)) {
                 return boxBoxCF;
+            }
+
+            if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE))
+            {
+                return boxCapsultCF;
+            }
+
+            if ((proxyType0 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE))
+            {
+                return boxCapsultCF;
             }
 
             if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)

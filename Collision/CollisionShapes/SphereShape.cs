@@ -15,14 +15,6 @@ namespace MobaGame.Collision
             return VInt3.zero;
         }
 
-        public override void batchedUnitVectorGetSupportingVertexWithoutMargin(VInt3[] vectors, out VInt3[] supportVerticesOut)
-        {
-            supportVerticesOut = new VInt3[vectors.Length];
-            for (int i = 0; i < supportVerticesOut.Length; i++) {
-                supportVerticesOut[i] = VInt3.zero;
-            }
-        }
-
         public override void getAabb(VIntTransform t, out VInt3 aabbMin, out VInt3 aabbMax)
         {
             VInt3 center = t.position;
@@ -33,12 +25,6 @@ namespace MobaGame.Collision
 
         public override BroadphaseNativeType getShapeType() {
             return BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE;
-        }
-
-        public override void calculateLocalInertia(VFixedPoint mass, out VInt3 inertia)
-        {
-            VFixedPoint elem = VFixedPoint.Create(4) / VFixedPoint.Create(10) * mass * getMargin() * getMargin();
-            inertia = new VInt3(elem, elem, elem);
         }
 
         public VFixedPoint getRadius() {
