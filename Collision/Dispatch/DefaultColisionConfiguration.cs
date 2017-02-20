@@ -13,7 +13,6 @@ namespace MobaGame.Collision
         protected CollisionAlgorithm convexConvexCreateFunc;
         protected CollisionAlgorithm sphereSphereCF;
         protected CollisionAlgorithm sphereBoxCF;
-        protected CollisionAlgorithm boxSphereCF;
         protected CollisionAlgorithm boxBoxCF;
         protected CollisionAlgorithm boxCapsultCF;
 
@@ -37,7 +36,6 @@ namespace MobaGame.Collision
 
             sphereSphereCF = new SphereSphereCollisionAlgorithm();
             sphereBoxCF = new SphereBoxCollisionAlgorithm();
-            boxSphereCF = new SphereBoxCollisionAlgorithm();
             boxCapsultCF = new BoxCapsuleCollisionAlgorithm();
             boxBoxCF = new BoxBoxCollisionAlgorithm();
 
@@ -64,7 +62,7 @@ namespace MobaGame.Collision
 
             if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE ) && (proxyType1==BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE))
             {
-                return	boxSphereCF;
+                return sphereBoxCF;
             }
 
             if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE)) {
