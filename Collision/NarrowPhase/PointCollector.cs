@@ -21,10 +21,5 @@ namespace MobaGame.Collision
                 distance = depth;
             }
         }
-
-        public override void setShapeIdentifiers(int partId0, int index0, int partId1, int index1)
-        {
-
-        }
     }
 }

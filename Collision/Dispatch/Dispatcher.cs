@@ -12,8 +12,6 @@ namespace MobaGame.Collision
 
         public abstract bool needsCollision(CollisionObject body0, CollisionObject body1);
 
-        public abstract bool needsResponse(CollisionObject body0, CollisionObject body1);
-
         public abstract void dispatchAllCollisionPairs(OverlappingPairCache pairCache, DispatcherInfo dispatchInfo, Dispatcher dispatcher);
 
         public abstract ManifoldResult applyManifold();

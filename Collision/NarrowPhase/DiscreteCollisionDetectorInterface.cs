@@ -6,10 +6,12 @@ namespace MobaGame.Collision
     {
         public abstract class Result
         {
-            ///setShapeIdentifiers provides experimental support for per-triangle material / custom material combiner
-            public abstract void setShapeIdentifiers(int partId0, int index0, int partId1, int index1);
-
             public abstract void addContactPoint(VInt3 normalOnBInWorld, VFixedPoint depth);
+
+            public bool hasContact
+            {
+                protected set; get;
+            }
         }
 
         public abstract void getClosestPoints(ClosestPointInput input, Result output);
@@ -20,7 +22,6 @@ namespace MobaGame.Collision
         public VIntTransform transformA = VIntTransform.Identity;
         public VIntTransform transformB = VIntTransform.Identity;
         public VFixedPoint maximumDistanceSquared;
-        //btStackAlloc* m_stackAlloc;
 
         public ClosestPointInput()
         {

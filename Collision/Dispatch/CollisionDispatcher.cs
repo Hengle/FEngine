@@ -81,15 +81,6 @@ namespace MobaGame.Collision
             return needsCollision;
         }
 
-        public override bool needsResponse(CollisionObject body0, CollisionObject body1)
-        {
-            //here you can do filtering
-            bool hasResponse = (body0.hasContactResponse() && body1.hasContactResponse());
-            //no response between two static/kinematic bodies:
-            hasResponse = hasResponse && ((!body0.isStaticOrKinematicObject()) || (!body1.isStaticOrKinematicObject()));
-            return hasResponse;
-        }
-
         private class CollisionPairCallback: OverlapCallback
         {
 

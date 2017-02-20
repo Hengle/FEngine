@@ -15,11 +15,11 @@
                 CollisionAlgorithm algorithm = dispatcher.findAlgorithm(colObj0, colObj1);
                 // discrete collision detection query
                 algorithm.processCollision(colObj0, colObj1, dispatchInfo, contactPointResult);
-                if(contactPointResult.manifoldPoint == null)
+                if(!contactPointResult.hasContact)
                 {
                     dispatcher.releaseManifold(contactPointResult);
                 }
-                return contactPointResult.manifoldPoint != null;
+                return contactPointResult.hasContact;
             }
             else
             {

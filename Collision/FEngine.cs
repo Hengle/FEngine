@@ -28,7 +28,7 @@ namespace MobaGame.Collision
 
         public void Tick()
         {
-            collisionWorld.performDiscreteCollisionDetection();
+            collisionWorld.Tick();
         }
 
         public CollisionWorld GetCollisionWorld()

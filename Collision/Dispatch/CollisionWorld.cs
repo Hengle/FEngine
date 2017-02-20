@@ -30,6 +30,24 @@ namespace MobaGame.Collision
             }
         }
 
+        public virtual void Tick()
+        {
+
+        }
+
+        protected void performDiscreteCollisionDetection()
+        {
+            updateAabbs();
+            broadphasePairCache.calculateOverlappingPairs(dispatcher1);
+            Dispatcher dispatcher = getDispatcher();
+            {
+                if (dispatcher != null)
+                {
+                    dispatcher.dispatchAllCollisionPairs(broadphasePairCache.getOverlappingPairCache(), dispatchInfo, dispatcher1);
+                }
+            }
+        }
+
         public List<CollisionObject> getCollisionObjectArray()
         {
             return collisionObjects;
@@ -61,19 +79,6 @@ namespace MobaGame.Collision
                 collisionFilterGroup,
                 collisionFilterMask,
                 dispatcher1));
-        }
-
-        public void performDiscreteCollisionDetection()
-        {
-            updateAabbs();
-            broadphasePairCache.calculateOverlappingPairs(dispatcher1);
-            Dispatcher dispatcher = getDispatcher();
-            {
-                if (dispatcher != null)
-                {
-                    dispatcher.dispatchAllCollisionPairs(broadphasePairCache.getOverlappingPairCache(), dispatchInfo, dispatcher1);
-                }
-            }
         }
 
         public void removeCollisionObject(CollisionObject collisionObject)
