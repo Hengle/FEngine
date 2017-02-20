@@ -69,7 +69,7 @@ namespace MobaGame.Collision
         {
             bool needsCollision = true;
 
-            if ((!body0.isActive()) && (!body1.isActive()))
+            if (body0.isStaticOrKinematicObject() && body1.isStaticOrKinematicObject())
             {
                 needsCollision = false;
             }

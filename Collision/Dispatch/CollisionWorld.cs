@@ -143,11 +143,8 @@ namespace MobaGame.Collision
             {
                 CollisionObject colObj = collisionObjects[i];
 
-                // only update aabb of active objects
-                if (colObj.isActive())
-                {
-                    updateSingleAabb(colObj);
-                }
+                updateSingleAabb(colObj);
+                
             }
         }
 

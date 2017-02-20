@@ -30,7 +30,7 @@ namespace MobaGame.Collision
             VFixedPoint radius = getRadius();
             VInt3 pos = VInt3.zero;
 
-            pos[getUpAxis()] = getHalfHeight();
+            pos[upAxis] = getHalfHeight();
             VInt3 tmp1 = vec * localScaling;
             tmp1 *= radius;
             VInt3 tmp2 = vec * getMargin();
@@ -41,7 +41,7 @@ namespace MobaGame.Collision
                 supVec = vtx;
             }
 
-            pos[getUpAxis()] = -getHalfHeight();
+            pos[upAxis] = -getHalfHeight();
             tmp1 = vec * localScaling;
             tmp1 *= radius;
             tmp2 = vec * getMargin();

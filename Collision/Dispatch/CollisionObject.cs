@@ -4,11 +4,6 @@ namespace MobaGame.Collision
 {
     public class CollisionObject
     {
-        public static readonly int ACTIVE_TAG = 1;
-        public static readonly int ISLAND_SLEEPING = 2;
-        public static readonly int WANTS_DEACTIVATION = 3;
-        public static readonly int DISABLE_DEACTIVATION = 4;
-        public static readonly int DISABLE_SIMULATION = 5;
         protected VIntTransform worldTransform = VIntTransform.Identity;
 
         protected VIntTransform interpolationWorldTransform = VIntTransform.Identity;
@@ -20,10 +15,6 @@ namespace MobaGame.Collision
         protected CollisionShape collisionShape;
 
         protected int collisionFlags;
-        protected int islandTag1;
-        protected int companionId;
-        protected int activationState1;
-        protected VFixedPoint deactivationTime;
 
         protected CollisionObjectType internalType = CollisionObjectType.COLLISION_OBJECT;
         protected bool checkCollideWith;
@@ -31,20 +22,11 @@ namespace MobaGame.Collision
         public CollisionObject()
         {
             this.collisionFlags = CollisionFlags.STATIC_OBJECT;
-            this.islandTag1 = -1;
-            this.companionId = -1;
-            this.activationState1 = 1;
         }
 
         public virtual bool checkCollideWithOverride(CollisionObject co)
         {
             return true;
-        }
-
-        public bool mergesSimulationIslands()
-        {
-            ///static objects, kinematic and object without contact response don't merge islands
-            return ((collisionFlags & (CollisionFlags.STATIC_OBJECT | CollisionFlags.KINEMATIC_OBJECT | CollisionFlags.NO_CONTACT_RESPONSE)) == 0);
         }
 
         public bool isStaticObject()
@@ -84,53 +66,6 @@ namespace MobaGame.Collision
         public void internalSetTemporaryCollisionShape(CollisionShape collisionShape)
         {
             this.collisionShape = collisionShape;
-        }
-
-        public int getActivationState()
-        {
-            return activationState1;
-        }
-
-        public void setActivationState(int newState)
-        {
-            if ((activationState1 != DISABLE_DEACTIVATION) && (activationState1 != DISABLE_SIMULATION))
-            {
-                this.activationState1 = newState;
-            }
-        }
-
-        public VFixedPoint getDeactivationTime()
-        {
-            return deactivationTime;
-        }
-
-        public void setDeactivationTime(VFixedPoint deactivationTime)
-        {
-            this.deactivationTime = deactivationTime;
-        }
-
-        public void forceActivationState(int newState)
-        {
-            this.activationState1 = newState;
-        }
-
-        public void activate()
-        {
-            activate(false);
-        }
-
-        public void activate(bool forceActivation)
-        {
-            if (forceActivation || (collisionFlags & (CollisionFlags.STATIC_OBJECT | CollisionFlags.KINEMATIC_OBJECT)) == 0)
-            {
-                setActivationState(ACTIVE_TAG);
-                deactivationTime = VFixedPoint.Zero;
-            }
-        }
-
-        public bool isActive()
-        {
-            return ((getActivationState() != ISLAND_SLEEPING) && (getActivationState() != DISABLE_SIMULATION));
         }
 
         // reserved for Bullet internal usage
@@ -189,26 +124,6 @@ namespace MobaGame.Collision
         {
             returnParam = interpolationAngularVelocity;
             return returnParam;
-        }
-
-        public int getIslandTag()
-        {
-            return islandTag1;
-        }
-
-        public void setIslandTag(int islandTag)
-        {
-            this.islandTag1 = islandTag;
-        }
-
-        public int getCompanionId()
-        {
-            return companionId;
-        }
-
-        public void setCompanionId(int companionId)
-        {
-            this.companionId = companionId;
         }
 
         public int getCollisionFlags()
