@@ -5,7 +5,7 @@ namespace MobaGame.Collision
 {
     public class FEngine: IDisposable
     {
-        private CollisionWorld collisionWorld;
+        private CollisionWorld dynamicWorld;
         private BroadphaseInterface broadPhase;
         private Dispatcher dispatcher;
 		private HashedOverlappingPairCache pbp;
@@ -17,23 +17,23 @@ namespace MobaGame.Collision
             pbp = new HashedOverlappingPairCache();
             broadPhase = new DbvtBroadphase(pbp);
             dispatcher = new CollisionDispatcher(new DefaultCollisionConfiguration());
-            collisionWorld = new CollisionWorld(dispatcher, broadPhase);
+            dynamicWorld = new DynamicsWorld(dispatcher, broadPhase);
             dispatcher.ghostPairCallback = ghostPairCallback;
         }
 
         public void Dispose()
         {
-            collisionWorld.destroy();
+            dynamicWorld.destroy();
         }
 
         public void Tick()
         {
-            collisionWorld.Tick();
+            dynamicWorld.Tick();
         }
 
         public CollisionWorld GetCollisionWorld()
         {
-            return collisionWorld;
+            return dynamicWorld;
         }
     }
 }

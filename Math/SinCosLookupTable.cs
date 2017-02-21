@@ -1,5 +1,5 @@
 ﻿using System;
-using UnityEngine;
+
 public static class SinCosLookupTable
 {
     public static readonly int BITS = 12;
