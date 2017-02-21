@@ -104,148 +104,175 @@ namespace MobaGame.Collision
 
             // Test axis L = A0 x B0
             T = t[2] * R[1, 0] - t[1] * R[2, 0];
-            ra = A[1] * AbsR[2, 0] + A[2] * AbsR[1, 0];
-            rb = B[1] * AbsR[0, 2] + B[2] * AbsR[0, 1];
-            depth = T.Abs() - (ra + rb);
-            if (depth > VFixedPoint.Zero)
+            if (T > Globals.EPS)
             {
-                return;
-            }
-            else if (depth > maxDepth)
-            {
-                maxDepth = depth;
-                worldNormal = VInt3.Cross(au[0], bu[0]) * (T < VFixedPoint.Zero ? -1 : 1);
-                code = 7;
+                ra = A[1] * AbsR[2, 0] + A[2] * AbsR[1, 0];
+                rb = B[1] * AbsR[0, 2] + B[2] * AbsR[0, 1];
+                depth = T.Abs() - (ra + rb);
+                if (depth > VFixedPoint.Zero)
+                {
+                    return;
+                }
+                else if (depth > maxDepth)
+                {
+                    maxDepth = depth;
+                    worldNormal = VInt3.Cross(au[0], bu[0]) * (T < VFixedPoint.Zero ? -1 : 1);
+                    code = 7;
+                }
             }
 
             // Test axis L = A0 x B1
             T = t[2] * R[1, 1] - t[1] * R[2, 1];
-            ra = A[1] * AbsR[2, 1] + A[2] * AbsR[1, 1];
-            rb = B[0] * AbsR[0, 2] + B[2] * AbsR[0, 0];
-            depth = T.Abs() - (ra + rb);
-            if (depth > VFixedPoint.Zero)
+            if(T > Globals.EPS)
             {
-                return;
-            }
-            else if (depth > maxDepth)
-            {
-                maxDepth = depth;
-                worldNormal = VInt3.Cross(au[0], bu[1]) * (T < VFixedPoint.Zero ? -1 : 1);
-                code = 8;
+                ra = A[1] * AbsR[2, 1] + A[2] * AbsR[1, 1];
+                rb = B[0] * AbsR[0, 2] + B[2] * AbsR[0, 0];
+                depth = T.Abs() - (ra + rb);
+                if (depth > VFixedPoint.Zero)
+                {
+                    return;
+                }
+                else if (depth > maxDepth)
+                {
+                    maxDepth = depth;
+                    worldNormal = VInt3.Cross(au[0], bu[1]) * (T < VFixedPoint.Zero ? -1 : 1);
+                    code = 8;
+                }
             }
 
             // Test axis L = A0 x B2
             T = t[2] * R[1, 2] - t[1] * R[2, 2];
-            ra = A[1] * AbsR[2, 2] + A[2] * AbsR[1, 2];
-            rb = B[0] * AbsR[0, 1] + B[1] * AbsR[0, 0];
-            depth = T.Abs() - (ra + rb);
-            if (depth > VFixedPoint.Zero)
+            if (T > Globals.EPS)
             {
-                return;
-            }
-            else if (depth > maxDepth)
-            {
-                maxDepth = depth;
-                worldNormal = VInt3.Cross(au[0], bu[2]) * (T < VFixedPoint.Zero ? -1 : 1);
-                code = 9;
+                ra = A[1] * AbsR[2, 2] + A[2] * AbsR[1, 2];
+                rb = B[0] * AbsR[0, 1] + B[1] * AbsR[0, 0];
+                depth = T.Abs() - (ra + rb);
+                if (depth > VFixedPoint.Zero)
+                {
+                    return;
+                }
+                else if (depth > maxDepth)
+                {
+                    maxDepth = depth;
+                    worldNormal = VInt3.Cross(au[0], bu[2]) * (T < VFixedPoint.Zero ? -1 : 1);
+                    code = 9;
+                }
             }
 
             // Test axis L = A1 x B0
             T = t[0] * R[2, 0] - t[2] * R[0, 0];
-            ra = A[0] * AbsR[2, 0] + A[2] * AbsR[0, 0];
-            rb = B[1] * AbsR[1, 2] + B[2] * AbsR[1, 1];
-            depth = T.Abs() - (ra + rb);
-            if (depth > VFixedPoint.Zero)
+            if (T > Globals.EPS)
             {
-                return;
-            }
-            else if (depth > maxDepth)
-            {
-                maxDepth = depth;
-                worldNormal = VInt3.Cross(au[1], bu[0]) * (T < VFixedPoint.Zero ? -1 : 1);
-                code = 10;
+                ra = A[0] * AbsR[2, 0] + A[2] * AbsR[0, 0];
+                rb = B[1] * AbsR[1, 2] + B[2] * AbsR[1, 1];
+                depth = T.Abs() - (ra + rb);
+                if (depth > VFixedPoint.Zero)
+                {
+                    return;
+                }
+                else if (depth > maxDepth)
+                {
+                    maxDepth = depth;
+                    worldNormal = VInt3.Cross(au[1], bu[0]) * (T < VFixedPoint.Zero ? -1 : 1);
+                    code = 10;
+                }
             }
 
             // Test axis L = A1 x B1
             T = t[0] * R[2, 1] - t[2] * R[0, 1];
-            ra = A[0] * AbsR[2, 1] + A[2] * AbsR[0, 1];
-            rb = B[0] * AbsR[1, 2] + B[2] * AbsR[1, 0];
-            depth = T.Abs() - (ra + rb);
-            if (depth > VFixedPoint.Zero)
+            if (T > Globals.EPS)
             {
-                return;
-            }
-            else if (depth > maxDepth)
-            {
-                maxDepth = depth;
-                worldNormal = VInt3.Cross(au[1], bu[1]) * (T < VFixedPoint.Zero ? -1 : 1);
-                code = 11;
+                ra = A[0] * AbsR[2, 1] + A[2] * AbsR[0, 1];
+                rb = B[0] * AbsR[1, 2] + B[2] * AbsR[1, 0];
+                depth = T.Abs() - (ra + rb);
+                if (depth > VFixedPoint.Zero)
+                {
+                    return;
+                }
+                else if (depth > maxDepth)
+                {
+                    maxDepth = depth;
+                    worldNormal = VInt3.Cross(au[1], bu[1]) * (T < VFixedPoint.Zero ? -1 : 1);
+                    code = 11;
+                }
             }
 
             // Test axis L = A1 x B2
             T = t[0] * R[2, 2] - t[2] * R[0, 2];
-            ra = A[0] * AbsR[2, 2] + A[2] * AbsR[0, 2];
-            rb = B[0] * AbsR[1, 1] + B[1] * AbsR[1, 0];
-            depth = T.Abs() - (ra + rb);
-            if (depth > VFixedPoint.Zero)
+            if (T > Globals.EPS)
             {
-                return;
-            }
-            else if (depth > maxDepth)
-            {
-                maxDepth = depth;
-                worldNormal = VInt3.Cross(au[1], bu[2]) * (T < VFixedPoint.Zero ? -1 : 1);
-                code = 12;
+                ra = A[0] * AbsR[2, 2] + A[2] * AbsR[0, 2];
+                rb = B[0] * AbsR[1, 1] + B[1] * AbsR[1, 0];
+                depth = T.Abs() - (ra + rb);
+                if (depth > VFixedPoint.Zero)
+                {
+                    return;
+                }
+                else if (depth > maxDepth)
+                {
+                    maxDepth = depth;
+                    worldNormal = VInt3.Cross(au[1], bu[2]) * (T < VFixedPoint.Zero ? -1 : 1);
+                    code = 12;
+                }
             }
 
             // Test axis L = A2 x B0
             T = t[1] * R[0, 0] - t[0] * R[1, 0];
-            ra = A[0] * AbsR[1, 0] + A[1] * AbsR[0, 0];
-            rb = B[1] * AbsR[2, 2] + B[2] * AbsR[2, 1];
-            depth = T.Abs() - (ra + rb);
-            if (depth > VFixedPoint.Zero)
+            if (T > Globals.EPS)
             {
-                return;
-            }
-            else if (depth > maxDepth)
-            {
-                maxDepth = depth;
-                worldNormal = VInt3.Cross(au[2], bu[0]) * (T < VFixedPoint.Zero ? -1 : 1);
-                code = 13;
+                ra = A[0] * AbsR[1, 0] + A[1] * AbsR[0, 0];
+                rb = B[1] * AbsR[2, 2] + B[2] * AbsR[2, 1];
+                depth = T.Abs() - (ra + rb);
+                if (depth > VFixedPoint.Zero)
+                {
+                    return;
+                }
+                else if (depth > maxDepth)
+                {
+                    maxDepth = depth;
+                    worldNormal = VInt3.Cross(au[2], bu[0]) * (T < VFixedPoint.Zero ? -1 : 1);
+                    code = 13;
+                }
             }
 
             // Test axis L = A2 x B1
             T = t[1] * R[0, 1] - t[0] * R[1, 1];
-            ra = A[0] * AbsR[1, 1] + A[1] * AbsR[0, 1];
-            rb = B[0] * AbsR[2, 2] + B[2] * AbsR[2, 0];
-            depth = T.Abs() - (ra + rb);
-            if (depth > VFixedPoint.Zero)
+            if (T > Globals.EPS)
             {
-                return;
-            }
-            else if (depth > maxDepth)
-            {
-                maxDepth = depth;
-                worldNormal = VInt3.Cross(au[2], bu[1]) * (T < VFixedPoint.Zero ? -1 : 1);
-                code = 14;
+                ra = A[0] * AbsR[1, 1] + A[1] * AbsR[0, 1];
+                rb = B[0] * AbsR[2, 2] + B[2] * AbsR[2, 0];
+                depth = T.Abs() - (ra + rb);
+                if (depth > VFixedPoint.Zero)
+                {
+                    return;
+                }
+                else if (depth > maxDepth)
+                {
+                    maxDepth = depth;
+                    worldNormal = VInt3.Cross(au[2], bu[1]) * (T < VFixedPoint.Zero ? -1 : 1);
+                    code = 14;
+                }
             }
 
             // Test axis L = A2 x B2
             T = t[1] * R[0, 2] - t[0] * R[1, 2];
-            ra = A[0] * AbsR[1, 2] + A[1] * AbsR[0, 2];
-            rb = B[0] * AbsR[2, 1] + B[1] * AbsR[2, 0];
-            depth = T.Abs() - (ra + rb);
-            if (depth > VFixedPoint.Zero)
+            if (T > Globals.EPS)
             {
-                return;
+                ra = A[0] * AbsR[1, 2] + A[1] * AbsR[0, 2];
+                rb = B[0] * AbsR[2, 1] + B[1] * AbsR[2, 0];
+                depth = T.Abs() - (ra + rb);
+                if (depth > VFixedPoint.Zero)
+                {
+                    return;
+                }
+                else if (depth > maxDepth)
+                {
+                    maxDepth = depth;
+                    worldNormal = VInt3.Cross(au[2], bu[2]) * (T < VFixedPoint.Zero ? -1 : 1);
+                    code = 15;
+                }
             }
-            else if (depth > maxDepth)
-            {
-                maxDepth = depth;
-                worldNormal = VInt3.Cross(au[2], bu[2]) * (T < VFixedPoint.Zero ? -1 : 1);
-                code = 15;
-            }
-            output.addContactPoint(worldNormal, maxDepth);
+            output.addContactPoint(worldNormal.Normalize(), maxDepth);
         }
     }
 }

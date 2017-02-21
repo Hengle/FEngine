@@ -14,10 +14,8 @@ namespace MobaGame.Collision
         {
             performDiscreteCollisionDetection();
             List<ManifoldResult> manifolds = dispatcher1.getAllManifolds();
-            for(int i = 0; i < manifolds.Count; i++)
-            {
-                ManifoldResult aresult = manifolds[i];
-            }
+
+           
         }
     }
 }
