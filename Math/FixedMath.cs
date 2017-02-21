@@ -192,7 +192,7 @@ namespace MobaGame
                 public static VFixedPoint acos(VFixedPoint a)
                 {
                     int num = (int)a.ValueBar * AcosLookupTable.HALF_COUNT / (1<<VFixedPoint.SHIFT_AMOUNT) + AcosLookupTable.HALF_COUNT;
-                    num = Mathf.Clamp(num, 0, AcosLookupTable.COUNT);
+                    num = Math.Min(Math.Max(num, 0), AcosLookupTable.COUNT);
                     return VFixedPoint.Create(AcosLookupTable.table[num]) / VFixedPoint.Create(0x2710L);
                 }
 

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
@@ -26,9 +26,9 @@ namespace MobaGame.Collision
             dynamicWorld.destroy();
         }
 
-        public void Tick()
+        public void Tick(VFixedPoint dt)
         {
-            dynamicWorld.Tick();
+            dynamicWorld.Tick(dt);
         }
 
         public CollisionWorld GetCollisionWorld()

@@ -30,9 +30,9 @@ namespace MobaGame.Collision
             }
         }
 
-        public virtual void Tick()
+        public virtual void Tick(VFixedPoint dt)
         {
-
+            performDiscreteCollisionDetection();
         }
 
         protected void performDiscreteCollisionDetection()

@@ -21,5 +21,15 @@ namespace MobaGame.Collision
                 distance = depth;
             }
         }
+
+        public override void PreStep(VFixedPoint dt)
+        {
+
+        }
+
+        public override void ApplyImpulse(VFixedPoint dt)
+        {
+
+        }
     }
 }

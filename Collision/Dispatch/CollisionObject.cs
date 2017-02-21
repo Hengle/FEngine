@@ -5,6 +5,15 @@ namespace MobaGame.Collision
     public class CollisionObject
     {
         protected VIntTransform worldTransform = VIntTransform.Identity;
+        public VInt3 LinearVel
+        {
+            set; get;
+        }
+
+        public VFixedPoint InvMass
+        {
+            set; get;
+        }
 
         protected BroadphaseProxy broadphaseHandle;
         protected CollisionShape collisionShape;
@@ -17,6 +26,8 @@ namespace MobaGame.Collision
         public CollisionObject()
         {
             this.collisionFlags = CollisionFlags.STATIC_OBJECT;
+            InvMass = VFixedPoint.One;
+            LinearVel = VInt3.zero;
         }
 
         public virtual bool checkCollideWithOverride(CollisionObject co)
@@ -93,6 +104,19 @@ namespace MobaGame.Collision
             }
 
             return true;
+        }
+
+        public void ApplyImpulse(VInt3 impulse)
+        {
+            if (!isStaticOrKinematicObject())
+            {
+                LinearVel += impulse * InvMass;
+            }
+        }
+
+        public void IntegrateVelocity(VFixedPoint dt)
+        {
+            worldTransform.position = worldTransform.position + LinearVel * dt;
         }
     }
 }
