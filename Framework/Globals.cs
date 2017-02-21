@@ -11,6 +11,8 @@ namespace MobaGame.Collision
         public static readonly VFixedPoint ALLOWD_PENETRATION = VFixedPoint.One / VFixedPoint.Create(100);
         public static readonly VFixedPoint BIAS_FACTOR = VFixedPoint.Two / VFixedPoint.Create(100);
         public static readonly VFixedPoint FRICTION = VFixedPoint.Half;
+        //gravity
+        public static readonly VInt3 g = new VInt3(VFixedPoint.Zero, -VFixedPoint.Create(10), VFixedPoint.Zero);
 
         public static VFixedPoint getContactBreakingThreshold()
         {

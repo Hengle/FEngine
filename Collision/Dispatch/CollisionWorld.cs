@@ -162,25 +162,6 @@ namespace MobaGame.Collision
             SingleRayCallback rayCB = new SingleRayCallback(rayFromTrans, rayToTrans, dispatcher1, resultCallback);
             broadphasePairCache.rayTest(rayCB, VInt3.zero, VInt3.zero);
         }
-
-        public void convexSweepTest(CollisionObject castObject, VIntTransform convexFromWorld, VIntTransform convexToWorld, ConvexResultCallback resultCallback, VFixedPoint allowedCcdPenetration)
-        {
-            VInt3 castShapeAabbMin, castShapeAabbMax;
-
-            CollisionShape castShape = castObject.getCollisionShape(); 
-
-            // Compute AABB that encompasses angular movement
-            VInt3 linVel = new VInt3();
-            VInt3 angVel = new VInt3();
-			TransformUtil.calculateVelocity(convexFromWorld, convexToWorld, VFixedPoint.One, ref linVel, ref angVel);
-			VIntTransform R = VIntTransform.Identity;
-            R.rotation = convexFromWorld.rotation;
-            castShape.calculateTemporalAabb(R, linVel, angVel, VFixedPoint.One, out castShapeAabbMin, out castShapeAabbMax);
-
-            SingleSweepCallback convexCB = new SingleSweepCallback(castObject, convexFromWorld, convexToWorld, resultCallback, allowedCcdPenetration, dispatcher1);
-
-            broadphasePairCache.rayTest(convexCB, castShapeAabbMin, castShapeAabbMax);
-        }
     }
 
     public abstract class RayResultCallback
@@ -235,63 +216,4 @@ namespace MobaGame.Collision
 		    return true;
 	    }
     }
-
-    public class SingleSweepCallback: BroadphaseRayCallback
-    {
-        public ConvexResultCallback m_resultCallback;
-        public VFixedPoint m_allowedCcdPenetration;
-        public CollisionObject m_castObject;
-        public Dispatcher dispatcher;
-
-        public SingleSweepCallback(CollisionObject castObject, VIntTransform convexFromTrans, VIntTransform convexToTrans, 
-            ConvexResultCallback resultCallback, VFixedPoint allowedPenetration, Dispatcher dispatcher):
-            base(convexFromTrans, convexToTrans)
-        {
-            m_castObject = castObject;
-            m_resultCallback = resultCallback;
-            m_allowedCcdPenetration = allowedPenetration;
-            this.dispatcher = dispatcher;
-        }
-
-        public override bool process(BroadphaseProxy proxy)
-        {
-            if (m_resultCallback.m_closestHitFraction == VFixedPoint.Zero)
-                return false;
-            CollisionObject collisionObject = proxy.clientObject;
-
-            if(m_resultCallback.needsCollision(collisionObject.getBroadphaseHandle()))
-            {
-                dispatcher.findObjectQueryAlgorithm(m_castObject, collisionObject).objectQuerySingle((ConvexShape)m_castObject.getCollisionShape(), rayFromTrans, rayToTrans,
-                collisionObject,
-                m_resultCallback,
-                m_allowedCcdPenetration);
-            }
-            return true;
-        }
-    }
-
-    public abstract class ConvexResultCallback
-    {
-        public VFixedPoint m_closestHitFraction = VFixedPoint.One;
-        public CollisionObject collisionObject;
-        public short m_collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER;
-        public short m_collisionFilterMask = CollisionFilterGroups.ALL_FILTER;
-
-        public bool hasHit()
-		{
-			return collisionObject != null;
-		}
-
-        public virtual bool needsCollision(BroadphaseProxy proxy0)
-		{
-			bool collides = (proxy0.collisionFilterGroup & m_collisionFilterMask) != 0;
-            collides = collides && (m_collisionFilterGroup & proxy0.collisionFilterMask) != 0;
-			return collides;
-		}
-
-        public abstract VFixedPoint addSingleResult(CollisionObject hitCollisionObject,
-            VInt3 hitNormalLocal,
-            VInt3 hitPointLocal,
-            VFixedPoint hitFraction);
-    };
 }

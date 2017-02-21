@@ -16,7 +16,15 @@ namespace MobaGame.Collision
             performDiscreteCollisionDetection();
             List<ManifoldResult> manifolds = dispatcher1.getAllManifolds();
 
-            for(int i = 0; i < manifolds.Count; i++)
+            for (int i = 0; i < collisionObjects.Count; i++)
+            {
+                if(!collisionObjects[i].isStaticOrKinematicObject())
+                {
+                    collisionObjects[i].LinearVel += Globals.g * dt;
+                }
+            }
+
+            for (int i = 0; i < manifolds.Count; i++)
             {
                 ManifoldResult aresult = manifolds[i];
                 aresult.PreStep(dt);
