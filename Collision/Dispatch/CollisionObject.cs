@@ -10,9 +10,25 @@ namespace MobaGame.Collision
             set; get;
         }
 
+        VFixedPoint _InvMass;
         public VFixedPoint InvMass
         {
-            set; get;
+            set
+            {
+                _InvMass = value;
+            }
+
+            get
+            {
+                if(isStaticOrKinematicObject())
+                {
+                    return VFixedPoint.Zero;
+                }
+                else
+                {
+                    return _InvMass;
+                }
+            }
         }
 
         protected BroadphaseProxy broadphaseHandle;
