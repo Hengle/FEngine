@@ -81,10 +81,13 @@ namespace MobaGame.Collision
 
         private class CollisionPairCallback: OverlapCallback
         {
+
+            private DispatcherInfo dispatchInfo;
             private CollisionDispatcher dispatcher;
 
-            public void init(CollisionDispatcher dispatcher)
+            public void init(DispatcherInfo dispatchInfo, CollisionDispatcher dispatcher)
             {
+                this.dispatchInfo = dispatchInfo;
                 this.dispatcher = dispatcher;
             }
 
@@ -99,7 +102,8 @@ namespace MobaGame.Collision
 
         public override void dispatchAllCollisionPairs(OverlappingPairCache pairCache)
         {
-            collisionPairCallback.init(this);
+            releaseAllManifold();
+            collisionPairCallback.init(dispatchInfo, this);
             pairCache.processAllOverlappingPairs(collisionPairCallback);
         }
 
