@@ -6,10 +6,10 @@ namespace MobaGame.Collision
     public class ManifoldResult : DiscreteCollisionDetectorInterface.Result
     {
         // we need this for compounds
-        CollisionObject body0;
-        CollisionObject body1;
-        VInt3 normalWorldOnB;
-        VFixedPoint depth;
+        public CollisionObject body0;
+        public CollisionObject body1;
+        public VInt3 normalWorldOnB;
+        public VFixedPoint depth;
         //for reduce calculation
         VFixedPoint InvK;
         VFixedPoint Bias;

@@ -27,10 +27,19 @@ namespace MobaGame.Collision
 
     public abstract class BroadphaseAabbCallback
     {
+        protected VInt3 aabbMin;
+
+        protected VInt3 aabbMax;
+
+        public BroadphaseAabbCallback(CollisionObject colObj)
+        {
+            colObj.getCollisionShape().getAabb(colObj.getWorldTransform(), out aabbMin, out aabbMax);
+        }
+
         public abstract bool process(BroadphaseProxy proxy);
     }
 
-    public abstract class BroadphaseRayCallback: BroadphaseAabbCallback
+    public abstract class BroadphaseRayCallback
     {
         public VIntTransform rayFromTrans;
         public VIntTransform rayToTrans;
@@ -55,6 +64,8 @@ namespace MobaGame.Collision
 
             lambdaMax = VInt3.Dot(rayDir, (rayToTrans.position - rayFromTrans.position));
         }
+
+        public abstract bool process(BroadphaseProxy proxy);
     }
 
 

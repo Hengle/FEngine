@@ -7,7 +7,7 @@ namespace MobaGame.Collision
     {
         protected List<CollisionObject> collisionObjects = new List<CollisionObject>();
         protected Dispatcher dispatcher1;
-        protected DispatcherInfo dispatchInfo = new DispatcherInfo();
+        
         protected BroadphaseInterface broadphasePairCache;
 
         public CollisionWorld(Dispatcher dispatcher, BroadphaseInterface broadphasePairCache)
@@ -43,7 +43,7 @@ namespace MobaGame.Collision
             {
                 if (dispatcher != null)
                 {
-                    dispatcher.dispatchAllCollisionPairs(broadphasePairCache.getOverlappingPairCache(), dispatchInfo, dispatcher1);
+                    dispatcher.dispatchAllCollisionPairs(broadphasePairCache.getOverlappingPairCache(), dispatcher1);
                 }
             }
         }
@@ -117,11 +117,6 @@ namespace MobaGame.Collision
             return dispatcher1;
         }
 
-        public DispatcherInfo getDispatchInfo()
-        {
-            return dispatchInfo;
-        }
-
         public void updateSingleAabb(CollisionObject colObj)
         {
             VInt3 minAabb, maxAabb;
@@ -162,31 +157,28 @@ namespace MobaGame.Collision
             SingleRayCallback rayCB = new SingleRayCallback(rayFromTrans, rayToTrans, dispatcher1, resultCallback);
             broadphasePairCache.rayTest(rayCB, VInt3.zero, VInt3.zero);
         }
+
+        ManifoldResult overlapTestManifold = new ManifoldResult();
+        public void OverlapTest(CollisionObject testObject, OverlapResultCallback resultCallback)
+        {
+            SingleOverlapCallback overlapCB = new SingleOverlapCallback(testObject, dispatcher1, overlapTestManifold);
+            if(overlapTestManifold.hasContact)
+            {
+                CollisionObject otherObject = (testObject == overlapTestManifold.body0 ? overlapTestManifold.body1 : overlapTestManifold.body0);
+                resultCallback.addSingleResult(otherObject, overlapTestManifold.normalWorldOnB * (testObject == overlapTestManifold.body0 ? -1 : 1), overlapTestManifold.depth);
+            }
+        }
     }
 
     public abstract class RayResultCallback
     {
-        public VFixedPoint closestHitFraction = VFixedPoint.One;
-        public CollisionObject collisionObject;
         public short collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER;
         public short collisionFilterMask = CollisionFilterGroups.ALL_FILTER;
-
-        public bool hasHit()
-        {
-            return (collisionObject != null);
-        }
-
-        public bool needsCollision(BroadphaseProxy proxy0)
-        {
-            bool collides = ((proxy0.collisionFilterGroup & collisionFilterMask) & 0xFFFF) != 0;
-            collides = collides && ((collisionFilterGroup & proxy0.collisionFilterMask) & 0xFFFF) != 0;
-            return collides;
-        }
-
+        public abstract bool hasHit();
         public abstract VFixedPoint addSingleResult(CollisionObject collisionObject, VInt3 hitNormalLocal, VFixedPoint hitFraction);
     }
 
-    public class SingleRayCallback : BroadphaseRayCallback
+    class SingleRayCallback : BroadphaseRayCallback
     {
         RayResultCallback m_resultCallback;
         Dispatcher dispatcher;
@@ -199,14 +191,10 @@ namespace MobaGame.Collision
 
         public override bool process(BroadphaseProxy proxy)
 	    {
-		    ///terminate further ray tests, once the closestHitFraction reached zero
-		    if (m_resultCallback.closestHitFraction == VFixedPoint.Zero)
-			    return false;
-
 		    CollisionObject collisionObject = proxy.clientObject;
 
 		    //only perform raycast if filterMask matches
-		    if(m_resultCallback.needsCollision(collisionObject.getBroadphaseHandle())) 
+		    if(dispatcher.needsCollision(collisionObject, m_resultCallback)) 
 		    {
                 RaytestAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject);
                 algorithm.rayTestSingle(rayFromTrans, rayToTrans,
@@ -215,5 +203,44 @@ namespace MobaGame.Collision
 			}
 		    return true;
 	    }
+    }
+
+    public abstract class OverlapResultCallback
+    {
+        public abstract bool hasHit();
+        public abstract VFixedPoint addSingleResult(CollisionObject collisionObject, VInt3 hitNormalLocal, VFixedPoint depth);
+    }
+
+    class SingleOverlapCallback : BroadphaseAabbCallback
+    {
+        ManifoldResult result;
+        Dispatcher dispatcher;
+        CollisionObject collisionObject;
+
+        public SingleOverlapCallback(CollisionObject collisionObject, Dispatcher dispatcher, ManifoldResult result):base(collisionObject)
+        {
+            this.dispatcher = dispatcher;
+            this.result = result;
+            this.collisionObject = collisionObject;
+        }
+
+        public override bool process(BroadphaseProxy proxy)
+        {
+            ///terminate further ray tests, once the closestHitFraction reached zero
+            if (aabbMin == aabbMax)
+                return false;
+
+            CollisionObject collisionObject = proxy.clientObject;
+
+            //only perform raycast if filterMask matches
+            if (dispatcher.needsCollision(collisionObject, this.collisionObject))
+            {
+                CollisionAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject, this.collisionObject);
+                algorithm.processCollision(collisionObject, this.collisionObject,
+                        dispatcher.getDispatchInfo(),
+                        result);
+            }
+            return true;
+        }
     }
 }

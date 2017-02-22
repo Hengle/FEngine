@@ -2,7 +2,7 @@
 {
     public class DefaultNearCallback: NearCallback
     {
-        public override bool handleCollision(BroadphasePair collisionPair, CollisionDispatcher dispatcher, DispatcherInfo dispatchInfo)
+        public override bool handleCollision(BroadphasePair collisionPair, CollisionDispatcher dispatcher)
         {
             CollisionObject colObj0 = collisionPair.pProxy0.clientObject;
             CollisionObject colObj1 = collisionPair.pProxy1.clientObject;
@@ -14,7 +14,7 @@
             {
                 CollisionAlgorithm algorithm = dispatcher.findAlgorithm(colObj0, colObj1);
                 // discrete collision detection query
-                algorithm.processCollision(colObj0, colObj1, dispatchInfo, contactPointResult);
+                algorithm.processCollision(colObj0, colObj1, dispatcher.getDispatchInfo(), contactPointResult);
                 if(!contactPointResult.hasContact)
                 {
                     dispatcher.releaseManifold(contactPointResult);

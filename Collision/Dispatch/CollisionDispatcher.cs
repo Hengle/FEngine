@@ -72,21 +72,25 @@ namespace MobaGame.Collision
             return needsCollision;
         }
 
+        public override bool needsCollision(CollisionObject body0, RayResultCallback rayResultCallback)
+        {
+            bool collides = ((body0.getBroadphaseHandle().collisionFilterGroup & rayResultCallback.collisionFilterMask) & 0xFFFF) != 0;
+            collides = collides && ((rayResultCallback.collisionFilterGroup & body0.getBroadphaseHandle().collisionFilterMask) & 0xFFFF) != 0;
+            return collides;
+        }
+
         private class CollisionPairCallback: OverlapCallback
         {
-
-            private DispatcherInfo dispatchInfo;
             private CollisionDispatcher dispatcher;
 
-            public void init(DispatcherInfo dispatchInfo, CollisionDispatcher dispatcher)
+            public void init(CollisionDispatcher dispatcher)
             {
-                this.dispatchInfo = dispatchInfo;
                 this.dispatcher = dispatcher;
             }
 
             public override bool processOverlap(BroadphasePair pair)
             {
-                if(dispatcher.getNearCallback().handleCollision(pair, dispatcher, dispatchInfo))
+                if(dispatcher.getNearCallback().handleCollision(pair, dispatcher))
                 {
                     if(dispatcher.ghostPairCallback != null)
                     {
@@ -106,10 +110,10 @@ namespace MobaGame.Collision
 
         private CollisionPairCallback collisionPairCallback = new CollisionPairCallback();
 
-        public override void dispatchAllCollisionPairs(OverlappingPairCache pairCache, DispatcherInfo dispatchInfo, Dispatcher dispatcher)
+        public override void dispatchAllCollisionPairs(OverlappingPairCache pairCache, Dispatcher dispatcher)
         {
             releaseAllManifold();
-            collisionPairCallback.init(dispatchInfo, this);
+            collisionPairCallback.init(this);
             pairCache.processAllOverlappingPairs(collisionPairCallback);
         }
 
