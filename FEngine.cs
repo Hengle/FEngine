@@ -9,11 +9,9 @@ namespace MobaGame.Collision
         private BroadphaseInterface broadPhase;
         private Dispatcher dispatcher;
 		private HashedOverlappingPairCache pbp;
-        private GhostPairCallback ghostPairCallback;
 
         public FEngine()
         {
-            ghostPairCallback = new GhostPairCallback();
             pbp = new HashedOverlappingPairCache();
             broadPhase = new DbvtBroadphase(pbp);
             dispatcher = new CollisionDispatcher(new DefaultCollisionConfiguration());

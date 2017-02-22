@@ -35,8 +35,6 @@ namespace MobaGame.Collision
         protected CollisionShape collisionShape;
 
         protected int collisionFlags;
-
-        protected CollisionObjectType internalType = CollisionObjectType.COLLISION_OBJECT;
         protected bool checkCollideWith;
 
         public CollisionObject()
@@ -74,12 +72,6 @@ namespace MobaGame.Collision
         public void setCollisionShape(CollisionShape collisionShape)
         {
             this.collisionShape = collisionShape;
-        }
-
-        // reserved for Bullet internal usage
-        public CollisionObjectType getInternalType()
-        {
-            return internalType;
         }
 
         public VIntTransform getWorldTransform()
