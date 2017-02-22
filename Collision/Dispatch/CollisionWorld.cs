@@ -43,7 +43,8 @@ namespace MobaGame.Collision
             {
                 if (dispatcher != null)
                 {
-                    dispatcher.dispatchAllCollisionPairs(broadphasePairCache.getOverlappingPairCache(), dispatcher1);
+                    dispatcher.releaseAllManifold();
+                    dispatcher.dispatchAllCollisionPairs(broadphasePairCache.getOverlappingPairCache());
                 }
             }
         }

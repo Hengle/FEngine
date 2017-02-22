@@ -97,9 +97,8 @@ namespace MobaGame.Collision
 
         private CollisionPairCallback collisionPairCallback = new CollisionPairCallback();
 
-        public override void dispatchAllCollisionPairs(OverlappingPairCache pairCache, Dispatcher dispatcher)
+        public override void dispatchAllCollisionPairs(OverlappingPairCache pairCache)
         {
-            releaseAllManifold();
             collisionPairCallback.init(this);
             pairCache.processAllOverlappingPairs(collisionPairCallback);
         }

@@ -19,7 +19,7 @@ namespace MobaGame.Collision
 
         public abstract bool needsCollision(CollisionObject body0, RayResultCallback rayResultCallback);
 
-        public abstract void dispatchAllCollisionPairs(OverlappingPairCache pairCache, Dispatcher dispatcher);
+        public abstract void dispatchAllCollisionPairs(OverlappingPairCache pairCache);
 
         public abstract ManifoldResult applyManifold();
 
