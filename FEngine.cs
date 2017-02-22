@@ -18,7 +18,6 @@ namespace MobaGame.Collision
             broadPhase = new DbvtBroadphase(pbp);
             dispatcher = new CollisionDispatcher(new DefaultCollisionConfiguration());
             dynamicWorld = new DynamicsWorld(dispatcher, broadPhase);
-            dispatcher.ghostPairCallback = ghostPairCallback;
         }
 
         public void Dispose()

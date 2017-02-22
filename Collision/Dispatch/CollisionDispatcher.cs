@@ -90,20 +90,7 @@ namespace MobaGame.Collision
 
             public override bool processOverlap(BroadphasePair pair)
             {
-                if(dispatcher.getNearCallback().handleCollision(pair, dispatcher))
-                {
-                    if(dispatcher.ghostPairCallback != null)
-                    {
-                        dispatcher.ghostPairCallback.addOverlappingPair(pair.pProxy0, pair.pProxy1);
-                    }
-                }
-                else
-                {
-                    if (dispatcher.ghostPairCallback != null)
-                    {
-                        dispatcher.ghostPairCallback.removeOverlappingPair(pair.pProxy0, pair.pProxy1);
-                    }
-                }
+                dispatcher.getNearCallback().handleCollision(pair, dispatcher);
                 return false;
             }
         }

@@ -84,10 +84,6 @@ namespace MobaGame.Collision
                                 pb = tmp;
                             }
                             paircache.removeOverlappingPair(pa, pb);
-                            if(dispatcher.ghostPairCallback != null)
-                            {
-                                dispatcher.ghostPairCallback.removeOverlappingPair(pa, pb);
-                            }
                             ni--;
                             i--;
                         }

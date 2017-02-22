@@ -158,15 +158,9 @@ namespace MobaGame.Collision
             broadphasePairCache.rayTest(rayCB, VInt3.zero, VInt3.zero);
         }
 
-        ManifoldResult overlapTestManifold = new ManifoldResult();
-        public void OverlapTest(CollisionObject testObject, OverlapResultCallback resultCallback)
+        public void OverlapTest(CollisionObject testObject, List<ManifoldResult> results)
         {
-            SingleOverlapCallback overlapCB = new SingleOverlapCallback(testObject, dispatcher1, overlapTestManifold);
-            if(overlapTestManifold.hasContact)
-            {
-                CollisionObject otherObject = (testObject == overlapTestManifold.body0 ? overlapTestManifold.body1 : overlapTestManifold.body0);
-                resultCallback.addSingleResult(otherObject, overlapTestManifold.normalWorldOnB * (testObject == overlapTestManifold.body0 ? -1 : 1), overlapTestManifold.depth);
-            }
+            SingleOverlapCallback overlapCB = new SingleOverlapCallback(testObject, dispatcher1, results);
         }
     }
 
@@ -174,6 +168,8 @@ namespace MobaGame.Collision
     {
         public short collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER;
         public short collisionFilterMask = CollisionFilterGroups.ALL_FILTER;
+        public VFixedPoint closestHitFraction;
+
         public abstract bool hasHit();
         public abstract VFixedPoint addSingleResult(CollisionObject collisionObject, VInt3 hitNormalLocal, VFixedPoint hitFraction);
     }
@@ -205,22 +201,16 @@ namespace MobaGame.Collision
 	    }
     }
 
-    public abstract class OverlapResultCallback
-    {
-        public abstract bool hasHit();
-        public abstract VFixedPoint addSingleResult(CollisionObject collisionObject, VInt3 hitNormalLocal, VFixedPoint depth);
-    }
-
     class SingleOverlapCallback : BroadphaseAabbCallback
     {
-        ManifoldResult result;
+        List<ManifoldResult> results;
         Dispatcher dispatcher;
         CollisionObject collisionObject;
 
-        public SingleOverlapCallback(CollisionObject collisionObject, Dispatcher dispatcher, ManifoldResult result):base(collisionObject)
+        public SingleOverlapCallback(CollisionObject collisionObject, Dispatcher dispatcher, List<ManifoldResult> results):base(collisionObject)
         {
             this.dispatcher = dispatcher;
-            this.result = result;
+            this.results = results;
             this.collisionObject = collisionObject;
         }
 
@@ -232,6 +222,7 @@ namespace MobaGame.Collision
 
             CollisionObject collisionObject = proxy.clientObject;
 
+            ManifoldResult result = new ManifoldResult();
             //only perform raycast if filterMask matches
             if (dispatcher.needsCollision(collisionObject, this.collisionObject))
             {
@@ -239,6 +230,11 @@ namespace MobaGame.Collision
                 algorithm.processCollision(collisionObject, this.collisionObject,
                         dispatcher.getDispatchInfo(),
                         result);
+
+                if(result.hasContact)
+                {
+                    results.Add(result);
+                }
             }
             return true;
         }
