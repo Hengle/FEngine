@@ -5,7 +5,7 @@ namespace MobaGame.Collision
 {
     public static class EmptyRaytestAlgorithm
     {
-        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
+        public static void rayTestSingle(VInt3 fromPos, VInt3 toPos, CollisionObject collisionObject, RayResultCallback resultCallback)
         {
             
         }

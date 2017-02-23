@@ -151,11 +151,7 @@ namespace MobaGame.Collision
 
         public void rayTest(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
         {
-            VIntTransform rayFromTrans = VIntTransform.Identity;
-            rayFromTrans.position = rayFromWorld;
-            VIntTransform rayToTrans = VIntTransform.Identity;
-            rayToTrans.position = rayToWorld;
-            SingleRayCallback rayCB = new SingleRayCallback(rayFromTrans, rayToTrans, dispatcher1, resultCallback);
+            SingleRayCallback rayCB = new SingleRayCallback(rayFromWorld, rayToWorld, dispatcher1, resultCallback);
             broadphasePairCache.rayTest(rayCB, VInt3.zero, VInt3.zero);
         }
 
@@ -180,7 +176,7 @@ namespace MobaGame.Collision
         RayResultCallback m_resultCallback;
         Dispatcher dispatcher;
 
-        public SingleRayCallback(VIntTransform rayFromWorld, VIntTransform rayToWorld, Dispatcher dispatcher, RayResultCallback resultCallback):base(rayFromWorld, rayToWorld)
+        public SingleRayCallback(VInt3 rayFromWorld, VInt3 rayToWorld, Dispatcher dispatcher, RayResultCallback resultCallback):base(rayFromWorld, rayToWorld)
         {
             this.dispatcher = dispatcher;
             m_resultCallback = resultCallback;
@@ -194,7 +190,7 @@ namespace MobaGame.Collision
 		    if(dispatcher.needsCollision(collisionObject, m_resultCallback)) 
 		    {
                 RaytestAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject);
-                algorithm(rayFromTrans, rayToTrans,
+                algorithm(rayFrom, rayTo,
                         collisionObject,
 					    m_resultCallback);
 			}

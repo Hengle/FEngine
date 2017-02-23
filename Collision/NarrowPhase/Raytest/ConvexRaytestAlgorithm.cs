@@ -8,7 +8,7 @@ namespace MobaGame.Collision
         static VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
         static SubsimplexConvexCast convexCaster = new SubsimplexConvexCast(simplexSolver);
 
-        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
+        public static void rayTestSingle(VInt3 fromPos, VInt3 toPos, CollisionObject collisionObject, RayResultCallback resultCallback)
         {
             CollisionShape collisionShape = collisionObject.getCollisionShape();
             VIntTransform colObjWorldTransform = collisionObject.getWorldTransform();
@@ -22,6 +22,11 @@ namespace MobaGame.Collision
 
             convexCaster.convexA = castShape;
             convexCaster.convexB = convexShape;
+
+            VIntTransform rayFromTrans = VIntTransform.Identity;
+            rayFromTrans.position = fromPos;
+            VIntTransform rayToTrans = VIntTransform.Identity;
+            rayToTrans.position = toPos;
 
             if (convexCaster.calcTimeOfImpact(rayFromTrans, rayToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
             {

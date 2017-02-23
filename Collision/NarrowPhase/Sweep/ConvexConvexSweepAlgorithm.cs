@@ -3,12 +3,12 @@ using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    public static class ConvexObjectQueryAlgorithm
+    public static class ConvexConvexSweepAlgorithm
     {
         static VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
         static GjkConvexCast castPtr = new GjkConvexCast(simplexSolver);
 
-        public static void objectQuerySingle(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
+        public static void objectQuerySingle(CollisionObject castObject, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
         {
             CollisionShape collisionShape = collisionObject.getCollisionShape();
             VIntTransform colObjWorldTransform = collisionObject.getWorldTransform();
@@ -16,10 +16,14 @@ namespace MobaGame.Collision
             castResult.hitObject = collisionObject;
             castResult.allowedPenetration = allowedPenetration;
 
-            castPtr.convexA = castShape;
+            castPtr.convexA = castObject.getCollisionShape();
             castPtr.convexB = (ConvexShape)collisionShape;
 
             simplexSolver.reset();
+
+            VIntTransform convexFromTrans = castObject.getWorldTransform();
+            VIntTransform convexToTrans = convexFromTrans;
+            convexToTrans.position = ToPos;
 
             if (castPtr.calcTimeOfImpact(convexFromTrans, convexToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
             {

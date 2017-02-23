@@ -2,7 +2,7 @@
 
 namespace MobaGame.Collision
 {
-    public delegate void RaytestAlgorithm(VIntTransform rayFromTrans, VIntTransform rayToTrans,
+    public delegate void RaytestAlgorithm(VInt3 FromPos, VInt3 ToPos,
             CollisionObject collisionObject,
             RayResultCallback resultCallback);
 }

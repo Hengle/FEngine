@@ -219,8 +219,8 @@ namespace MobaGame.Collision
             BroadphaseRayTester callback = new BroadphaseRayTester(rayCallback);
 
             sets[DYNAMIC_SET].rayTestInternal(sets[DYNAMIC_SET].root,
-                rayCallback.rayFromTrans.position,
-                rayCallback.rayToTrans.position,
+                rayCallback.rayFrom,
+                rayCallback.rayTo,
                 rayCallback.rayDirectionInverse,
                 rayCallback.signs,
                 rayCallback.lambdaMax,
@@ -229,8 +229,8 @@ namespace MobaGame.Collision
                 callback);
 
             sets[FIXED_SET].rayTestInternal(sets[FIXED_SET].root,
-                rayCallback.rayFromTrans.position,
-                rayCallback.rayToTrans.position,
+                rayCallback.rayFrom,
+                rayCallback.rayTo,
                 rayCallback.rayDirectionInverse,
                 rayCallback.signs,
                 rayCallback.lambdaMax,

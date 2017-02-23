@@ -41,18 +41,18 @@ namespace MobaGame.Collision
 
     public abstract class BroadphaseRayCallback
     {
-        public VIntTransform rayFromTrans;
-        public VIntTransform rayToTrans;
+        public VInt3 rayFrom;
+        public VInt3 rayTo;
         public VInt3 rayDirectionInverse;
         public uint[] signs = new uint[3];
         public VFixedPoint lambdaMax;
 
-        public BroadphaseRayCallback(VIntTransform rayFromTrans, VIntTransform rayToTrans)
+        public BroadphaseRayCallback(VInt3 rayFrom, VInt3 rayTo)
         {
-            this.rayFromTrans = rayFromTrans;
-            this.rayToTrans = rayToTrans;
+            this.rayFrom = rayFrom;
+            this.rayTo = rayTo;
 
-            VInt3 rayDir = (rayToTrans.position - rayFromTrans.position).Normalize();
+            VInt3 rayDir = (rayTo - rayFrom).Normalize();
 
             ///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
             rayDirectionInverse.x = rayDir[0] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[0];
@@ -62,7 +62,7 @@ namespace MobaGame.Collision
             signs[1] = rayDirectionInverse.y < VFixedPoint.Zero ? 1u : 0;
             signs[2] = rayDirectionInverse.z < VFixedPoint.Zero ? 1u : 0;
 
-            lambdaMax = VInt3.Dot(rayDir, (rayToTrans.position - rayFromTrans.position));
+            lambdaMax = VInt3.Dot(rayDir, (rayTo - rayFrom));
         }
 
         public abstract bool process(BroadphaseProxy proxy);

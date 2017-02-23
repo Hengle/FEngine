@@ -4,11 +4,11 @@ namespace MobaGame.Collision
 {
     public static class BoxRaytestAlgorithm
     {
-        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
+        public static void rayTestSingle(VInt3 fromPos, VInt3 toPos, CollisionObject collisionObject, RayResultCallback resultCallback)
         {
             VIntTransform collisionObjectTransform = collisionObject.getWorldTransform();
-            VInt3 rayFromPointLocal = collisionObjectTransform.InverseTransformPoint(rayFromTrans.position);
-            VInt3 rayToPointLocal = collisionObjectTransform.InverseTransformPoint(rayToTrans.position);
+            VInt3 rayFromPointLocal = collisionObjectTransform.InverseTransformPoint(fromPos);
+            VInt3 rayToPointLocal = collisionObjectTransform.InverseTransformPoint(toPos);
 
             BoxShape boxShape = (BoxShape)collisionObject.getCollisionShape();
 
