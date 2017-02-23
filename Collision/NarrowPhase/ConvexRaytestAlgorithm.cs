@@ -3,19 +3,12 @@ using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    public class ConvexRaytestAlgorithm : RaytestAlgorithm
+    public static class ConvexRaytestAlgorithm
     {
-        VoronoiSimplexSolver simplexSolver;
-        SubsimplexConvexCast convexCaster;
+        static VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
+        static SubsimplexConvexCast convexCaster = new SubsimplexConvexCast(simplexSolver);
 
-        public ConvexRaytestAlgorithm()
-        {
-            simplexSolver = new VoronoiSimplexSolver();
-
-            convexCaster = new SubsimplexConvexCast(simplexSolver);
-        }
-
-        public override void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
+        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
         {
             CollisionShape collisionShape = collisionObject.getCollisionShape();
             VIntTransform colObjWorldTransform = collisionObject.getWorldTransform();

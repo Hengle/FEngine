@@ -5,9 +5,6 @@ namespace MobaGame.Collision
 {
     public class DefaultCollisionConfiguration: CollisionConfiguration
     {
-        protected VoronoiSimplexSolver simplexSolver;
-        protected ConvexPenetrationDepthSolver pdSolver;
-
         //default CreationFunctions, filling the m_doubleDispatch table
         protected CollisionAlgorithm emptyCreateFunc;
         protected CollisionAlgorithm convexConvexCreateFunc;
@@ -23,24 +20,17 @@ namespace MobaGame.Collision
 
         public DefaultCollisionConfiguration()
         {
-            simplexSolver = new VoronoiSimplexSolver();
-            pdSolver = new EpaSolver();
+            sphereSphereCF = SphereSphereCollisionAlgorithm.processCollision;
+            sphereBoxCF = SphereBoxCollisionAlgorithm.processCollision;
+            boxCapsultCF = BoxCapsuleCollisionAlgorithm.processCollision;
+            boxBoxCF = BoxBoxCollisionAlgorithm.processCollision;
+            convexConvexCreateFunc = ConvexConvexAlgorithm.processCollision;
+            emptyCreateFunc = EmptyAlgorithm.processCollision;
 
-            /*
-            //default CreationFunctions, filling the m_doubleDispatch table
-            */
-            convexConvexCreateFunc = new ConvexConvexAlgorithm(simplexSolver, pdSolver);
-            emptyCreateFunc = new EmptyAlgorithm();
-
-            sphereSphereCF = new SphereSphereCollisionAlgorithm();
-            sphereBoxCF = new SphereBoxCollisionAlgorithm();
-            boxCapsultCF = new BoxCapsuleCollisionAlgorithm();
-            boxBoxCF = new BoxBoxCollisionAlgorithm();
-
-            emptyRaytestFunc = new EmptyRaytestAlgorithm();
-            convexRaytestFunc = new ConvexRaytestAlgorithm();
-            sphereRaytestFunc = new SphereRaytestAlgorithm();
-            boxRaytestFunc = new BoxRaytestAlgorithm();
+            emptyRaytestFunc = EmptyRaytestAlgorithm.rayTestSingle;
+            convexRaytestFunc = ConvexRaytestAlgorithm.rayTestSingle;
+            sphereRaytestFunc = SphereRaytestAlgorithm.rayTestSingle;
+            boxRaytestFunc = BoxRaytestAlgorithm.rayTestSingle;
         }
 
         public override CollisionAlgorithm getCollisionAlgorithmCreateFunc(BroadphaseNativeType proxyType0, BroadphaseNativeType proxyType1)

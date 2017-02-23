@@ -3,9 +3,9 @@ using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    public class SphereRaytestAlgorithm : RaytestAlgorithm
+    public class SphereRaytestAlgorithm
     {
-        public override void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
+        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
         {
             SphereShape sphereShape = (SphereShape)collisionObject.getCollisionShape();
             VInt3 objectPosition = collisionObject.getWorldTransform().position;

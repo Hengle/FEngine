@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace MobaGame.Collision
 {
-    public class BoxCapsuleCollisionAlgorithm: CollisionAlgorithm
+    public static class BoxCapsuleCollisionAlgorithm
     {
-        public override void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
+        public static void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             bool needSwap = body0.getCollisionShape() is CapsuleShape;
             CollisionObject boxObject = needSwap ? body1 : body0;
@@ -97,11 +97,6 @@ namespace MobaGame.Collision
 
             hitNormal = boxTransform.TransformDirection(hitNormal).Normalize() * (needSwap ? 1 : -1);
             resultOut.addContactPoint(hitNormal, depth); 
-        }
-
-        public override void destroy()
-        {
-
         }
     }
 }

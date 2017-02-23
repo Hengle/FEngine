@@ -2,22 +2,45 @@
 
 namespace MobaGame.Collision
 {
-    public class GjkConvexCast : ConvexCast
+    class PointCollector : DiscreteCollisionDetectorInterface.Result
+    {
+        public VInt3 normalOnBInWorld = VInt3.zero;
+        public VInt3 pointInWorld = VInt3.zero;
+        public VFixedPoint distance = VFixedPoint.MaxValue; // negative means penetration
+
+        public bool hasResult = false;
+
+        public override void addContactPoint(VInt3 normalOnBInWorld, VFixedPoint depth)
+        {
+            if (depth < distance)
+            {
+                hasResult = true;
+                this.normalOnBInWorld = normalOnBInWorld;
+                // negative means penetration
+                distance = depth;
+            }
+        }
+    }
+
+    public class GjkConvexCast
     {
         protected readonly ObjectPool<ClosestPointInput> pointInputsPool = new ObjectPool<ClosestPointInput>();
 
         private readonly SimplexSolverInterface simplexSolver;
 
-        private readonly GjkPairDetector gjk = new GjkPairDetector();
+        private readonly GjkPairDetector gjk;
 
         private static readonly int MAX_ITERATIONS = 32;
+
+        public CollisionShape convexA, convexB;
 
         public GjkConvexCast(SimplexSolverInterface simplexSolver)
         {
             this.simplexSolver = simplexSolver;
+            gjk = new GjkPairDetector(simplexSolver, null);
         }
 
-        public override bool calcTimeOfImpact(VIntTransform fromA, VIntTransform toA, VIntTransform fromB, VIntTransform toB, CastResult result)
+        public bool calcTimeOfImpact(VIntTransform fromA, VIntTransform toA, VIntTransform fromB, VIntTransform toB, CastResult result)
         {
             VInt3 linvelA = toA.position - fromA.position;
             VInt3 linvelB = toB.position - fromB.position;
@@ -36,8 +59,7 @@ namespace MobaGame.Collision
             int numIter = 0;
 
             PointCollector pointCollector = new PointCollector();
-
-            gjk.init(simplexSolver, null);
+           
             ClosestPointInput input = pointInputsPool.Get();
             input.init();
             try

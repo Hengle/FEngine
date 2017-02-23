@@ -3,24 +3,15 @@ using System.Collections.Generic;
 
 namespace MobaGame.Collision
 { 
-    public class ConvexConvexAlgorithm: CollisionAlgorithm
+    public static class ConvexConvexAlgorithm
     {
-        protected ObjectPool<ClosestPointInput> pointInputsPool = new ObjectPool<ClosestPointInput>();
+        static ObjectPool<ClosestPointInput> pointInputsPool = new ObjectPool<ClosestPointInput>();
 
-        GjkPairDetector gjkPairDetector;
+        static VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
+        static ConvexPenetrationDepthSolver pdSolver = new EpaSolver();
+        static GjkPairDetector gjkPairDetector = new GjkPairDetector(simplexSolver, pdSolver);
 
-        public ConvexConvexAlgorithm(SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver pdSolver):base()
-        {
-            gjkPairDetector = new GjkPairDetector();
-            gjkPairDetector.init(simplexSolver, pdSolver);
-        }
-
-        public override void destroy()
-        {
-
-        }
-
-        public override void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
+        public static void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             ConvexShape min0 = (ConvexShape)body0.getCollisionShape();
             ConvexShape min1 = (ConvexShape)body1.getCollisionShape();

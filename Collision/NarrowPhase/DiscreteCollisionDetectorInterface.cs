@@ -12,10 +12,6 @@ namespace MobaGame.Collision
             {
                 protected set; get;
             }
-
-            public abstract void PreStep(VFixedPoint dt);
-
-            public abstract void ApplyImpulse(VFixedPoint dt);
         }
 
         public abstract void getClosestPoints(ClosestPointInput input, Result output);

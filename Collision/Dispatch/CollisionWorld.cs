@@ -194,7 +194,7 @@ namespace MobaGame.Collision
 		    if(dispatcher.needsCollision(collisionObject, m_resultCallback)) 
 		    {
                 RaytestAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject);
-                algorithm.rayTestSingle(rayFromTrans, rayToTrans,
+                algorithm(rayFromTrans, rayToTrans,
                         collisionObject,
 					    m_resultCallback);
 			}
@@ -228,7 +228,7 @@ namespace MobaGame.Collision
             if (dispatcher.needsCollision(collisionObject, this.collisionObject))
             {
                 CollisionAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject, this.collisionObject);
-                algorithm.processCollision(collisionObject, this.collisionObject,
+                algorithm(collisionObject, this.collisionObject,
                         dispatcher.getDispatchInfo(),
                         result);
 

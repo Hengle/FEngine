@@ -3,14 +3,9 @@ using System.Collections.Generic;
 
 namespace MobaGame.Collision
 {
-    public class SphereBoxCollisionAlgorithm: CollisionAlgorithm
+    public static class SphereBoxCollisionAlgorithm
     {
-        public override void destroy()
-        {
-
-        }
-
-        public override void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
+        public static void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             bool isSwapped = body0.getCollisionShape() is SphereShape;
             CollisionObject sphereObj = isSwapped ? body1 : body0;
@@ -29,7 +24,7 @@ namespace MobaGame.Collision
             }
         }
 
-        public bool getSphereDistance(CollisionObject boxObj, out VInt3 normal, out VFixedPoint penetrationDepth, VInt3 sphereCenter, VFixedPoint radius, VFixedPoint maxContactDistance)
+        static bool getSphereDistance(CollisionObject boxObj, out VInt3 normal, out VFixedPoint penetrationDepth, VInt3 sphereCenter, VFixedPoint radius, VFixedPoint maxContactDistance)
         {
             BoxShape boxShape = (BoxShape)boxObj.getCollisionShape();
             VInt3 boxHalfExtent = boxShape.getHalfExtentsWithoutMargin();
@@ -82,7 +77,7 @@ namespace MobaGame.Collision
             return true;
         }
 
-        public VFixedPoint getSpherePenetration(VInt3 boxHalfExtent, VInt3 sphereRelPos, ref VInt3 closestPoint, out VInt3 normal)
+        static VFixedPoint getSpherePenetration(VInt3 boxHalfExtent, VInt3 sphereRelPos, ref VInt3 closestPoint, out VInt3 normal)
         {
             //project the center of the sphere on the closest face of the box
             VFixedPoint faceDist = boxHalfExtent.x - sphereRelPos.x;

@@ -3,9 +3,9 @@ using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    class EmptyRaytestAlgorithm : RaytestAlgorithm
+    public static class EmptyRaytestAlgorithm
     {
-        public override void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
+        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
         {
             
         }

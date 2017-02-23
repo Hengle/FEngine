@@ -16,7 +16,7 @@ namespace MobaGame.Collision
         private ConvexPenetrationDepthSolver penetrationDepthSolver;
 
 
-        public void init(SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver penetrationDepthSolver)
+        public GjkPairDetector(SimplexSolverInterface simplexSolver, ConvexPenetrationDepthSolver penetrationDepthSolver)
         {
             this.cachedSeparatingAxis = VInt3.zero;
             this.penetrationDepthSolver = penetrationDepthSolver;

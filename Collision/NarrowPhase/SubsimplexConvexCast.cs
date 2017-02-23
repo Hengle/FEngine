@@ -2,18 +2,20 @@
 
 namespace MobaGame.Collision
 {
-    public class SubsimplexConvexCast: ConvexCast
+    public class SubsimplexConvexCast
     {
         private static readonly int MAX_ITERATIONS = 32;
 
         private SimplexSolverInterface simplexSolver;
+
+        public ConvexShape convexA, convexB;
 
         public SubsimplexConvexCast(SimplexSolverInterface simplexSolver)
         {
             this.simplexSolver = simplexSolver;
         }
 
-        public override bool calcTimeOfImpact(VIntTransform fromA, VIntTransform toA, VIntTransform fromB, VIntTransform toB, CastResult result)
+        public bool calcTimeOfImpact(VIntTransform fromA, VIntTransform toA, VIntTransform fromB, VIntTransform toB, CastResult result)
         {	
 		    simplexSolver.reset();
 

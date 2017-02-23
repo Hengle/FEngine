@@ -33,13 +33,13 @@ namespace MobaGame.Collision
             hasContact = true;
         }
 
-        public override void PreStep(VFixedPoint dt)
+        public void PreStep(VFixedPoint dt)
         {
             InvK = VFixedPoint.One / (body0.InvMass + body1.InvMass);
             Bias = Globals.BIAS_FACTOR / dt * FMath.Min(VFixedPoint.Zero, depth + Globals.ALLOWD_PENETRATION);
         }
 
-        public override void ApplyImpulse(VFixedPoint dt)
+        public void ApplyImpulse(VFixedPoint dt)
         {
             VInt3 relVel = body0.LinearVel - body1.LinearVel;
             VFixedPoint vn = VInt3.Dot(relVel, normalWorldOnB);

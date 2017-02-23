@@ -1,19 +1,12 @@
 ﻿using MobaGame.FixedMath;
-using System.Collections.Generic;
-using System;
 
 namespace MobaGame.Collision
 {
-    public class BoxBoxCollisionAlgorithm: CollisionAlgorithm
+    public static class BoxBoxCollisionAlgorithm
     {
-        BoxBoxDetector detector = new BoxBoxDetector();
+        static BoxBoxDetector detector = new BoxBoxDetector();
 
-        public override void destroy()
-        {
-
-        }
-
-        public override void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
+        public static void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
         {
             detector.init((BoxShape)body0.getCollisionShape(), (BoxShape)body1.getCollisionShape());
             ClosestPointInput input = new ClosestPointInput();

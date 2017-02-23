@@ -1,11 +1,11 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    public class EmptyObjectQueryFunc : ObjectQueryAlgorithm
+    public class EmptyObjectQueryFunc
     {
-        public override void objectQuerySingle(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans, CollisionObject collisionObject, ConvexResultCallback resultCallback, VFixedPoint allowedPenetration)
+        public static void objectQuerySingle(ConvexShape castShape, VIntTransform convexFromTrans, VIntTransform convexToTrans, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
         {
 
         }

@@ -3,15 +3,9 @@ using System.Collections.Generic;
 
 namespace MobaGame.Collision
 {
-    public class SphereSphereCollisionAlgorithm: CollisionAlgorithm
+    public static class SphereSphereCollisionAlgorithm
     {
-
-        public override void destroy()
-        {
-
-        }
-
-        public override void processCollision(CollisionObject col0, CollisionObject col1, DispatcherInfo dispatchInfo,
+        public static void processCollision(CollisionObject col0, CollisionObject col1, DispatcherInfo dispatchInfo,
             ManifoldResult resultOut)
         {
             SphereShape sphere0 = (SphereShape) col0.getCollisionShape();

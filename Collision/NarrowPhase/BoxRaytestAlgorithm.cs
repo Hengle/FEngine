@@ -2,9 +2,9 @@
 
 namespace MobaGame.Collision
 {
-    public class BoxRaytestAlgorithm : RaytestAlgorithm
+    public static class BoxRaytestAlgorithm
     {
-        public override void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
+        public static void rayTestSingle(VIntTransform rayFromTrans, VIntTransform rayToTrans, CollisionObject collisionObject, RayResultCallback resultCallback)
         {
             VIntTransform collisionObjectTransform = collisionObject.getWorldTransform();
             VInt3 rayFromPointLocal = collisionObjectTransform.InverseTransformPoint(rayFromTrans.position);
