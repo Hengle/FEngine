@@ -7,19 +7,14 @@ namespace MobaGame.Collision
     class KinematicCharacterController : ActionInterface
     {
         VInt3[] upAxisDirection = new VInt3[] { VInt3.right, VInt3.up, VInt3.forward };
-
-        protected VFixedPoint halfHeight;
         protected CollisionObject me;
 
         protected VFixedPoint verticalVelocity;
         protected VFixedPoint verticalOffset;
         protected VFixedPoint fallSpeed;
         protected VFixedPoint jumpSpeed;
-        protected VFixedPoint maximumJumpHeight;
-        protected VFixedPoint maxSlopeRadians;
         protected VFixedPoint maxSlopeCosine;
         protected VFixedPoint gravity;
-        protected VFixedPoint turnAngle;
         protected VFixedPoint stepHeight;
         protected VFixedPoint addedMargin;
         protected VInt3 walkDirection;
@@ -51,7 +46,7 @@ namespace MobaGame.Collision
             this.fallSpeed = VFixedPoint.Create(55); // Terminal velocity of a sky diver in m/s.
             this.jumpSpeed = VFixedPoint.Create(10); 
             this.wasOnGround = false;
-            maxSlopeRadians = VFixedPoint.Create(50) / VFixedPoint.Create(180) / FMath.Trig.Rag2Deg;
+            VFixedPoint maxSlopeRadians = VFixedPoint.Create(50) / VFixedPoint.Create(180) / FMath.Trig.Rag2Deg;
             maxSlopeCosine = FMath.Trig.Cos(maxSlopeRadians);
         }
 
@@ -107,13 +102,14 @@ namespace MobaGame.Collision
             verticalOffset = verticalVelocity * dt;
 
             VIntTransform transform = me.getWorldTransform();
+            //climb up slope
             stepUp(collisionWorld);
 
             VFixedPoint dtMoving = FMath.Min(dt, velocityTimeInterval);
             velocityTimeInterval -= dt;
             VInt3 move = walkDirection * dtMoving;
             stepForwardAndStrafe(collisionWorld, move);
-
+            //slide down slope
             stepDown(collisionWorld, dt);
 
             transform.position = currentPosition;
@@ -179,17 +175,131 @@ namespace MobaGame.Collision
 
         protected void stepUp(CollisionWorld collisionWorld)
         {
-            
+            VIntTransform start = VIntTransform.Identity, end = VIntTransform.Identity;
+
+            targetPosition = currentPosition + upAxisDirection[upAxis] * (stepHeight + (verticalOffset > VFixedPoint.Zero ? verticalOffset : VFixedPoint.Zero));
+            start.position = currentPosition + upAxisDirection[upAxis] * (me.getCollisionShape().getMargin() + addedMargin);
+            end.position = targetPosition;
+
+            VInt3 up = -upAxisDirection[upAxis];
+            KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(ghostObject, up, 0.0f);
+            callback.collisionFilterGroup = me.getBroadphaseHandle().collisionFilterGroup;
+            callback.collisionFilterMask = me.getBroadphaseHandle().collisionFilterMask;
+
+            world.convexSweepTest(me, start, end, callback);
+
+            if (callback.hasHit())
+            {
+                // we moved up only a fraction of the step height
+                currentStepOffset = stepHeight * callback.closestHitFraction;
+                currentPosition = currentPosition * callback.closestHitFraction + targetPosition * (VFixedPoint.One - callback.closestHitFraction);
+                verticalVelocity = VFixedPoint.Zero;
+                verticalOffset = VFixedPoint.Zero;
+            }
+            else {
+                currentStepOffset = stepHeight;
+                currentPosition = targetPosition;
+            }
         }
+
+        protected void updateTargetPositionBasedOnCollision(VInt3 hitNormal)
+        {
+            VInt3 movementDirection = targetPosition - currentPosition;
+            VFixedPoint movementLength = movementDirection.magnitude;
+
+            if (movementLength > Globals.EPS)
+            {
+                movementDirection = movementDirection.Normalize();
+
+                VInt3 reflectionDir = computeReflectionDirection(movementDirection, hitNormal);
+                reflectionDir = reflectionDir.Normalize();
+
+                VInt3 perpendicularDir = perpendicularComponent(reflectionDir, hitNormal);
+                targetPosition = currentPosition + perpendicularDir * movementLength;
+            }
+        }
+
 
         protected void stepForwardAndStrafe(CollisionWorld collisionWorld, VInt3 walkMove)
         {
+            VIntTransform start = VIntTransform.Identity, end = VIntTransform.Identity;
+            targetPosition = currentPosition + walkMove;
 
+            VFixedPoint fraction = VFixedPoint.One;
+
+            int maxIter = 10;
+            while(fraction > VFixedPoint.Create(0.01f) && maxIter-- > 0)
+            {
+                start.position = currentPosition;
+                end.position = targetPosition;
+
+                KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(ghostObject, upAxisDirection[upAxis], -1.0f);
+                callback.collisionFilterGroup = me.getBroadphaseHandle().collisionFilterGroup;
+                callback.collisionFilterMask = me.getBroadphaseHandle().collisionFilterMask;
+
+                VFixedPoint margin = me.getCollisionShape().getMargin();
+                me.getCollisionShape().setMargin(margin + addedMargin);
+
+                collisionWorld.convexSweepTest(me, start, end, callback);
+                me.getCollisionShape().setMargin(margin);
+
+                fraction -= callback.closestHitFraction;
+
+                if (callback.hasHit())
+                {
+                    updateTargetPositionBasedOnCollision(callback.hitNormalWorld);
+                    VInt3 currentDir = targetPosition - currentPosition;
+                    VFixedPoint distance2 = currentDir.sqrMagnitude;
+                    if(distance2 > Globals.EPS2)
+                    {
+                        currentDir = currentDir.Normalize();
+                        if(VInt3.Dot(currentDir, normalizedDirection) <= VFixedPoint.Zero)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    currentPosition = targetPosition;
+                }
+            }
         }
 
         protected void stepDown(CollisionWorld collisionWorld, VFixedPoint dt)
         {
+            VIntTransform start = VIntTransform.Identity, end = VIntTransform.Identity;
 
+            VFixedPoint additionalDownStep = wasOnGround ? stepHeight : VFixedPoint.Zero;
+            VInt3 stepDrop = upAxisDirection[upAxis] * (currentStepOffset + additionalDownStep);
+            VFixedPoint downVelocity = (additionalDownStep == VFixedPoint.Zero && verticalVelocity < VFixedPoint.Zero ? -verticalVelocity : VFixedPoint.Zero) * dt;
+            VInt3 gravityDrop = upAxisDirection[upAxis] * downVelocity;
+            targetPosition -= stepDrop;
+            targetPosition -= gravityDrop;
+
+            start.position = currentPosition; end.position = targetPosition;
+
+            KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(ghostObject, upAxisDirection[upAxis], maxSlopeCosine);
+            callback.collisionFilterGroup = me.getBroadphaseHandle().collisionFilterGroup;
+            callback.collisionFilterMask = me.getBroadphaseHandle().collisionFilterMask;
+
+            collisionWorld.convexSweepTest(convexShape, start, end, callback);
+
+            if (callback.hasHit())
+            {
+                // we dropped a fraction of the height -> hit floor
+                currentPosition = currentPosition* callback.closestHitFraction + targetPosition * (VFixedPoint.One - callback.closestHitFraction);
+                verticalVelocity = VFixedPoint.Zero;
+                verticalOffset = VFixedPoint.Zero;
+            }
+            else {
+                // we dropped the full height
+                currentPosition = targetPosition;
+            }
         }
 
         public bool onGround()
@@ -197,4 +307,24 @@ namespace MobaGame.Collision
             return verticalVelocity == VFixedPoint.Zero && verticalOffset == VFixedPoint.Zero;
         }
     }
+
+    class KinematicClosestNotMeConvexResultCallback: CastResult
+    {
+
+        protected CollisionObject me;
+        protected VInt3 up;
+		protected VFixedPoint minSlopeDot;
+
+        public KinematicClosestNotMeConvexResultCallback(CollisionObject me, VInt3 up, VFixedPoint minSlopeDot)
+        {
+            this.me = me;
+            this.up = up;
+            this.minSlopeDot = minSlopeDot;
+        }
+
+        public override void addSingleResult(CastResult convexResult)
+        {
+       
+		}
+	}
 }
