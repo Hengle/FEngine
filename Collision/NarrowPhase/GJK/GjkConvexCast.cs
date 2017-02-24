@@ -40,7 +40,7 @@ namespace MobaGame.Collision
             gjk = new GjkPairDetector(simplexSolver, null);
         }
 
-        public bool calcTimeOfImpact(VIntTransform fromA, VIntTransform toA, VIntTransform fromB, VIntTransform toB, CastResult result)
+        public bool calcTimeOfImpact(VIntTransform fromA, VIntTransform toA, VIntTransform fromB, VIntTransform toB, VFixedPoint allowedPenetration, CastResult result)
         {
             VInt3 linvelA = toA.position - fromA.position;
             VInt3 linvelB = toB.position - fromB.position;
@@ -131,7 +131,7 @@ namespace MobaGame.Collision
 
                     // is n normalized?
                     // don't report time of impact for motion away from the contact normal (or causes minor penetration)
-                    if (VInt3.Dot(n, r) >= -result.allowedPenetration)
+                    if (VInt3.Dot(n, r) >= -allowedPenetration)
                     {
                         return false;
                     }

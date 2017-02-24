@@ -8,12 +8,12 @@ namespace MobaGame.Collision
         protected List<CollisionObject> collisionObjects = new List<CollisionObject>();
         protected Dispatcher dispatcher1;
         
-        protected BroadphaseInterface broadphasePairCache;
+        protected BroadphaseInterface broadphase;
 
         public CollisionWorld(Dispatcher dispatcher, BroadphaseInterface broadphasePairCache)
         {
             this.dispatcher1 = dispatcher;
-            this.broadphasePairCache = broadphasePairCache;
+            this.broadphase = broadphasePairCache;
         }
 
         public void destroy()
@@ -38,13 +38,13 @@ namespace MobaGame.Collision
         protected void performDiscreteCollisionDetection()
         {
             updateAabbs();
-            broadphasePairCache.calculateOverlappingPairs(dispatcher1);
+            broadphase.calculateOverlappingPairs(dispatcher1);
             Dispatcher dispatcher = getDispatcher();
             {
                 if (dispatcher != null)
                 {
                     dispatcher.releaseAllManifold();
-                    dispatcher.dispatchAllCollisionPairs(broadphasePairCache.getOverlappingPairCache());
+                    dispatcher.dispatchAllCollisionPairs(broadphase.getOverlappingPairCache());
                 }
             }
         }
@@ -100,17 +100,17 @@ namespace MobaGame.Collision
 
         public void setBroadphase(BroadphaseInterface pairCache)
         {
-            broadphasePairCache = pairCache;
+            broadphase = pairCache;
         }
 
         public BroadphaseInterface getBroadphase()
         {
-            return broadphasePairCache;
+            return broadphase;
         }
 
         public OverlappingPairCache getPairCache()
         {
-            return broadphasePairCache.getOverlappingPairCache();
+            return broadphase.getOverlappingPairCache();
         }
 
         public Dispatcher getDispatcher()
@@ -128,7 +128,7 @@ namespace MobaGame.Collision
             minAabb -= contactThreshold;
             maxAabb += contactThreshold;
 
-            BroadphaseInterface bp = broadphasePairCache;
+            BroadphaseInterface bp = broadphase;
 
             // moving objects should be moderately sized, probably something wrong if not
             VInt3 tmp = maxAabb - minAabb; // TODO: optimize
@@ -149,15 +149,18 @@ namespace MobaGame.Collision
             }
         }
 
-        public void rayTest(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback)
+        public void rayTest(VInt3 rayFromWorld, VInt3 rayToWorld, RayResultCallback resultCallback, short collisionFilterMask = CollisionFilterGroups.ALL_FILTER, short collisionFilterGroup = CollisionFilterGroups.ALL_FILTER)
         {
             SingleRayCallback rayCB = new SingleRayCallback(rayFromWorld, rayToWorld, dispatcher1, resultCallback);
-            broadphasePairCache.rayTest(rayCB, VInt3.zero, VInt3.zero);
+            broadphase.rayTest(rayCB, dispatcher1, VInt3.zero, VInt3.zero, collisionFilterGroup, collisionFilterMask);
         }
 
-        public void OverlapTest(CollisionObject testObject, List<ManifoldResult> results)
+        public void OverlapTest(CollisionObject testObject, List<ManifoldResult> results, short collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER, short collisionFilterMask = CollisionFilterGroups.ALL_FILTER)
         {
             SingleOverlapCallback overlapCB = new SingleOverlapCallback(testObject, dispatcher1, results);
+            VInt3 aabbMin = VInt3.zero, aabbMax = VInt3.zero;
+            testObject.getCollisionShape().getAabb(testObject.getWorldTransform(), out aabbMin, out aabbMax);
+            broadphase.aabbTest(aabbMin, aabbMax, overlapCB, dispatcher1, collisionFilterGroup, collisionFilterMask);
         }
     }
 
@@ -187,13 +190,11 @@ namespace MobaGame.Collision
 		    CollisionObject collisionObject = proxy.clientObject;
 
 		    //only perform raycast if filterMask matches
-		    if(dispatcher.needsCollision(collisionObject, m_resultCallback)) 
-		    {
-                RaytestAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject);
-                algorithm(rayFrom, rayTo,
-                        collisionObject,
-					    m_resultCallback);
-			}
+            RaytestAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject);
+            algorithm(rayFrom, rayTo,
+                    collisionObject,
+					m_resultCallback);
+			
 		    return true;
 	    }
     }
@@ -221,18 +222,17 @@ namespace MobaGame.Collision
 
             ManifoldResult result = new ManifoldResult();
             //only perform raycast if filterMask matches
-            if (dispatcher.needsCollision(collisionObject, this.collisionObject))
-            {
-                CollisionAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject, this.collisionObject);
-                algorithm(collisionObject, this.collisionObject,
-                        dispatcher.getDispatchInfo(),
-                        result);
 
-                if(result.hasContact)
-                {
-                    results.Add(result);
-                }
+            CollisionAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject, this.collisionObject);
+            algorithm(collisionObject, this.collisionObject,
+                    dispatcher.getDispatchInfo(),
+                    result);
+
+            if(result.hasContact)
+            {
+                results.Add(result);
             }
+            
             return true;
         }
     }

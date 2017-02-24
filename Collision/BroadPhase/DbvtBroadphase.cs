@@ -44,8 +44,8 @@ namespace MobaGame.Collision
 
             //collide dynamics:
             {
-                Dbvt.collideTT(sets[DYNAMIC_SET].root, sets[FIXED_SET].root, collider);
-                Dbvt.collideTT(sets[DYNAMIC_SET].root, sets[DYNAMIC_SET].root, collider);
+                Dbvt.collideTT(sets[DYNAMIC_SET].root, sets[FIXED_SET].root, dispatcher, collider);
+                Dbvt.collideTT(sets[DYNAMIC_SET].root, sets[DYNAMIC_SET].root, dispatcher, collider);
             }
 
             //dynamic -> fixed set:
@@ -214,11 +214,12 @@ namespace MobaGame.Collision
             }
         }
 
-        public override void rayTest(BroadphaseRayCallback rayCallback, VInt3 aabbMin, VInt3 aabbMax)
+        public override void rayTest(BroadphaseRayCallback rayCallback, Dispatcher dispatcher, VInt3 aabbMin, VInt3 aabbMax, short collisionFilterGroup, short collisionFilterMask)
         {
             BroadphaseRayTester callback = new BroadphaseRayTester(rayCallback);
 
             sets[DYNAMIC_SET].rayTestInternal(sets[DYNAMIC_SET].root,
+                dispatcher,
                 rayCallback.rayFrom,
                 rayCallback.rayTo,
                 rayCallback.rayDirectionInverse,
@@ -226,9 +227,12 @@ namespace MobaGame.Collision
                 rayCallback.lambdaMax,
                 aabbMin,
                 aabbMax,
+                collisionFilterGroup,
+                collisionFilterMask,
                 callback);
 
             sets[FIXED_SET].rayTestInternal(sets[FIXED_SET].root,
+                dispatcher,
                 rayCallback.rayFrom,
                 rayCallback.rayTo,
                 rayCallback.rayDirectionInverse,
@@ -236,6 +240,8 @@ namespace MobaGame.Collision
                 rayCallback.lambdaMax,
                 aabbMin,
                 aabbMax,
+                collisionFilterGroup,
+                collisionFilterMask,
                 callback);
 
         }
@@ -255,15 +261,15 @@ namespace MobaGame.Collision
         }
         
 
-        public override void aabbTest(VInt3 aabbMin, VInt3 aabbMax, BroadphaseAabbCallback aabbCallback)
+        public override void aabbTest(VInt3 aabbMin, VInt3 aabbMax, BroadphaseAabbCallback aabbCallback, Dispatcher dispatcher, short collisionFilterGroup, short collisionFilterMask)
         {
             BroadphaseAabbTester callback = new BroadphaseAabbTester(aabbCallback);
 
             DbvtAabbMm bounds = new DbvtAabbMm();
             DbvtAabbMm.FromMM(aabbMin, aabbMax, bounds);
             //process all children, that overlap with  the given AABB bounds
-            sets[DYNAMIC_SET].collideTV(sets[DYNAMIC_SET].root, bounds, callback);
-            sets[FIXED_SET].collideTV(sets[FIXED_SET].root, bounds, callback);
+            sets[DYNAMIC_SET].collideTV(sets[DYNAMIC_SET].root, dispatcher, bounds, collisionFilterGroup, collisionFilterMask, callback);
+            sets[FIXED_SET].collideTV(sets[FIXED_SET].root, dispatcher, bounds, collisionFilterGroup, collisionFilterMask, callback);
         }
     }
 }

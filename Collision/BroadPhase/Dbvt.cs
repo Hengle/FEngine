@@ -152,7 +152,7 @@ namespace MobaGame.Collision
             leaves--;
         }
 
-        public static void collideTT(Node root0, Node root1, ICollide policy)
+        public static void collideTT(Node root0, Node root1, Dispatcher dispatcher, ICollide policy)
         {
             //DBVT_CHECKTYPE
             if (root0 != null && root1 != null)
@@ -195,6 +195,8 @@ namespace MobaGame.Collision
                                 stack.Add(new sStkNN(p.a, p.b.childs[1]));
                             }
                             else {
+                                if (!dispatcher.needsCollision(p.a.data.collisionFilterGroup, p.a.data.collisionFilterMask, p.b.data.collisionFilterGroup, p.b.data.collisionFilterMask))
+                                    continue;
                                 policy.Process(p.a, p.b);
                             }
                         }
@@ -204,7 +206,7 @@ namespace MobaGame.Collision
             }
         }
 
-        public void collideTV(Node root, DbvtAabbMm volume, ICollide policy)
+        public void collideTV(Node root, Dispatcher dispatcher, DbvtAabbMm volume, short collisionFilterGroup, short collisionFilterMask, ICollide policy)
         {
             if (root != null)
             {
@@ -223,6 +225,8 @@ namespace MobaGame.Collision
                         }
                         else
                         {
+                            if (!dispatcher.needsCollision(collisionFilterGroup, collisionFilterMask, n.data.collisionFilterGroup, n.data.collisionFilterMask))
+                                continue;
                             policy.Process(n);
                         }
                     }
@@ -230,7 +234,7 @@ namespace MobaGame.Collision
             }
         }
 
-        public void rayTestInternal(Node root, VInt3 rayFrom, VInt3 rayTo, VInt3 rayDirectionInverse, uint[] signs, VFixedPoint lambdaMax, VInt3 aabbMin, VInt3 aabbMax, ICollide policy)
+        public void rayTestInternal(Node root, Dispatcher dispatcher, VInt3 rayFrom, VInt3 rayTo, VInt3 rayDirectionInverse, uint[] signs, VFixedPoint lambdaMax, VInt3 aabbMin, VInt3 aabbMax, short collisionFilterGroup, short collisionFilterMask, ICollide policy)
         {
             if (root != null)
             {
@@ -255,6 +259,8 @@ namespace MobaGame.Collision
                         }
                         else
                         {
+                            if (!dispatcher.needsCollision(collisionFilterGroup, collisionFilterMask, node.data.collisionFilterGroup, node.data.collisionFilterMask))
+                                continue;
                             policy.Process(node);
                         }
                     }

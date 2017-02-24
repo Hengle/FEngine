@@ -14,7 +14,6 @@ namespace MobaGame.Collision
             VIntTransform colObjWorldTransform = collisionObject.getWorldTransform();
             CastResult castResult = new CastResult();
             castResult.hitObject = collisionObject;
-            castResult.allowedPenetration = allowedPenetration;
 
             castPtr.convexA = castObject.getCollisionShape();
             castPtr.convexB = (ConvexShape)collisionShape;
@@ -25,7 +24,7 @@ namespace MobaGame.Collision
             VIntTransform convexToTrans = convexFromTrans;
             convexToTrans.position = ToPos;
 
-            if (castPtr.calcTimeOfImpact(convexFromTrans, convexToTrans, colObjWorldTransform, colObjWorldTransform, castResult))
+            if (castPtr.calcTimeOfImpact(convexFromTrans, convexToTrans, colObjWorldTransform, colObjWorldTransform, allowedPenetration, castResult))
             {
                 //add hit
                 results.Add(castResult);

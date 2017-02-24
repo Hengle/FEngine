@@ -13,6 +13,5 @@ namespace MobaGame.Collision
         public VInt3 normal;
         public VInt3 hitPoint;
         public VFixedPoint fraction = VFixedPoint.MaxValue; // input and output
-        public VFixedPoint allowedPenetration = VFixedPoint.Zero;
     }
 }

@@ -113,7 +113,7 @@ namespace MobaGame.Collision
 		    }
 
 		    // don't report time of impact for motion away from the contact normal (or causes minor penetration)
-		    if (VInt3.Dot(result.normal, r) >= -result.allowedPenetration)
+		    if (VInt3.Dot(result.normal, r) >= VFixedPoint.Zero)
 			    return false;
 
 		    VInt3 hitA;

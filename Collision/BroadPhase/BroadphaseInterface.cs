@@ -20,9 +20,9 @@ namespace MobaGame.Collision
         ///will add some transform later
         public abstract void getBroadphaseAabb(out VInt3 aabbMin, out VInt3 aabbMax);
 
-        public abstract void rayTest(BroadphaseRayCallback rayCallback, VInt3 aabbMin, VInt3 aabbMax);
+        public abstract void rayTest(BroadphaseRayCallback rayCallback, Dispatcher dispatcher, VInt3 aabbMin, VInt3 aabbMax, short collisionFilterGroup, short collisionFilterMask);
 
-	    public abstract void aabbTest(VInt3 aabbMin, VInt3 aabbMax, BroadphaseAabbCallback callback);
+	    public abstract void aabbTest(VInt3 aabbMin, VInt3 aabbMax, BroadphaseAabbCallback callback, Dispatcher dispatcher, short collisionFilterGroup, short collisionFilterMask);
     }
 
     public abstract class BroadphaseAabbCallback

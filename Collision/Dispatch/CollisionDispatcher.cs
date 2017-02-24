@@ -56,26 +56,10 @@ namespace MobaGame.Collision
             return algo;
         }
 
-        public override bool needsCollision(CollisionObject body0, CollisionObject body1)
+        public override bool needsCollision(short collisionFilterGroup0, short collisionFilterMask0, short collisionFilterGroup1, short collisionFilterMask1)
         {
-            bool needsCollision = true;
-
-            if (body0.isStaticOrKinematicObject() && body1.isStaticOrKinematicObject())
-            {
-                needsCollision = false;
-            }
-            else if (!body0.CheckCollideWith(body1))
-            {
-                needsCollision = false;
-            }
-
-            return needsCollision;
-        }
-
-        public override bool needsCollision(CollisionObject body0, RayResultCallback rayResultCallback)
-        {
-            bool collides = ((body0.getBroadphaseHandle().collisionFilterGroup & rayResultCallback.collisionFilterMask) & 0xFFFF) != 0;
-            collides = collides && ((rayResultCallback.collisionFilterGroup & body0.getBroadphaseHandle().collisionFilterMask) & 0xFFFF) != 0;
+            bool collides = ((collisionFilterGroup0 & collisionFilterMask1) & 0xFFFF) != 0;
+            collides = collides && ((collisionFilterGroup1 & collisionFilterMask0) & 0xFFFF) != 0;
             return collides;
         }
 
