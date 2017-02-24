@@ -65,7 +65,7 @@ namespace MobaGame.Collision
             if(c <= VFixedPoint.Zero || a == VFixedPoint.Zero)
             {
                 u0 = VFixedPoint.Zero;
-                normal = -vab;
+                normal = B0 - A0;
                 return true;
             }
 

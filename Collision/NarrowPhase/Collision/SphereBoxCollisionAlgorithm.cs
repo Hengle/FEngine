@@ -18,21 +18,19 @@ namespace MobaGame.Collision
             VFixedPoint radius = sphere0.getRadius();
             VFixedPoint maxContactDistance = Globals.getContactBreakingThreshold();
 
-            if(getSphereDistance(boxObj, out normalOnSurfaceB, out penetrationDepth, sphereCenter, radius, maxContactDistance))
+            if(getSphereDistance((BoxShape)boxObj.getCollisionShape(), boxObj.getWorldTransform(), sphereCenter, radius, maxContactDistance, out normalOnSurfaceB, out penetrationDepth))
             {
                 resultOut.addContactPoint(normalOnSurfaceB * (isSwapped ? -1 : 1), penetrationDepth);
             }
         }
 
-        static bool getSphereDistance(CollisionObject boxObj, out VInt3 normal, out VFixedPoint penetrationDepth, VInt3 sphereCenter, VFixedPoint radius, VFixedPoint maxContactDistance)
+        public static bool getSphereDistance(BoxShape boxShape, VIntTransform m44T, VInt3 sphereCenter, VFixedPoint radius, VFixedPoint maxContactDistance, out VInt3 normal, out VFixedPoint penetrationDepth)
         {
-            BoxShape boxShape = (BoxShape)boxObj.getCollisionShape();
             VInt3 boxHalfExtent = boxShape.getHalfExtentsWithoutMargin();
             VFixedPoint boxMargin = boxShape.getMargin();
             penetrationDepth = VFixedPoint.One;
 
             // convert the sphere position to the box's local space
-            VIntTransform m44T = boxObj.getWorldTransform();
             VInt3 sphereRelPos = m44T.InverseTransformPoint(sphereCenter);
 
             // Determine the closest point to the sphere center in the box
