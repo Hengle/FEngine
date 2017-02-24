@@ -182,17 +182,28 @@ namespace MobaGame.Collision
             end.position = targetPosition;
 
             VInt3 up = -upAxisDirection[upAxis];
-            KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(ghostObject, up, 0.0f);
-            callback.collisionFilterGroup = me.getBroadphaseHandle().collisionFilterGroup;
-            callback.collisionFilterMask = me.getBroadphaseHandle().collisionFilterMask;
+            List<CastResult> results = new List<CastResult>();
+            collisionWorld.convexSweepTest(convexShape, start, end, results);
 
-            world.convexSweepTest(me, start, end, callback);
-
-            if (callback.hasHit())
+            if (results.Count > 0)
             {
+                VFixedPoint closestHitFraction = VFixedPoint.One;
+                for (int i = 0; i < results.Count; i++)
+                {
+                    VFixedPoint fraction = results[i].fraction;
+                    if (VInt3.Dot(results[i].normal, up) < VFixedPoint.Zero)
+                    {
+                        fraction = VFixedPoint.One;
+                    }
+
+                    if (fraction < closestHitFraction)
+                    {
+                        closestHitFraction = fraction;
+                    }
+                }
                 // we moved up only a fraction of the step height
-                currentStepOffset = stepHeight * callback.closestHitFraction;
-                currentPosition = currentPosition * callback.closestHitFraction + targetPosition * (VFixedPoint.One - callback.closestHitFraction);
+                currentStepOffset = stepHeight * closestHitFraction;
+                currentPosition = currentPosition * closestHitFraction + targetPosition * (VFixedPoint.One - closestHitFraction);
                 verticalVelocity = VFixedPoint.Zero;
                 verticalOffset = VFixedPoint.Zero;
             }
@@ -233,21 +244,28 @@ namespace MobaGame.Collision
                 start.position = currentPosition;
                 end.position = targetPosition;
 
-                KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(ghostObject, upAxisDirection[upAxis], -1.0f);
-                callback.collisionFilterGroup = me.getBroadphaseHandle().collisionFilterGroup;
-                callback.collisionFilterMask = me.getBroadphaseHandle().collisionFilterMask;
-
                 VFixedPoint margin = me.getCollisionShape().getMargin();
                 me.getCollisionShape().setMargin(margin + addedMargin);
 
-                collisionWorld.convexSweepTest(me, start, end, callback);
+                List<CastResult> results = new List<CastResult>();
+                collisionWorld.convexSweepTest(convexShape, start, end, results);
                 me.getCollisionShape().setMargin(margin);
 
-                fraction -= callback.closestHitFraction;
-
-                if (callback.hasHit())
+                if (results.Count > 0)
                 {
-                    updateTargetPositionBasedOnCollision(callback.hitNormalWorld);
+                    VFixedPoint closestHitFraction = results[0].fraction;
+                    VInt3 hitNormalWorld = results[0].normal;
+                    for (int i = 1; i < results.Count; i++)
+                    {
+                        VFixedPoint afraction = results[i].fraction;
+                        if(afraction <= closestHitFraction)
+                        {
+                            closestHitFraction = afraction;
+                            hitNormalWorld = results[i].normal;
+                        }
+                    }
+                    fraction -= closestHitFraction;
+                    updateTargetPositionBasedOnCollision(hitNormalWorld);
                     VInt3 currentDir = targetPosition - currentPosition;
                     VFixedPoint distance2 = currentDir.sqrMagnitude;
                     if(distance2 > Globals.EPS2)
@@ -283,16 +301,27 @@ namespace MobaGame.Collision
 
             start.position = currentPosition; end.position = targetPosition;
 
-            KinematicClosestNotMeConvexResultCallback callback = new KinematicClosestNotMeConvexResultCallback(ghostObject, upAxisDirection[upAxis], maxSlopeCosine);
-            callback.collisionFilterGroup = me.getBroadphaseHandle().collisionFilterGroup;
-            callback.collisionFilterMask = me.getBroadphaseHandle().collisionFilterMask;
+            List<CastResult> results = new List<CastResult>();
+            collisionWorld.convexSweepTest(convexShape, start, end, results);
 
-            collisionWorld.convexSweepTest(convexShape, start, end, callback);
-
-            if (callback.hasHit())
+            if (results.Count > 0)
             {
+                VFixedPoint closestHitFraction = VFixedPoint.One;
+                for(int i = 0; i < results.Count; i++)
+                {
+                    VFixedPoint fraction = results[i].fraction;
+                    if(VInt3.Dot(results[i].normal, upAxisDirection[upAxis]) < maxSlopeCosine)
+                    {
+                        fraction = VFixedPoint.One;
+                    }
+
+                    if(fraction < closestHitFraction)
+                    {
+                        closestHitFraction = fraction;
+                    }
+                }
                 // we dropped a fraction of the height -> hit floor
-                currentPosition = currentPosition* callback.closestHitFraction + targetPosition * (VFixedPoint.One - callback.closestHitFraction);
+                currentPosition = currentPosition * closestHitFraction + targetPosition * (VFixedPoint.One - closestHitFraction);
                 verticalVelocity = VFixedPoint.Zero;
                 verticalOffset = VFixedPoint.Zero;
             }
@@ -307,24 +336,4 @@ namespace MobaGame.Collision
             return verticalVelocity == VFixedPoint.Zero && verticalOffset == VFixedPoint.Zero;
         }
     }
-
-    class KinematicClosestNotMeConvexResultCallback: CastResult
-    {
-
-        protected CollisionObject me;
-        protected VInt3 up;
-		protected VFixedPoint minSlopeDot;
-
-        public KinematicClosestNotMeConvexResultCallback(CollisionObject me, VInt3 up, VFixedPoint minSlopeDot)
-        {
-            this.me = me;
-            this.up = up;
-            this.minSlopeDot = minSlopeDot;
-        }
-
-        public override void addSingleResult(CastResult convexResult)
-        {
-       
-		}
-	}
 }
