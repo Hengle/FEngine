@@ -10,10 +10,10 @@ namespace MobaGame.Collision
         
         protected BroadphaseInterface broadphase;
 
-        public CollisionWorld(Dispatcher dispatcher, BroadphaseInterface broadphasePairCache)
+        public CollisionWorld(Dispatcher dispatcher, BroadphaseInterface broadphase)
         {
             this.dispatcher1 = dispatcher;
-            this.broadphase = broadphasePairCache;
+            this.broadphase = broadphase;
         }
 
         public void destroy()
@@ -162,16 +162,6 @@ namespace MobaGame.Collision
             testObject.getCollisionShape().getAabb(testObject.getWorldTransform(), out aabbMin, out aabbMax);
             broadphase.aabbTest(aabbMin, aabbMax, overlapCB, dispatcher1, collisionFilterGroup, collisionFilterMask);
         }
-    }
-
-    public abstract class RayResultCallback
-    {
-        public short collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER;
-        public short collisionFilterMask = CollisionFilterGroups.ALL_FILTER;
-        public VFixedPoint closestHitFraction;
-
-        public abstract bool hasHit();
-        public abstract VFixedPoint addSingleResult(CollisionObject collisionObject, VInt3 hitNormalLocal, VFixedPoint hitFraction);
     }
 
     class SingleRayCallback : BroadphaseRayCallback

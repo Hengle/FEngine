@@ -5,8 +5,10 @@ namespace MobaGame.Collision
 {
     public class DynamicsWorld: CollisionWorld
     {
+        public List<ActionInterface> actions;
+
         int iteration = 4;
-        public DynamicsWorld(Dispatcher dispatcher, BroadphaseInterface broadphasePairCache):base(dispatcher, broadphasePairCache)
+        public DynamicsWorld(Dispatcher dispatcher, BroadphaseInterface broadphase):base(dispatcher, broadphase)
         {
 
         }
@@ -14,6 +16,8 @@ namespace MobaGame.Collision
         public override void Tick(VFixedPoint dt)
         {
             performDiscreteCollisionDetection();
+
+            //resolve contact contraints
             List<ManifoldResult> manifolds = dispatcher1.getAllManifolds();
 
             for (int i = 0; i < collisionObjects.Count; i++)
@@ -42,6 +46,12 @@ namespace MobaGame.Collision
             for(int i = 0; i < collisionObjects.Count; i++)
             {
                 collisionObjects[i].IntegrateVelocity(dt);
+            }
+
+            //process actions
+            for(int i = 0; i < actions.Count; i++)
+            {
+                actions[i].updateAction(this, dt);
             }
         }
     }

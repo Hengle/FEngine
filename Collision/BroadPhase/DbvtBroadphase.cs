@@ -218,13 +218,28 @@ namespace MobaGame.Collision
         {
             BroadphaseRayTester callback = new BroadphaseRayTester(rayCallback);
 
+            VInt3 rayDirectionInverse;
+            uint[] signs = new uint[3];
+            VFixedPoint lambdaMax;
+
+            VInt3 rayDir = (rayCallback.rayTo - rayCallback.rayFrom);
+            lambdaMax = rayDir.magnitude;
+            rayDir = rayDir.Normalize();
+            ///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
+            rayDirectionInverse.x = rayDir[0] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[0];
+            rayDirectionInverse.y = rayDir[1] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[1];
+            rayDirectionInverse.z = rayDir[2] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[2];
+            signs[0] = rayDirectionInverse.x < VFixedPoint.Zero ? 1u : 0;
+            signs[1] = rayDirectionInverse.y < VFixedPoint.Zero ? 1u : 0;
+            signs[2] = rayDirectionInverse.z < VFixedPoint.Zero ? 1u : 0;
+
             sets[DYNAMIC_SET].rayTestInternal(sets[DYNAMIC_SET].root,
                 dispatcher,
                 rayCallback.rayFrom,
                 rayCallback.rayTo,
-                rayCallback.rayDirectionInverse,
-                rayCallback.signs,
-                rayCallback.lambdaMax,
+                rayDirectionInverse,
+                signs,
+                lambdaMax,
                 aabbMin,
                 aabbMax,
                 collisionFilterGroup,
@@ -235,9 +250,9 @@ namespace MobaGame.Collision
                 dispatcher,
                 rayCallback.rayFrom,
                 rayCallback.rayTo,
-                rayCallback.rayDirectionInverse,
-                rayCallback.signs,
-                rayCallback.lambdaMax,
+                rayDirectionInverse,
+                signs,
+                lambdaMax,
                 aabbMin,
                 aabbMax,
                 collisionFilterGroup,
