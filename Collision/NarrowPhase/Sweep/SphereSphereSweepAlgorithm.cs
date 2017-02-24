@@ -27,27 +27,17 @@ namespace MobaGame.Collision
             SphereShape testShape = (SphereShape)castObject.getCollisionShape();
             SphereShape sphereShape = (SphereShape)collisionObject.getCollisionShape();
             VIntTransform collisionObjectTransform = collisionObject.getWorldTransform();
-            VInt3 move = ToPos - castObject.getWorldTransform().position;
-            VInt3 movedCenter = move + collisionObjectTransform.position;
 
             VFixedPoint d = VFixedPoint.Zero;
             VFixedPoint tmp = VFixedPoint.Zero;
+            VInt3 normal = VInt3.zero;
             if(sphereSphereSweep(testShape.getRadius(), castObject.getWorldTransform().position, ToPos, sphereShape.getRadius(), 
-                collisionObjectTransform.position, ref d, ref tmp))
+                collisionObjectTransform.position, ref d, ref tmp, ref normal))
             {
                 CastResult result = new CastResult();
                 result.hitObject = collisionObject;
                 result.fraction = d;
-                if (d == VFixedPoint.Zero)
-                {
-                    result.normal = -move;
-                }
-                else
-                {
-                    result.normal = collisionObjectTransform.position - (castObject.getWorldTransform().position + move * d);
-                }
-
-                result.normal = result.normal.Normalize();
+                result.normal = normal;
                 results.Add(result);
             }            
         }
@@ -58,7 +48,8 @@ namespace MobaGame.Collision
                                         VFixedPoint rb,//radius of sphere B
                                         VInt3 B0,//position of sphere B
                                         ref VFixedPoint u0, //normalized time of first collision
-                                        ref VFixedPoint u1 //normalized time of second collision
+                                        ref VFixedPoint u1, //normalized time of second collision
+                                        ref VInt3 normal
                                       )
         {
             VInt3 vab = A1 - A0;
@@ -74,6 +65,7 @@ namespace MobaGame.Collision
             if(c <= VFixedPoint.Zero || a == VFixedPoint.Zero)
             {
                 u0 = VFixedPoint.Zero;
+                normal = -vab;
                 return true;
             }
 
@@ -88,6 +80,7 @@ namespace MobaGame.Collision
 
                 if (u1 < VFixedPoint.Zero || u0 > VFixedPoint.Zero) return false;
 
+                normal = (B0 - (A0 + vab * u0)).Normalize();
                 return true;
             }
 

@@ -30,17 +30,11 @@ namespace MobaGame.Collision
             {
                 VInt3 ToPos = spherePosition + move;
                 VFixedPoint u0 = VFixedPoint.Zero;
-                if(SphereSphereSweepAlgorithm.sphereSphereSweep(sphere.getRadius(), spherePosition, ToPos, capsule.getRadius(), capsuleObject.getWorldTransform().position, ref u0, ref tmp))
+                VInt3 normal = VInt3.zero;
+                if(SphereSphereSweepAlgorithm.sphereSphereSweep(sphere.getRadius(), spherePosition, ToPos, capsule.getRadius(), capsuleObject.getWorldTransform().position, ref u0, ref tmp, ref normal))
                 {
                     result.fraction = u0;
-                    if (u0 == VFixedPoint.Zero)
-                    {
-                        result.normal = -dir * length;
-                    }
-                    else
-                    {
-                        result.normal = capsuleObject.getWorldTransform().position - (spherePosition + move * u0);
-                    }
+                    result.normal = normal;
                 }
                 else
                 {
