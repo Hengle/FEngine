@@ -203,7 +203,7 @@ namespace MobaGame.Collision
                 }
                 // we moved up only a fraction of the step height
                 currentStepOffset = stepHeight * closestHitFraction;
-                currentPosition = currentPosition * closestHitFraction + targetPosition * (VFixedPoint.One - closestHitFraction);
+                currentPosition = currentPosition * (VFixedPoint.One - closestHitFraction) + targetPosition * closestHitFraction;
                 verticalVelocity = VFixedPoint.Zero;
                 verticalOffset = VFixedPoint.Zero;
             }
@@ -321,7 +321,7 @@ namespace MobaGame.Collision
                     }
                 }
                 // we dropped a fraction of the height -> hit floor
-                currentPosition = currentPosition * closestHitFraction + targetPosition * (VFixedPoint.One - closestHitFraction);
+                currentPosition = currentPosition * (VFixedPoint.One - closestHitFraction) + targetPosition * closestHitFraction;
                 verticalVelocity = VFixedPoint.Zero;
                 verticalOffset = VFixedPoint.Zero;
             }
