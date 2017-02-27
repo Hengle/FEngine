@@ -6,35 +6,33 @@ namespace MobaGame.Collision
     public static class SphereCapsuleSweepAlgorithm
     {
         //sphere move to collide capsule
-        static bool sweepSphereCapsule(CollisionObject sphereObject, VInt3 start, VInt3 end,
-            CollisionObject capsuleObject, CastResult result)
+        static bool sweepSphereCapsule(SphereShape sphere, VIntTransform sphereTransform, VInt3 start, VInt3 end,
+            CapsuleShape capsule, VIntTransform capsuleTransform, ref VInt3 normal, ref VFixedPoint t)
         {
             VInt3 move = end - start;
-            SphereShape sphere = (SphereShape)sphereObject.getCollisionShape();
-            CapsuleShape capsule = (CapsuleShape)capsuleObject.getCollisionShape();
             VFixedPoint radiusSum = sphere.getRadius() + capsule.getRadius();
-            VIntTransform capsuleTransform = capsuleObject.getWorldTransform();
             VInt3 capsuleP0 = capsuleTransform.TransformPoint(capsule.getUpAxis() * capsule.getHalfHeight());
             VInt3 capsuleP1 = capsuleTransform.TransformPoint(capsule.getUpAxis() * -capsule.getHalfHeight());
-            VInt3 spherePosition = sphereObject.getWorldTransform().position;
+            VInt3 spherePosition = start;
             VFixedPoint tmp = VFixedPoint.Zero;
             if(Distance.distancePointSegmentSquared(capsuleP0, capsuleP1, spherePosition, ref tmp) < radiusSum * radiusSum)
             {
-                result.fraction = VFixedPoint.Zero;
-                result.normal = -move.Normalize();
+                t = VFixedPoint.Zero;
+                normal = -move.Normalize();
                 return true;
             }
 
             VFixedPoint u0 = VFixedPoint.Zero;
-            VInt3 normal = VInt3.zero;
+            VInt3 tmpNormal = VInt3.zero;
 
             if (capsuleP0 == capsuleP1)
             {
                 VInt3 ToPos = spherePosition + move;
-                if(SphereSphereSweepAlgorithm.sphereSphereSweep(sphere.getRadius(), spherePosition, ToPos, capsule.getRadius(), capsuleObject.getWorldTransform().position, ref u0, ref tmp, ref normal))
+                if(SphereSphereSweepAlgorithm.sphereSphereSweep(sphere.getRadius(), spherePosition, ToPos, capsule.getRadius(), capsuleTransform.position, ref u0, ref tmp, ref tmpNormal))
                 {
-                    result.fraction = u0;
-                    result.normal = normal;
+                    t = u0;
+                    normal = tmpNormal;
+                    return true;
                 }
                 else
                 {
@@ -43,8 +41,12 @@ namespace MobaGame.Collision
             }
             else if(CapsuleRaytestAlgorithm.raycastCapsule(start, end, capsuleP0, capsuleP1, radiusSum, ref normal, ref u0))
             {
-                result.fraction = u0;
-                result.normal = normal;
+                t = u0;
+                VFixedPoint param = VFixedPoint.Zero;
+                VInt3 movedSphereCenter = start + (end - start) * u0;
+                Distance.distancePointSegmentSquared(capsuleP0, capsuleP1, movedSphereCenter, ref param);
+                normal = movedSphereCenter - (capsuleP0 * (VFixedPoint.One - param) + capsuleP1 * param);
+                normal = normal.Normalize();
                 return true;
             }
             
@@ -56,12 +58,21 @@ namespace MobaGame.Collision
             bool needSwap = castObject.getCollisionShape() is CapsuleShape;
             CollisionObject sphereObject = needSwap ? collisionObject : castObject;
             CollisionObject capsuleObject = !needSwap ? castObject : collisionObject;
+            SphereShape sphere = (SphereShape)sphereObject.getCollisionShape();
+            CapsuleShape capsule = (CapsuleShape)capsuleObject.getCollisionShape();
 
-            CastResult result = new CastResult();
-            if(sweepSphereCapsule(sphereObject, FromPos, ToPos, capsuleObject, result))
+            VInt3 relativeFromPos = needSwap ? collisionObject.getWorldTransform().position : FromPos;
+            VInt3 relativeToPos = needSwap ? collisionObject.getWorldTransform().position - ToPos + FromPos : ToPos;
+
+            VFixedPoint t = VFixedPoint.Zero;
+            VInt3 normal = VInt3.zero;
+
+            if(sweepSphereCapsule(sphere, sphereObject.getWorldTransform(), relativeFromPos, relativeToPos, capsule, capsuleObject.getWorldTransform(), ref normal, ref t))
             {
+                CastResult result = new CastResult();
                 result.hitObject = collisionObject;
-                result.normal = result.normal * (needSwap ? -1 : 1);
+                result.fraction = t;
+                result.normal = normal * (needSwap ? -1 : 1);
                 results.Add(result);
             }
         }

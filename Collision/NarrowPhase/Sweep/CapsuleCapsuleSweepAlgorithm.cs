@@ -108,7 +108,7 @@ namespace MobaGame.Collision
             VInt3 D = (lss1p1 - lss1p0) * VFixedPoint.Half;
             VInt3 p0 = lss0p0 - D, p1 = lss0p1 - D, p0b = lss0p0 + D, p1b = lss0p1 + D;
             VInt3 normal = VInt3.Cross(p1b - p0b, p1 - p0b); normal = normal.Normalize();
-            VFixedPoint minDist = VFixedPoint.One; bool status = false;
+            dist = VFixedPoint.One; bool status = false;
 
             VInt3 pa, pb, pc;
             if(VInt3.Dot(normal, dir) >= VFixedPoint.Zero)
@@ -126,7 +126,7 @@ namespace MobaGame.Collision
             VFixedPoint t = VFixedPoint.Zero, u = VFixedPoint.Zero, v = VFixedPoint.Zero;
             if(rayQuad(transform1.position, dir, pa, pb, pc, ref t, ref u, ref v, true) && t >= VFixedPoint.Zero && t < length)
             {
-                minDist = t / length;
+                dist = t / length;
                 status = true;
             }
 
@@ -144,7 +144,7 @@ namespace MobaGame.Collision
                     {
                         if(s > VFixedPoint.Zero && s < VFixedPoint.One)
                         {
-                            minDist = s;
+                            dist = s;
                             status = true;
                         }
                     }
@@ -154,10 +154,25 @@ namespace MobaGame.Collision
             if(status)
             {
                 VInt3 x, y;
-                Distance.SegmentSegmentDist2(lss0p0 + dir * length * minDist , lss0p1 - lss0p0, lss1p0, lss1p1 - lss1p0, out x, out y);
+                Distance.SegmentSegmentDist2(lss0p0 + dir * length * dist, lss0p1 - lss0p0, lss1p0, lss1p1 - lss1p0, out x, out y);
                 hitNormal = (y - x).Normalize();
             }
             return status;
+        }
+
+        public static void objectQuerySingle(CollisionObject castObject, VInt3 FromPos, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
+        {
+            CapsuleShape lss0 = (CapsuleShape)castObject.getCollisionShape();
+            CapsuleShape lss1 = (CapsuleShape)collisionObject.getCollisionShape();
+            VFixedPoint t = VFixedPoint.One; VInt3 hitNormal = VInt3.zero;
+            if(sweepCapsuleCapsule(lss0, castObject.getWorldTransform(), FromPos, ToPos, lss1, collisionObject.getWorldTransform(), ref t, ref hitNormal))
+            {
+                CastResult result = new CastResult();
+                result.fraction = t;
+                result.hitObject = collisionObject;
+                result.hitPoint = hitNormal;
+                results.Add(result);
+            }
         }
     }
 }
