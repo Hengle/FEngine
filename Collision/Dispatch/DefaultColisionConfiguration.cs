@@ -25,6 +25,7 @@ namespace MobaGame.Collision
         protected SweepAlgorithm sphereBoxSweepFunc;
         protected SweepAlgorithm boxBoxSweepFunc;
         protected SweepAlgorithm boxCapsultSweepFunc;
+        protected SweepAlgorithm capsuleCapsuleSweepFunc;
 
         public DefaultCollisionConfiguration()
         {
@@ -45,6 +46,7 @@ namespace MobaGame.Collision
             convexConvexSweepFunc = ConvexConvexSweepAlgorithm.objectQuerySingle;
             sphereBoxSweepFunc = SphereBoxSweepAlgorithm.objectQuerySingle;
             sphereSphereSweepFunc = SphereSphereSweepAlgorithm.objectQuerySingle;
+            capsuleCapsuleSweepFunc = CapsuleCapsuleSweepAlgorithm.objectQuerySingle;
             
         }
 
@@ -129,6 +131,12 @@ namespace MobaGame.Collision
             {
                 return sphereBoxSweepFunc;
             }
+
+            if ((proxyType0 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE))
+            {
+                return capsuleCapsuleSweepFunc;
+            }
+
 
             /*if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
             {
