@@ -39,9 +39,6 @@ namespace MobaGame.Collision
             return Diff.sqrMagnitude;
         }
 
-        /*
-        A segment is defined by S1(t) = P * t + a * (1 - t), S2(t) = q * t + b * (1 - t) with 0 <= t <= 1
-        */
         public static VFixedPoint SegmentSegmentDist2 (VInt3 p, VInt3 a, //seg 1 origin, vector
                                                VInt3 q, VInt3 b, //seg 2 origin, vector
                                                out VInt3 x, out VInt3 y//closet points

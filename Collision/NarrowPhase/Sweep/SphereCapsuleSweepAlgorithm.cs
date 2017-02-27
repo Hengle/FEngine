@@ -60,6 +60,7 @@ namespace MobaGame.Collision
             CastResult result = new CastResult();
             if(sweepSphereCapsule(sphereObject, FromPos, ToPos, capsuleObject, result))
             {
+                result.hitObject = collisionObject;
                 result.normal = result.normal * (needSwap ? -1 : 1);
                 results.Add(result);
             }
