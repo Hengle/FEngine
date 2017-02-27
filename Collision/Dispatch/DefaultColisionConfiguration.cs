@@ -7,23 +7,22 @@ namespace MobaGame.Collision
     {
         //default CreationFunctions, filling the m_doubleDispatch table
         protected CollisionAlgorithm emptyCreateFunc;
-        protected CollisionAlgorithm convexConvexCreateFunc;
+        //protected CollisionAlgorithm convexConvexCreateFunc;
         protected CollisionAlgorithm sphereSphereCF;
         protected CollisionAlgorithm sphereBoxCF;
         protected CollisionAlgorithm boxBoxCF;
         protected CollisionAlgorithm boxCapsultCF;
 
         protected RaytestAlgorithm emptyRaytestFunc;
-        protected RaytestAlgorithm convexRaytestFunc;
+        //protected RaytestAlgorithm convexRaytestFunc;
         protected RaytestAlgorithm sphereRaytestFunc;
         protected RaytestAlgorithm boxRaytestFunc;
         protected RaytestAlgorithm capsuleRaytestFunc;
 
         protected SweepAlgorithm emptySweepFunc;
-        protected SweepAlgorithm convexConvexSweepFunc;
+        //protected SweepAlgorithm convexConvexSweepFunc;
         protected SweepAlgorithm sphereSphereSweepFunc;
         protected SweepAlgorithm sphereBoxSweepFunc;
-        protected SweepAlgorithm boxBoxSweepFunc;
         protected SweepAlgorithm boxCapsultSweepFunc;
         protected SweepAlgorithm capsuleCapsuleSweepFunc;
 
@@ -33,17 +32,17 @@ namespace MobaGame.Collision
             sphereBoxCF = SphereBoxCollisionAlgorithm.processCollision;
             boxCapsultCF = BoxCapsuleCollisionAlgorithm.processCollision;
             boxBoxCF = BoxBoxCollisionAlgorithm.processCollision;
-            convexConvexCreateFunc = ConvexConvexAlgorithm.processCollision;
+            //convexConvexCreateFunc = ConvexConvexAlgorithm.processCollision;
             emptyCreateFunc = EmptyAlgorithm.processCollision;
 
             emptyRaytestFunc = EmptyRaytestAlgorithm.rayTestSingle;
-            convexRaytestFunc = ConvexRaytestAlgorithm.rayTestSingle;
+            //convexRaytestFunc = ConvexRaytestAlgorithm.rayTestSingle;
             sphereRaytestFunc = SphereRaytestAlgorithm.rayTestSingle;
             boxRaytestFunc = BoxRaytestAlgorithm.rayTestSingle;
             capsuleRaytestFunc = CapsuleRaytestAlgorithm.rayTestSingle;
 
             emptySweepFunc = EmptySweepFunc.objectQuerySingle;
-            convexConvexSweepFunc = ConvexConvexSweepAlgorithm.objectQuerySingle;
+            //convexConvexSweepFunc = ConvexConvexSweepAlgorithm.objectQuerySingle;
             sphereBoxSweepFunc = SphereBoxSweepAlgorithm.objectQuerySingle;
             sphereSphereSweepFunc = SphereSphereSweepAlgorithm.objectQuerySingle;
             capsuleCapsuleSweepFunc = CapsuleCapsuleSweepAlgorithm.objectQuerySingle;
