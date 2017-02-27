@@ -22,7 +22,7 @@ namespace MobaGame.Collision
 	        }
         }
 
-        public static void objectQuerySingle(CollisionObject castObject, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
+        public static void objectQuerySingle(CollisionObject castObject, VInt3 FromPos, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
         {
             SphereShape testShape = (SphereShape)castObject.getCollisionShape();
             SphereShape sphereShape = (SphereShape)collisionObject.getCollisionShape();
@@ -31,7 +31,7 @@ namespace MobaGame.Collision
             VFixedPoint d = VFixedPoint.Zero;
             VFixedPoint tmp = VFixedPoint.Zero;
             VInt3 normal = VInt3.zero;
-            if(sphereSphereSweep(testShape.getRadius(), castObject.getWorldTransform().position, ToPos, sphereShape.getRadius(), 
+            if(sphereSphereSweep(testShape.getRadius(), FromPos, ToPos, sphereShape.getRadius(), 
                 collisionObjectTransform.position, ref d, ref tmp, ref normal))
             {
                 CastResult result = new CastResult();

@@ -82,19 +82,29 @@ namespace MobaGame.Collision
 
             VFixedPoint t = VFixedPoint.One, tmpT = VFixedPoint.One;
             VInt3 normal = VInt3.zero, tmpNormal = VInt3.one;
-            bool hitCylinder = IntersectSegmentCylinder(fromPos, toPos, p0, p1, capsule.getRadius(), ref normal, ref t);
+            bool hit = false;
+            hit = IntersectSegmentCylinder(fromPos, toPos, p0, p1, capsule.getRadius(), ref normal, ref t);
             bool hitSphere1 = SphereRaytestAlgorithm.rayTestSphere(fromPos, toPos, p0, capsule.getRadius(), ref tmpNormal, ref tmpT);
             if(hitSphere1 && tmpT < t)
             {
-                t = tmpT; normal = tmpNormal;
+                VInt3 hitPos = fromPos * (VFixedPoint.One - tmpT) + toPos * tmpT; 
+                if(VInt3.Dot(hitPos - p0, capsDir) * VInt3.Dot(hitPos, capsDir) > VFixedPoint.Zero)
+                {
+                    t = tmpT; normal = tmpNormal; hit = true;
+                }
             }
             bool hitSphere2 = SphereRaytestAlgorithm.rayTestSphere(fromPos, toPos, p1, capsule.getRadius(), ref tmpNormal, ref tmpT);
             if (hitSphere2 && tmpT < t)
             {
+                VInt3 hitPos = fromPos * (VFixedPoint.One - tmpT) + toPos * tmpT;
+                if (VInt3.Dot(hitPos - p0, capsDir) * VInt3.Dot(hitPos, capsDir) > VFixedPoint.Zero)
+                {
+                    t = tmpT; normal = tmpNormal; hit = true;
+                }
                 t = tmpT; normal = tmpNormal;
             }
 
-            if(hitCylinder || hitSphere1 || hitSphere2)
+            if(hit)
             {
                 resultCallback.addSingleResult(collisionObject, normal, t);
             }

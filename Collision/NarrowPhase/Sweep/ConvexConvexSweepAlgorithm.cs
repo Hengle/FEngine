@@ -8,7 +8,7 @@ namespace MobaGame.Collision
         static VoronoiSimplexSolver simplexSolver = new VoronoiSimplexSolver();
         static GjkConvexCast castPtr = new GjkConvexCast(simplexSolver);
 
-        public static void objectQuerySingle(CollisionObject castObject, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
+        public static void objectQuerySingle(CollisionObject castObject, VInt3 FromPos, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
         {
             CollisionShape collisionShape = collisionObject.getCollisionShape();
             VIntTransform colObjWorldTransform = collisionObject.getWorldTransform();
@@ -21,6 +21,7 @@ namespace MobaGame.Collision
             simplexSolver.reset();
 
             VIntTransform convexFromTrans = castObject.getWorldTransform();
+            convexFromTrans.position = FromPos;
             VIntTransform convexToTrans = convexFromTrans;
             convexToTrans.position = ToPos;
 

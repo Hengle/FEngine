@@ -69,7 +69,7 @@ namespace MobaGame.Collision
             return true;
         }
         
-        public static bool sweepCapsuleCapsule(CapsuleShape lss0, VIntTransform transform0, VInt3 toPos, CapsuleShape lss1, VIntTransform transform1, ref VFixedPoint dist, ref VInt3 normal)
+        /*public static bool sweepCapsuleCapsule(CapsuleShape lss0, VIntTransform transform0, VInt3 FromPos, VInt3 toPos, CapsuleShape lss1, VIntTransform transform1, ref VFixedPoint dist, ref VInt3 normal)
         {
             VFixedPoint radiusSun = lss0.getRadius() + lss1.getRadius();
             VInt3 center = transform1.position;
@@ -98,6 +98,6 @@ namespace MobaGame.Collision
             // 1. Extrude lss0 by lss1's length
             // 2. Inflate extruded shape by lss1's radius
             // 3. Raycast against resulting quad
-        }
+        }*/
     }
 }
