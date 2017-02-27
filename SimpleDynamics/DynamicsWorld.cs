@@ -15,8 +15,8 @@ namespace MobaGame.Collision
 
         public override void Tick(VFixedPoint dt)
         {
+            updateAabbs();
             //ResolveContactConstraint(dt);
-
             //process actions
             for (int i = 0; i < actions.Count; i++)
             {
@@ -26,9 +26,7 @@ namespace MobaGame.Collision
 
         private void ResolveContactConstraint(VFixedPoint dt)
         {
-            updateAabbs();
             //performDiscreteCollisionDetection();
-
             //resolve contact contraints
             List<ManifoldResult> manifolds = dispatcher1.getAllManifolds();
 
