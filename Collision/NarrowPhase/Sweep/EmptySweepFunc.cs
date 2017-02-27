@@ -3,7 +3,7 @@ using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    public class EmptyObjectQueryFunc
+    public class EmptySweepFunc
     {
         public static void objectQuerySingle(CollisionObject castObject, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
         {

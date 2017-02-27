@@ -3,7 +3,7 @@ using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    public delegate void SweepAlgorithm(CollisionObject castObject, VInt3 ToPos,
+    public delegate void SweepAlgorithm(CollisionObject castObject, VInt3 start, VInt3 end,
                       CollisionObject collisionObject,
                       List<CastResult> results, VFixedPoint allowedPenetration);
 

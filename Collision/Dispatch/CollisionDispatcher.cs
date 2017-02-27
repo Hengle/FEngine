@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MobaGame.Collision
 {
@@ -8,6 +9,7 @@ namespace MobaGame.Collision
         private NearCallback nearCallback;
         private readonly CollisionAlgorithm[,] doubleDispatch = new CollisionAlgorithm[MAX_BROADPHASE_COLLISION_TYPES,MAX_BROADPHASE_COLLISION_TYPES];
         private readonly RaytestAlgorithm[] raytestDispatch = new RaytestAlgorithm[MAX_BROADPHASE_COLLISION_TYPES];
+        private readonly SweepAlgorithm[,] doubleSweepDispatch = new SweepAlgorithm[MAX_BROADPHASE_COLLISION_TYPES, MAX_BROADPHASE_COLLISION_TYPES];
 
         private ObjectPool<ManifoldResult> manifoldPool;
         private List<ManifoldResult> manifolds;
@@ -25,6 +27,11 @@ namespace MobaGame.Collision
                 for (int j = 0; j < MAX_BROADPHASE_COLLISION_TYPES; j++)
                 {
                     doubleDispatch[i, j] = collisionConfiguration.getCollisionAlgorithmCreateFunc(
+                        (BroadphaseNativeType)i,
+                        (BroadphaseNativeType)j
+                    );
+
+                    doubleSweepDispatch[i, j] = collisionConfiguration.getSweepAlgorithmCreateFunc(
                         (BroadphaseNativeType)i,
                         (BroadphaseNativeType)j
                     );
@@ -54,6 +61,11 @@ namespace MobaGame.Collision
         {
             RaytestAlgorithm algo = raytestDispatch[(int)body.getCollisionShape().getShapeType()];
             return algo;
+        }
+
+        public override SweepAlgorithm findSweepAlgorithm(CollisionObject body0, CollisionObject body1)
+        {
+            return doubleSweepDispatch[(int)body0.getCollisionShape().getShapeType(), (int)body1.getCollisionShape().getShapeType()];
         }
 
         public override bool needsCollision(short collisionFilterGroup0, short collisionFilterMask0, short collisionFilterGroup1, short collisionFilterMask1)
@@ -120,5 +132,6 @@ namespace MobaGame.Collision
         {
             return manifolds;
         }
+ 
     }
 }

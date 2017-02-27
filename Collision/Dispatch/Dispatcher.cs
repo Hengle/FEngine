@@ -15,6 +15,8 @@ namespace MobaGame.Collision
 
         public abstract RaytestAlgorithm findAlgorithm(CollisionObject body);
 
+        public abstract SweepAlgorithm findSweepAlgorithm(CollisionObject body0, CollisionObject body1);
+
         public abstract bool needsCollision(short collisionFilterGroup0, short collisionFilterMask0, short collisionFilterGroup1, short collisionFilterMask1);
 
         public abstract void dispatchAllCollisionPairs(OverlappingPairCache pairCache);

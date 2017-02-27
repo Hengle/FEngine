@@ -58,6 +58,11 @@ namespace MobaGame
                 return new VInt3((lhs.y * rhs.z) - (lhs.z * rhs.y), (lhs.z * rhs.x) - (lhs.x * rhs.z), (lhs.x * rhs.y) - (lhs.y * rhs.x));
             }
 
+            public VInt3 Abs()
+            {
+                return new VInt3(x.Abs(), y.Abs(), z.Abs());
+            }
+
             public VInt3 Normalize()
             {
                 VFixedPoint amagnitude = magnitude;

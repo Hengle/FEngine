@@ -183,7 +183,7 @@ namespace MobaGame.Collision
 
             VInt3 up = -upAxisDirection[upAxis];
             List<CastResult> results = new List<CastResult>();
-            //collisionWorld.convexSweepTest(convexShape, start, end, results);
+            collisionWorld.SweepTest(me, start.position, end.position, results);
 
             if (results.Count > 0)
             {
@@ -248,7 +248,7 @@ namespace MobaGame.Collision
                 me.getCollisionShape().setMargin(margin + addedMargin);
 
                 List<CastResult> results = new List<CastResult>();
-                //collisionWorld.convexSweepTest(convexShape, start, end, results);
+                collisionWorld.SweepTest(me, start.position, end.position, results);
                 me.getCollisionShape().setMargin(margin);
 
                 if (results.Count > 0)
@@ -302,7 +302,7 @@ namespace MobaGame.Collision
             start.position = currentPosition; end.position = targetPosition;
 
             List<CastResult> results = new List<CastResult>();
-            //collisionWorld.convexSweepTest(convexShape, start, end, results);
+            collisionWorld.SweepTest(me, start.position, end.position, results);
 
             if (results.Count > 0)
             {

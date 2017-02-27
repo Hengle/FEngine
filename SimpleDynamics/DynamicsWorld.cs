@@ -15,14 +15,26 @@ namespace MobaGame.Collision
 
         public override void Tick(VFixedPoint dt)
         {
-            performDiscreteCollisionDetection();
+            //ResolveContactConstraint(dt);
+
+            //process actions
+            for (int i = 0; i < actions.Count; i++)
+            {
+                actions[i].updateAction(this, dt);
+            }
+        }
+
+        private void ResolveContactConstraint(VFixedPoint dt)
+        {
+            updateAabbs();
+            //performDiscreteCollisionDetection();
 
             //resolve contact contraints
             List<ManifoldResult> manifolds = dispatcher1.getAllManifolds();
 
             for (int i = 0; i < collisionObjects.Count; i++)
             {
-                if(!collisionObjects[i].isStaticOrKinematicObject())
+                if (!collisionObjects[i].isStaticOrKinematicObject())
                 {
                     collisionObjects[i].LinearVel += Globals.g * dt;
                 }
@@ -33,8 +45,8 @@ namespace MobaGame.Collision
                 ManifoldResult aresult = manifolds[i];
                 aresult.PreStep(dt);
             }
-           
-            for(int iter = 0; iter < iteration; iter++)
+
+            for (int iter = 0; iter < iteration; iter++)
             {
                 for (int i = 0; i < manifolds.Count; i++)
                 {
@@ -43,15 +55,9 @@ namespace MobaGame.Collision
                 }
             }
 
-            for(int i = 0; i < collisionObjects.Count; i++)
+            for (int i = 0; i < collisionObjects.Count; i++)
             {
                 collisionObjects[i].IntegrateVelocity(dt);
-            }
-
-            //process actions
-            for(int i = 0; i < actions.Count; i++)
-            {
-                actions[i].updateAction(this, dt);
             }
         }
     }
