@@ -79,10 +79,10 @@ namespace MobaGame.Collision
                 return boxCapsultCF;
             }
 
-            if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
+            /*if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
             {
                 return convexConvexCreateFunc;
-            }
+            }*/
 
             // failed to find an algorithm
             return emptyCreateFunc;
@@ -105,10 +105,10 @@ namespace MobaGame.Collision
                 return capsuleRaytestFunc;
             }
 
-            if (proxyType < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
+            /*if (proxyType < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
             {
                 return convexRaytestFunc;
-            }
+            }*/
 
             return emptyRaytestFunc;
         }
@@ -130,10 +130,10 @@ namespace MobaGame.Collision
                 return sphereBoxSweepFunc;
             }
 
-            if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
+            /*if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
             {
                 return convexConvexSweepFunc;
-            }
+            }*/
 
             // failed to find an algorithm
             return emptySweepFunc;
