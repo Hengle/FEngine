@@ -24,7 +24,7 @@ namespace MobaGame.Collision
 
         public static void swap(DbvtAabbMm p1, DbvtAabbMm p2)
         {
-            VInt3 tmp = p1.mi; ;
+            VInt3 tmp = p1.mi; 
             p1.mi = p2.mi;
 		    p2.mi = tmp;
 
@@ -81,6 +81,15 @@ namespace MobaGame.Collision
             box.mi = mi;
             box.mx = mx;
             return box;
+        }
+
+        public static DbvtAabbMm FromVec(VInt3 from, VInt3 to, DbvtAabbMm output)
+        {
+            DbvtAabbMm box = output;
+            box.mi.x = FMath.Min(from.x, to.x);box.mi.y = FMath.Min(from.y, to.y);box.mi.x = FMath.Min(from.z, to.z);
+            box.mx.x = FMath.Max(from.x, to.x);box.mx.y = FMath.Max(from.y, to.y);box.mx.x = FMath.Max(from.z, to.z);
+            return box;
+
         }
 
         public void Expand(VInt3 e)

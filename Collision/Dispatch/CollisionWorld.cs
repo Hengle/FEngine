@@ -169,8 +169,9 @@ namespace MobaGame.Collision
             testObject.getCollisionShape().getAabb(testObject.getWorldTransform(), out aabbMin, out aabbMax);
 
             VInt3 dir = end - start;
-            aabbMin -= dir.Abs();
-            aabbMax += dir.Abs();
+            DbvtAabbMm aabb = new DbvtAabbMm();
+            aabb = DbvtAabbMm.FromVec(start, end, aabb);
+            aabb.Expand((aabbMax - aabbMin) * VFixedPoint.Half);
 
             SingleSweepCallback sweepCB = new SingleSweepCallback(testObject, start, end, dispatcher1, results);
             broadphase.aabbTest(aabbMin, aabbMax, sweepCB, dispatcher1, collisionFilterGroup, collisionFilterMask);
