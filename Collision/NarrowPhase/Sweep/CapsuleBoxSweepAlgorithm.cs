@@ -149,5 +149,18 @@ namespace MobaGame.Collision
 
             return extrudeMesh(boxTris, extrusionDir, dir, tris);
         }
+
+        public static bool sweepCapsuleBox(VInt3 p0, VInt3 p1, VFixedPoint radius, VInt3 boxHalfExtension, VIntTransform boxTransform, VInt3 dir, VFixedPoint length, ref VFixedPoint fraction, ref VInt3 hitNormal)
+        {
+            if(Distance.distanceSegmentBoxSquared(p0, p1, radius, boxHalfExtension, boxTransform) < radius * radius)
+            {
+                fraction = VFixedPoint.Zero;
+                hitNormal = -dir;
+                return true;
+            }
+
+
+
+        }
     }
 }

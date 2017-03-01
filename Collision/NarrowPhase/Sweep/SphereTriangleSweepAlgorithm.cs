@@ -98,7 +98,7 @@ namespace MobaGame.Collision
 
             if (testInitialialOverlap)
             {
-                VInt3 cp = Distance.closestPointTriangle2(center, triVerts[0], triVerts[1], triVerts[2], edge10, edge20);
+                VInt3 cp = Distance.closestPtPointTriangle2(center, triVerts[0], triVerts[1], triVerts[2]);
                 if ((cp - center).sqrMagnitude <= radius * radius)
                 {
                     impactDistance = VFixedPoint.Zero;
@@ -213,7 +213,7 @@ namespace MobaGame.Collision
         public static bool sweepSphereTriangles(Triangle[] triangles,
                     VInt3 center, VFixedPoint radius,
                     VInt3 unitDir, VFixedPoint distance,
-                    SweepHit h, ref VInt3 triNormalOut,
+                    ref VFixedPoint fraction, ref VInt3 hitNormal,
                     bool testInitialOverlap)
         {
             if(triangles.Length == 0)
@@ -227,6 +227,7 @@ namespace MobaGame.Collision
             VFixedPoint bestAlignment = VFixedPoint.Two;
             VInt3 bestTriNormal = VInt3.zero;
 
+            int index = -1;
             for(int i = 0; i < triangles.Length; i++)
             {
                 Triangle currentTri = triangles[i];
@@ -250,19 +251,37 @@ namespace MobaGame.Collision
                 if (!sweepSphereVsTri(currentTri.verts, triNormal, center, radius, unitDir, distance, ref currentDistance, ref unused, testInitialOverlap))
                     continue;
 
+                VFixedPoint hitDot = -VInt3.Dot(triNormal, unitDir).Abs();
+                if (!keepTriangle(currentDistance, hitDot, curT, bestAlignment, distance, Globals.EPS))
+                    continue;
 
+                if (currentDistance == VFixedPoint.Zero)
+                {
+                    hitNormal = -unitDir;
+                    fraction = VFixedPoint.Zero;
+                    return true;
+                }
+                curT = currentDistance;
+                bestAlignment = hitDot;
+                bestTriNormal = triNormal;
+                index = i;
             }
+
+            return computeSphereTriangleImpactData(index, curT, center, unitDir, bestTriNormal, triangles, ref fraction, ref hitNormal);
         }
 
-
-        static int getInitIndex(List<int> cachedIndex, int nTris)
+        static bool computeSphereTriangleImpactData(int index, VFixedPoint curT, VInt3 center, VInt3 unitDir, VInt3 bestTriNormal, Triangle[] triangles, ref VFixedPoint fraction, ref VInt3 hitNormal)
         {
-            int initIndex = 0;
-            if(cachedIndex.Count > 0)
-            {
-                initIndex = cachedIndex[0];
-            }
-            return initIndex;
+            if (index < 0)
+                return false;
+
+            if (VInt3.Dot(bestTriNormal, unitDir) > VFixedPoint.Zero)
+                bestTriNormal *= -1;
+
+            fraction = curT;
+            hitNormal = bestTriNormal;
+
+            return true;
         }
 
         static bool rejectTriangle(VInt3 center, VInt3 unitDir, VFixedPoint curT, VFixedPoint radius, VInt3[] triVerts, VFixedPoint dpc0)
@@ -271,6 +290,34 @@ namespace MobaGame.Collision
                 return true;
             if (!cullTriangle(triVerts, unitDir, radius, curT, dpc0))
                 return true;
+            return false;
+        }
+
+        static bool keepTriangle(VFixedPoint triImpactDistance, VFixedPoint triAlignmentValue, VFixedPoint bestImpactDistance, VFixedPoint bestAlignmentValue, VFixedPoint maxDistance, VFixedPoint distEpsilon)
+        {
+            // Reject triangle if further than the maxDistance
+            if (triImpactDistance > maxDistance)
+                return false;
+
+            // PT: make it a relative epsilon to make sure it still works with large distances
+            distEpsilon *= FMath.Max(VFixedPoint.One, FMath.Max(triImpactDistance, bestImpactDistance));
+
+            // If new distance is more than epsilon closer than old distance
+            if (triImpactDistance < bestImpactDistance - distEpsilon)
+                return true;
+
+            // If new distance is no more than epsilon farther than oldDistance and "face is more opposing than previous"
+            if (triImpactDistance < bestImpactDistance + distEpsilon && triAlignmentValue < bestAlignmentValue)
+                return true;
+
+            // If alignment value is the same, but the new triangle is closer than the best distance
+            if (triAlignmentValue == bestAlignmentValue && triImpactDistance < bestImpactDistance)
+                return true;
+
+            // If initial overlap happens, keep the triangle
+            if (triImpactDistance == VFixedPoint.Zero)
+                return true;
+
             return false;
         }
 
