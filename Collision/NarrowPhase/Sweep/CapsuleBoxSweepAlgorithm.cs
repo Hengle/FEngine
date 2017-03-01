@@ -157,7 +157,7 @@ namespace MobaGame.Collision
                 fraction = VFixedPoint.Zero;
                 hitNormal = -dir;
                 return true;
-            }
+            }  
 
 
 
