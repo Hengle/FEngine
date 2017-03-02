@@ -163,17 +163,18 @@ namespace MobaGame.Collision
             broadphase.aabbTest(aabbMin, aabbMax, overlapCB, dispatcher1, collisionFilterGroup, collisionFilterMask);
         }
 
-        public void SweepTest(CollisionObject testObject, VInt3 start, VInt3 end, List<CastResult> results, short collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER, short collisionFilterMask = CollisionFilterGroups.ALL_FILTER)
+        public void SweepTest(CollisionObject testObject, VInt3 end, List<CastResult> results, short collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER, short collisionFilterMask = CollisionFilterGroups.ALL_FILTER)
         {
             VInt3 aabbMin, aabbMax;
             testObject.getCollisionShape().getAabb(testObject.getWorldTransform(), out aabbMin, out aabbMax);
 
+            VInt3 start = testObject.getWorldTransform().position;
             VInt3 dir = end - start;
             DbvtAabbMm aabb = new DbvtAabbMm();
             aabb = DbvtAabbMm.FromVec(start, end, aabb);
             aabb.Expand((aabbMax - aabbMin) * VFixedPoint.Half);
 
-            SingleSweepCallback sweepCB = new SingleSweepCallback(testObject, start, end, dispatcher1, results);
+            SingleSweepCallback sweepCB = new SingleSweepCallback(testObject, end, dispatcher1, results);
             broadphase.aabbTest(aabbMin, aabbMax, sweepCB, dispatcher1, collisionFilterGroup, collisionFilterMask);
         }
     }
@@ -246,14 +247,13 @@ namespace MobaGame.Collision
         List<CastResult> results;
         Dispatcher dispatcher;
         CollisionObject collisionObject;
-        VInt3 start, end;
+        VInt3 end;
 
-        public SingleSweepCallback(CollisionObject collisionObject, VInt3 start, VInt3 end, Dispatcher dispatcher, List<CastResult> results) : base(collisionObject)
+        public SingleSweepCallback(CollisionObject collisionObject, VInt3 end, Dispatcher dispatcher, List<CastResult> results) : base(collisionObject)
         {
             this.dispatcher = dispatcher;
             this.results = results;
             this.collisionObject = collisionObject;
-            this.start = start;
             this.end = end;
         }
 
@@ -269,7 +269,7 @@ namespace MobaGame.Collision
             //only perform raycast if filterMask matches
 
             SweepAlgorithm algorithm = dispatcher.findSweepAlgorithm(collisionObject, this.collisionObject);
-            algorithm(this.collisionObject, start, end, collisionObject, results, VFixedPoint.Create(0.01f));
+            algorithm(this.collisionObject, end, collisionObject, results, VFixedPoint.Create(0.01f));
 
             return true;
         }

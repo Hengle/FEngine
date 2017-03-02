@@ -118,11 +118,9 @@ namespace MobaGame.Collision
         };
 
         static Triangle[] boxTris;
-        static int extrudeBox(BoxShape localBox, VIntTransform world, VInt3 extrusionDir, Triangle[] tris, VInt3 dir)
+        static int extrudeBox(VInt3 aabbMax, VIntTransform world, VInt3 extrusionDir, Triangle[] tris, VInt3 dir)
         {
-            VInt3 aabbMax, aabbMin;
-            localBox.getAabb(world, out aabbMin, out aabbMax);
-            computeBoxPoints(aabbMax, aabbMin);
+            computeBoxPoints(aabbMax,-aabbMax);
 
             if(boxTris == null)
             {
@@ -150,17 +148,64 @@ namespace MobaGame.Collision
             return extrudeMesh(boxTris, extrusionDir, dir, tris);
         }
 
+        static Triangle[] triangles;
+
         public static bool sweepCapsuleBox(VInt3 p0, VInt3 p1, VFixedPoint radius, VInt3 boxHalfExtension, VIntTransform boxTransform, VInt3 dir, VFixedPoint length, ref VFixedPoint fraction, ref VInt3 hitNormal)
         {
-            if(Distance.distanceSegmentBoxSquared(p0, p1, radius, boxHalfExtension, boxTransform) < radius * radius)
+            if(DistanceBox.distanceSegmentBoxSquared(p0, p1, boxHalfExtension, boxTransform) < radius * radius)
             {
                 fraction = VFixedPoint.Zero;
                 hitNormal = -dir;
                 return true;
-            }  
+            }
+
+            VInt3 extrusionDir = (p1 - p0) * VFixedPoint.Half;
+
+            {
+                if(triangles == null)
+                {
+                    triangles = new Triangle[12 * 7];
+                    for(int i = 0; i < triangles.Length; i++)
+                    {
+                        triangles[i] = new Triangle();
+                    }
+
+                    int nbTris = extrudeBox(boxHalfExtension, boxTransform, extrusionDir, triangles, dir);
 
 
+                    if(SphereTriangleSweepAlgorithm.sweepSphereTriangles(triangles, nbTris, (p1 + p0) * VFixedPoint.Half, radius, dir, length, ref fraction, ref hitNormal, true))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
+        public static void objectQuerySingle(CollisionObject castObject, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
+        {
+            bool needSwap = collisionObject.getCollisionShape() is CapsuleShape;
+
+            CollisionObject capsuleObject = needSwap ? collisionObject : castObject;
+            CollisionObject boxObject = needSwap ? castObject : collisionObject;
+
+            VInt3 dir = ToPos - castObject.getWorldTransform().position;
+            VFixedPoint length = dir.magnitude;
+            dir = dir / length * (needSwap ? -1 : 1);
+
+            VFixedPoint fraction = VFixedPoint.Zero; VInt3 hitNormal = VInt3.zero;
+
+            CapsuleShape capsule = (CapsuleShape)capsuleObject.getCollisionShape();
+            BoxShape box = (BoxShape)boxObject.getCollisionShape();
+            VInt3 p0 = capsuleObject.getWorldTransform().TransformPoint(capsule.getUpAxis() * -capsule.getHalfHeight());
+            VInt3 p1 = capsuleObject.getWorldTransform().TransformPoint(capsule.getUpAxis() * capsule.getHalfHeight());
+            if (sweepCapsuleBox(p0, p1, capsule.getRadius(), box.getHalfExtentsWithMargin(), boxObject.getWorldTransform(), dir, length, ref fraction, ref hitNormal))
+            {
+                CastResult result = new CastResult();
+                result.fraction = fraction;
+                result.hitObject = collisionObject;
+                result.normal = hitNormal * (needSwap ? -1 : 1);
+            }
         }
     }
 }

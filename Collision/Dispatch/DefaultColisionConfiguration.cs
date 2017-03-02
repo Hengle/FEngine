@@ -7,20 +7,17 @@ namespace MobaGame.Collision
     {
         //default CreationFunctions, filling the m_doubleDispatch table
         protected CollisionAlgorithm emptyCreateFunc;
-        //protected CollisionAlgorithm convexConvexCreateFunc;
         protected CollisionAlgorithm sphereSphereCF;
         protected CollisionAlgorithm sphereBoxCF;
         protected CollisionAlgorithm boxBoxCF;
         protected CollisionAlgorithm boxCapsultCF;
 
         protected RaytestAlgorithm emptyRaytestFunc;
-        //protected RaytestAlgorithm convexRaytestFunc;
         protected RaytestAlgorithm sphereRaytestFunc;
         protected RaytestAlgorithm boxRaytestFunc;
         protected RaytestAlgorithm capsuleRaytestFunc;
 
         protected SweepAlgorithm emptySweepFunc;
-        //protected SweepAlgorithm convexConvexSweepFunc;
         protected SweepAlgorithm sphereSphereSweepFunc;
         protected SweepAlgorithm sphereBoxSweepFunc;
         protected SweepAlgorithm boxCapsultSweepFunc;
@@ -32,17 +29,14 @@ namespace MobaGame.Collision
             sphereBoxCF = SphereBoxCollisionAlgorithm.processCollision;
             boxCapsultCF = BoxCapsuleCollisionAlgorithm.processCollision;
             boxBoxCF = BoxBoxCollisionAlgorithm.processCollision;
-            //convexConvexCreateFunc = ConvexConvexAlgorithm.processCollision;
             emptyCreateFunc = EmptyAlgorithm.processCollision;
 
             emptyRaytestFunc = EmptyRaytestAlgorithm.rayTestSingle;
-            //convexRaytestFunc = ConvexRaytestAlgorithm.rayTestSingle;
             sphereRaytestFunc = SphereRaytestAlgorithm.rayTestSingle;
             boxRaytestFunc = BoxRaytestAlgorithm.rayTestSingle;
             capsuleRaytestFunc = CapsuleRaytestAlgorithm.rayTestSingle;
 
             emptySweepFunc = EmptySweepFunc.objectQuerySingle;
-            //convexConvexSweepFunc = ConvexConvexSweepAlgorithm.objectQuerySingle;
             sphereBoxSweepFunc = SphereBoxSweepAlgorithm.objectQuerySingle;
             sphereSphereSweepFunc = SphereSphereSweepAlgorithm.objectQuerySingle;
             capsuleCapsuleSweepFunc = CapsuleCapsuleSweepAlgorithm.objectQuerySingle;
@@ -80,11 +74,6 @@ namespace MobaGame.Collision
                 return boxCapsultCF;
             }
 
-            /*if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
-            {
-                return convexConvexCreateFunc;
-            }*/
-
             // failed to find an algorithm
             return emptyCreateFunc;
         }
@@ -105,11 +94,6 @@ namespace MobaGame.Collision
             {
                 return capsuleRaytestFunc;
             }
-
-            /*if (proxyType < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
-            {
-                return convexRaytestFunc;
-            }*/
 
             return emptyRaytestFunc;
         }
@@ -135,12 +119,6 @@ namespace MobaGame.Collision
             {
                 return capsuleCapsuleSweepFunc;
             }
-
-
-            /*if (proxyType0 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE && proxyType1 < BroadphaseNativeType.CONCAVE_SHAPES_START_HERE)
-            {
-                return convexConvexSweepFunc;
-            }*/
 
             // failed to find an algorithm
             return emptySweepFunc;

@@ -24,17 +24,16 @@ namespace MobaGame.Collision
             return BoxRaytestAlgorithm.rayTestBox(fromPos, ToPos, aabbMax, boxTransform, ref dist, ref normal);
         }
 
-        public static void objectQuerySingle(CollisionObject castObject, VInt3 FromPos, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
+        public static void objectQuerySingle(CollisionObject castObject, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
         {
             VIntTransform castTransform = castObject.getWorldTransform();
-            castTransform.position = FromPos;
             bool needSwap = castObject.getCollisionShape() is BoxShape;
             BoxShape box = (BoxShape)(needSwap ? castObject.getCollisionShape() : collisionObject.getCollisionShape());
             VIntTransform boxTransform = needSwap ? castTransform : collisionObject.getWorldTransform();
             SphereShape sphere = (SphereShape)(needSwap ? collisionObject.getCollisionShape() : castObject.getCollisionShape());
-            VInt3 spherePos = needSwap ? collisionObject.getWorldTransform().position : FromPos; 
+            VInt3 spherePos = needSwap ? collisionObject.getWorldTransform().position : castObject.getWorldTransform().position; 
 
-            VInt3 toPos = needSwap ? spherePos - (ToPos - FromPos) : ToPos;
+            VInt3 toPos = needSwap ? spherePos - (ToPos - castTransform.position) : ToPos;
 
             VFixedPoint dist = VFixedPoint.Zero;
             VInt3 normal = VInt3.zero;

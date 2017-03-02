@@ -210,7 +210,7 @@ namespace MobaGame.Collision
             return testRayVsSphereOrCapsule(ref impactDistance, TestSphere, center, radius, dir, length, triVerts, e0, e1);
         }
 
-        public static bool sweepSphereTriangles(Triangle[] triangles,
+        public static bool sweepSphereTriangles(Triangle[] triangles, int nbTris,
                     VInt3 center, VFixedPoint radius,
                     VInt3 unitDir, VFixedPoint distance,
                     ref VFixedPoint fraction, ref VInt3 hitNormal,
@@ -228,7 +228,7 @@ namespace MobaGame.Collision
             VInt3 bestTriNormal = VInt3.zero;
 
             int index = -1;
-            for(int i = 0; i < triangles.Length; i++)
+            for(int i = 0; i < nbTris; i++)
             {
                 Triangle currentTri = triangles[i];
 

@@ -6,14 +6,14 @@ namespace MobaGame.Collision
     public static class SphereCapsuleSweepAlgorithm
     {
         //sphere move to collide capsule
-        static bool sweepSphereCapsule(SphereShape sphere, VIntTransform sphereTransform, VInt3 start, VInt3 end,
+        static bool sweepSphereCapsule(SphereShape sphere, VIntTransform sphereTransform, VInt3 end,
             CapsuleShape capsule, VIntTransform capsuleTransform, ref VInt3 normal, ref VFixedPoint t)
         {
-            VInt3 move = end - start;
+            VInt3 move = end - sphereTransform.position;
             VFixedPoint radiusSum = sphere.getRadius() + capsule.getRadius();
             VInt3 capsuleP0 = capsuleTransform.TransformPoint(capsule.getUpAxis() * capsule.getHalfHeight());
             VInt3 capsuleP1 = capsuleTransform.TransformPoint(capsule.getUpAxis() * -capsule.getHalfHeight());
-            VInt3 spherePosition = start;
+            VInt3 spherePosition = sphereTransform.position;
             VFixedPoint tmp = VFixedPoint.Zero;
             if(Distance.distancePointSegmentSquared(capsuleP0, capsuleP1, spherePosition, ref tmp) < radiusSum * radiusSum)
             {
@@ -39,11 +39,11 @@ namespace MobaGame.Collision
                     return false;
                 }
             }
-            else if(CapsuleRaytestAlgorithm.raycastCapsule(start, end, capsuleP0, capsuleP1, radiusSum, ref normal, ref u0))
+            else if(CapsuleRaytestAlgorithm.raycastCapsule(spherePosition, end, capsuleP0, capsuleP1, radiusSum, ref normal, ref u0))
             {
                 t = u0;
                 VFixedPoint param = VFixedPoint.Zero;
-                VInt3 movedSphereCenter = start + (end - start) * u0;
+                VInt3 movedSphereCenter = spherePosition + (end - spherePosition) * u0;
                 Distance.distancePointSegmentSquared(capsuleP0, capsuleP1, movedSphereCenter, ref param);
                 normal = movedSphereCenter - (capsuleP0 * (VFixedPoint.One - param) + capsuleP1 * param);
                 normal = normal.Normalize();
@@ -53,7 +53,7 @@ namespace MobaGame.Collision
             return false;
         }
 
-        public static void objectQuerySingle(CollisionObject castObject, VInt3 FromPos, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
+        public static void objectQuerySingle(CollisionObject castObject, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
         {
             bool needSwap = castObject.getCollisionShape() is CapsuleShape;
             CollisionObject sphereObject = needSwap ? collisionObject : castObject;
@@ -61,13 +61,12 @@ namespace MobaGame.Collision
             SphereShape sphere = (SphereShape)sphereObject.getCollisionShape();
             CapsuleShape capsule = (CapsuleShape)capsuleObject.getCollisionShape();
 
-            VInt3 relativeFromPos = needSwap ? collisionObject.getWorldTransform().position : FromPos;
-            VInt3 relativeToPos = needSwap ? collisionObject.getWorldTransform().position - ToPos + FromPos : ToPos;
+            VInt3 toPos = needSwap ? sphereObject.getWorldTransform().position - (ToPos - castObject.getWorldTransform().position) : ToPos;
 
             VFixedPoint t = VFixedPoint.Zero;
             VInt3 normal = VInt3.zero;
 
-            if(sweepSphereCapsule(sphere, sphereObject.getWorldTransform(), relativeFromPos, relativeToPos, capsule, capsuleObject.getWorldTransform(), ref normal, ref t))
+            if(sweepSphereCapsule(sphere, sphereObject.getWorldTransform(), ToPos, capsule, capsuleObject.getWorldTransform(), ref normal, ref t))
             {
                 CastResult result = new CastResult();
                 result.hitObject = collisionObject;

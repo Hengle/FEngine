@@ -69,9 +69,9 @@ namespace MobaGame.Collision
             return true;
         }
         
-        public static bool sweepCapsuleCapsule(CapsuleShape lss0, VIntTransform transform0, VInt3 FromPos, VInt3 toPos, CapsuleShape lss1, VIntTransform transform1, ref VFixedPoint dist, ref VInt3 hitNormal)
+        public static bool sweepCapsuleCapsule(CapsuleShape lss0, VIntTransform transform0, VInt3 toPos, CapsuleShape lss1, VIntTransform transform1, ref VFixedPoint dist, ref VInt3 hitNormal)
         {
-            transform0.position = FromPos;
+            VInt3 FromPos = transform0.position;
             VFixedPoint radiusSun = lss0.getRadius() + lss1.getRadius();
             VFixedPoint length = (toPos - FromPos).magnitude;
             VInt3 dir = (toPos - FromPos) / length;
@@ -160,12 +160,12 @@ namespace MobaGame.Collision
             return status;
         }
 
-        public static void objectQuerySingle(CollisionObject castObject, VInt3 FromPos, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
+        public static void objectQuerySingle(CollisionObject castObject, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
         {
             CapsuleShape lss0 = (CapsuleShape)castObject.getCollisionShape();
             CapsuleShape lss1 = (CapsuleShape)collisionObject.getCollisionShape();
             VFixedPoint t = VFixedPoint.One; VInt3 hitNormal = VInt3.zero;
-            if(sweepCapsuleCapsule(lss0, castObject.getWorldTransform(), FromPos, ToPos, lss1, collisionObject.getWorldTransform(), ref t, ref hitNormal))
+            if(sweepCapsuleCapsule(lss0, castObject.getWorldTransform(),  ToPos, lss1, collisionObject.getWorldTransform(), ref t, ref hitNormal))
             {
                 CastResult result = new CastResult();
                 result.fraction = t;

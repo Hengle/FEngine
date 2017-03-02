@@ -168,9 +168,7 @@ namespace MobaGame.Collision
 
             // P inside face region. Compute Q through its barycentric coords (u,v,w)
             VFixedPoint denom = VFixedPoint.One / (va + vb + vc);
-            VFixedPoint v = vb * denom;
-            VFixedPoint w = vc * denom;
-            return a + ab * v + ac * w;
+            return a + ab * vb * denom + ac * vc * denom;
         }
     }
 }
