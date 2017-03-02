@@ -19,9 +19,11 @@ namespace MobaGame.Collision
 
         protected SweepAlgorithm emptySweepFunc;
         protected SweepAlgorithm sphereSphereSweepFunc;
+        protected SweepAlgorithm sphereCapsuleSweepFunc;
         protected SweepAlgorithm sphereBoxSweepFunc;
         protected SweepAlgorithm boxCapsultSweepFunc;
         protected SweepAlgorithm capsuleCapsuleSweepFunc;
+        protected SweepAlgorithm capsuleBoxSweepFunc;
 
         public DefaultCollisionConfiguration()
         {
@@ -39,7 +41,9 @@ namespace MobaGame.Collision
             emptySweepFunc = EmptySweepFunc.objectQuerySingle;
             sphereBoxSweepFunc = SphereBoxSweepAlgorithm.objectQuerySingle;
             sphereSphereSweepFunc = SphereSphereSweepAlgorithm.objectQuerySingle;
+            sphereCapsuleSweepFunc = SphereCapsuleSweepAlgorithm.objectQuerySingle;
             capsuleCapsuleSweepFunc = CapsuleCapsuleSweepAlgorithm.objectQuerySingle;
+            capsuleBoxSweepFunc = CapsuleBoxSweepAlgorithm.objectQuerySingle;
             
         }
 
@@ -105,6 +109,16 @@ namespace MobaGame.Collision
                 return sphereSphereSweepFunc;
             }
 
+            if ((proxyType0 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE))
+            {
+                return sphereCapsuleSweepFunc;
+            }
+
+            if ((proxyType0 == BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE))
+            {
+                return sphereCapsuleSweepFunc;
+            }
+
             if ((proxyType0 == BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE))
             {
                 return sphereBoxSweepFunc;
@@ -118,6 +132,16 @@ namespace MobaGame.Collision
             if ((proxyType0 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE))
             {
                 return capsuleCapsuleSweepFunc;
+            }
+
+            if ((proxyType0 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE))
+            {
+                return capsuleBoxSweepFunc;
+            }
+
+            if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE))
+            {
+                return capsuleBoxSweepFunc;
             }
 
             // failed to find an algorithm
