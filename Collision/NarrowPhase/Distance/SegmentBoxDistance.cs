@@ -5,7 +5,8 @@ namespace MobaGame.Collision
 {
     public static class DistanceBox
     {
-        public static VFixedPoint distanceSegmentBoxSquared(VInt3 p0, VInt3 p1, VInt3 boxHalfExtent, VIntTransform boxTransform)
+        public static VFixedPoint distanceSegmentBoxSquared(VInt3 p0, VInt3 p1, VInt3 boxHalfExtent, VIntTransform boxTransform, ref VFixedPoint segmentParam,
+                                        ref VInt3 boxParam)
         {
             VFixedPoint lp = VFixedPoint.Zero;
             VInt3 bp = VInt3.zero;
@@ -15,16 +16,20 @@ namespace MobaGame.Collision
             {
                 if (lp <= VFixedPoint.One)
                 {
+                    segmentParam = lp;
+                    boxParam = bp;
                     return sqrDistance;
                 }
                 else
                 {
-                    return BoxPointDistance.distancePointBoxSquared(p1, boxTransform, boxHalfExtent);
+                    segmentParam = VFixedPoint.One;
+                    return BoxPointDistance.distancePointBoxSquared(p1, boxTransform, boxHalfExtent, ref boxParam);
                 }
             }
             else
             {
-                return BoxPointDistance.distancePointBoxSquared(p0, boxTransform, boxHalfExtent);
+                segmentParam = VFixedPoint.Zero;
+                return BoxPointDistance.distancePointBoxSquared(p0, boxTransform, boxHalfExtent, ref boxParam);
             }
         }
 

@@ -152,7 +152,8 @@ namespace MobaGame.Collision
 
         public static bool sweepCapsuleBox(VInt3 p0, VInt3 p1, VFixedPoint radius, VInt3 boxHalfExtension, VIntTransform boxTransform, VInt3 dir, VFixedPoint length, ref VFixedPoint fraction, ref VInt3 hitNormal)
         {
-            if(DistanceBox.distanceSegmentBoxSquared(p0, p1, boxHalfExtension, boxTransform) < radius * radius)
+            VFixedPoint tmp1 = VFixedPoint.Zero; VInt3 tmp2 = VInt3.zero;
+            if(DistanceBox.distanceSegmentBoxSquared(p0, p1, boxHalfExtension, boxTransform, ref tmp1, ref tmp2) < radius * radius)
             {
                 fraction = VFixedPoint.Zero;
                 hitNormal = -dir;
@@ -160,24 +161,24 @@ namespace MobaGame.Collision
             }
 
             VInt3 extrusionDir = (p1 - p0) * VFixedPoint.Half;
-
             {
-                if(triangles == null)
+                if (triangles == null)
                 {
                     triangles = new Triangle[12 * 7];
-                    for(int i = 0; i < triangles.Length; i++)
+                    for (int i = 0; i < triangles.Length; i++)
                     {
                         triangles[i] = new Triangle();
                     }
-
-                    int nbTris = extrudeBox(boxHalfExtension, boxTransform, extrusionDir, triangles, dir);
-
-
-                    if(SphereTriangleSweepAlgorithm.sweepSphereTriangles(triangles, nbTris, (p1 + p0) * VFixedPoint.Half, radius, dir, length, ref fraction, ref hitNormal, true))
-                    {
-                        return true;
-                    }
                 }
+
+                int nbTris = extrudeBox(boxHalfExtension, boxTransform, extrusionDir, triangles, dir);
+
+
+                if(SphereTriangleSweepAlgorithm.sweepSphereTriangles(triangles, nbTris, (p1 + p0) * VFixedPoint.Half, radius, dir, length, ref fraction, ref hitNormal, true))
+                {
+                    return true;
+                }
+                
             }
             return false;
         }

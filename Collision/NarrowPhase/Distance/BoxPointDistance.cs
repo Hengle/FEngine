@@ -5,7 +5,7 @@ namespace MobaGame.Collision
 {
     public static class BoxPointDistance
     {
-        public static VFixedPoint distancePointBoxSquared(VInt3 point, VIntTransform boxTransform, VInt3 boxExtent)
+        public static VFixedPoint distancePointBoxSquared(VInt3 point, VIntTransform boxTransform, VInt3 boxExtent, ref VInt3 boxParam)
         {
             VInt3 closest = boxTransform.InverseTransformPoint(point);
 
@@ -25,6 +25,7 @@ namespace MobaGame.Collision
                     closest[ax] = boxExtent[ax];
                 }
             }
+            boxParam = closest;
 
             return sqrDistance;
         }
