@@ -43,7 +43,6 @@ namespace MobaGame.Collision
             {
                 if (dispatcher != null)
                 {
-                    dispatcher.releaseAllManifold();
                     dispatcher.dispatchAllCollisionPairs(broadphase.getOverlappingPairCache());
                 }
             }
@@ -264,9 +263,6 @@ namespace MobaGame.Collision
                 return false;
 
             CollisionObject collisionObject = proxy.clientObject;
-
-            ManifoldResult result = new ManifoldResult();
-            //only perform raycast if filterMask matches
 
             SweepAlgorithm algorithm = dispatcher.findSweepAlgorithm(collisionObject, this.collisionObject);
             algorithm(this.collisionObject, end, collisionObject, results, VFixedPoint.Create(0.01f));

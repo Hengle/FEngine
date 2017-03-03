@@ -5,7 +5,6 @@ namespace MobaGame.Collision
 {
     public class DefaultCollisionConfiguration: CollisionConfiguration
     {
-        //default CreationFunctions, filling the m_doubleDispatch table
         protected CollisionAlgorithm emptyCreateFunc;
         protected CollisionAlgorithm sphereSphereCF;
         protected CollisionAlgorithm sphereBoxCF;
@@ -21,7 +20,6 @@ namespace MobaGame.Collision
         protected SweepAlgorithm sphereSphereSweepFunc;
         protected SweepAlgorithm sphereCapsuleSweepFunc;
         protected SweepAlgorithm sphereBoxSweepFunc;
-        protected SweepAlgorithm boxCapsultSweepFunc;
         protected SweepAlgorithm capsuleCapsuleSweepFunc;
         protected SweepAlgorithm capsuleBoxSweepFunc;
 

@@ -11,15 +11,8 @@ namespace MobaGame.Collision
         private readonly RaytestAlgorithm[] raytestDispatch = new RaytestAlgorithm[MAX_BROADPHASE_COLLISION_TYPES];
         private readonly SweepAlgorithm[,] doubleSweepDispatch = new SweepAlgorithm[MAX_BROADPHASE_COLLISION_TYPES, MAX_BROADPHASE_COLLISION_TYPES];
 
-        private ObjectPool<ManifoldResult> manifoldPool;
-        private List<ManifoldResult> manifolds;
-
         public CollisionDispatcher(CollisionConfiguration collisionConfiguration)
         {
-            manifoldPool = new ObjectPool<ManifoldResult>();
-            manifolds = new List<ManifoldResult>();
-
-
             setNearCallback(new DefaultNearCallback());
 
             for (int i = 0; i < MAX_BROADPHASE_COLLISION_TYPES; i++)
@@ -98,40 +91,8 @@ namespace MobaGame.Collision
 
         public override void dispatchAllCollisionPairs(OverlappingPairCache pairCache)
         {
-            releaseAllManifold();
             collisionPairCallback.init(dispatchInfo, this);
             pairCache.processAllOverlappingPairs(collisionPairCallback);
         }
-
-        public override ManifoldResult applyManifold()
-        {
-            ManifoldResult newManifold = manifoldPool.Get();
-            manifolds.Add(newManifold);
-            return newManifold;
-        }
-
-        public override void releaseManifold(ManifoldResult result)
-        {
-            if(manifolds.Contains(result))
-            {
-                manifolds.Remove(result);
-            }
-            manifoldPool.Release(result);
-        }
-
-        public override void releaseAllManifold()
-        {
-            for(int i = 0; i < manifolds.Count; i++)
-            {
-                manifoldPool.Release(manifolds[i]);
-            }
-            manifolds.Clear();
-        }
-
-        public override List<ManifoldResult> getAllManifolds()
-        {
-            return manifolds;
-        }
- 
     }
 }
