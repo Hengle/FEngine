@@ -15,22 +15,5 @@ namespace MobaGame.Collision
             angVel.z = rotation.z;
             angVel = angVel.Normalize() * rotation.w / timeStep;
 	    }
-
-        public static VIntTransform integrateTransform(VIntTransform curTrans, VInt3 linvel, VInt3 angvel, VFixedPoint timeStep)
-        {
-            VIntTransform predictedTransform = VIntTransform.Identity;
-            predictedTransform.position += linvel * timeStep;
-            VFixedPoint fAngle = angvel.magnitude;
-
-            // limit the angular motion
-            if (fAngle * timeStep > ANGULAR_MOTION_THRESHOLD) {
-                fAngle = ANGULAR_MOTION_THRESHOLD / timeStep;
-            }
-
-            VIntQuaternion dorn = VIntQuaternion.AngleAxis(fAngle * timeStep, angvel);
-            VIntQuaternion predictedOrn = dorn * curTrans.rotation;
-            predictedTransform.rotation = predictedOrn;
-            return predictedTransform;
-        }
     }
 }

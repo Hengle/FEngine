@@ -9,7 +9,7 @@ namespace MobaGame.Collision
 
         ManifoldPoint[] pointCache = new ManifoldPoint[MANIFOLD_CACHE_SIZE];
 
-        CollisionObject body0, body1;
+        public CollisionObject body0, body1;
         int cachedPoints;
 
         public PersistentManifold()
@@ -34,6 +34,11 @@ namespace MobaGame.Collision
         public void clearManifold()
         {
             cachedPoints = 0;
+        }
+        
+        public int getContactPointsNum()
+        {
+            return cachedPoints;
         }
 
         public int addManifoldPoint(ManifoldPoint newPoint)
@@ -68,8 +73,8 @@ namespace MobaGame.Collision
             for(int i = cachedPoints - 1; i >= 0; i--)
             {
                 ManifoldPoint manifoldPoint = pointCache[i];
-                manifoldPoint.positionWorldOnA = trA.TransformPoint(manifoldPoint.localPointA);
-                manifoldPoint.positionWorldOnB = trB.TransformPoint(manifoldPoint.localPointB);
+                manifoldPoint.localPointA = trA.TransformPoint(manifoldPoint.positionWorldOnA);
+                manifoldPoint.localPointA = trB.TransformPoint(manifoldPoint.positionWorldOnB);
                 manifoldPoint.distance = VInt3.Dot(manifoldPoint.normalWorldOnB, manifoldPoint.positionWorldOnA - manifoldPoint.positionWorldOnB);
             }
 
@@ -106,6 +111,11 @@ namespace MobaGame.Collision
         {
             return pt.distance <= getContactBreakingThreshold();
         }
+
+        public ManifoldPoint getManifoldPoint(int index)
+        {
+            return pointCache[index];
+        }
     }
 
 
@@ -130,16 +140,16 @@ namespace MobaGame.Collision
 
         public void init(VInt3 pointA, VInt3 pointB, VInt3 normal, VFixedPoint distance)
         {
-            localPointA = pointA;
-            localPointB = pointB;
+            positionWorldOnA = pointA;
+            positionWorldOnB = pointB;
             normalWorldOnB = normal;
             this.distance = distance;
         }
 
         public void set(ManifoldPoint p)
         {
-            localPointA = p.localPointA;
-            localPointB = p.localPointB;
+            positionWorldOnA = p.positionWorldOnA;
+            positionWorldOnB = p.positionWorldOnB;
             normalWorldOnB = p.normalWorldOnB;
             distance = p.distance;
         }

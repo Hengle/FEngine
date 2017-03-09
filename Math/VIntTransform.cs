@@ -7,13 +7,11 @@ namespace MobaGame
         public struct VIntTransform
         {
             public VInt3 position;
-            VIntQuaternion _rotation;
             VInt3 _up;
             VInt3 _right;
             VInt3 _forward;
-            VInt3 _localScale;
 
-            public static readonly VIntTransform Identity = new VIntTransform(VInt3.zero, VIntQuaternion.identity);
+            public static readonly VIntTransform Identity = new VIntTransform(VInt3.zero, VInt3.right, VInt3.up, VInt3.forward);
 
             public VIntTransform(Transform trans)
             {
@@ -21,34 +19,14 @@ namespace MobaGame
                 _up = new VInt3(trans.up);
                 _right = new VInt3(trans.right);
                 _forward = new VInt3(trans.forward);
-                _localScale = new VInt3(trans.localScale);
-                _rotation = new VIntQuaternion(trans.rotation);
             }
 
-            public VIntTransform(VInt3 position, VIntQuaternion rotation)
+            public VIntTransform(VInt3 position, VInt3 right, VInt3 up, VInt3 forward)
             {
                 this.position = position;
-                _rotation = rotation;
-                _up = rotation * VInt3.up;
-                _right = rotation * VInt3.right;
-                _forward = rotation * VInt3.forward;
-                _localScale = VInt3.one;
-            }
-
-            public VIntQuaternion rotation
-            {
-                get
-                {
-                    return _rotation;
-                }
-
-                set
-                {
-                    _rotation = value;
-                    _up = _rotation * VInt3.up;
-                    _right = _rotation * VInt3.right;
-                    _forward = _rotation * VInt3.forward;
-                }
+                _up = up;
+                _right = right;
+                _forward = forward;
             }
 
             public VInt3 forward
@@ -61,7 +39,6 @@ namespace MobaGame
                 set
                 {
                     _forward = value.Normalize();
-                    rotation = VIntQuaternion.FromToRotation(VInt3.forward, value);
                 }
             }
 
@@ -81,19 +58,6 @@ namespace MobaGame
                 }
             }
 
-            public VInt3 scale
-            {
-                get
-                {
-                    return _localScale;
-                }
-
-                set
-                {
-                    _localScale = value;
-                }
-            }
-
             public VInt3 TransformDirection(VInt3 local)
             {
                 return _right * local.x + _up * local.y + _forward * local.z;
@@ -101,12 +65,7 @@ namespace MobaGame
 
             public VInt3 TransformPoint(VInt3 local)
             {
-                return _right * _localScale.x * local.x + _up * _localScale.y * local.y + _forward * _localScale.z * local.z + position;
-            }
-
-            public VInt3 TransformVector(VInt3 local)
-            {
-                return _right * _localScale.x * local.x + _up * _localScale.y * local.y + _forward * _localScale.z * local.z;
+                return _right * local.x + _up * local.y + _forward * local.z + position;
             }
 
             public VInt3 InverseTransformDirection(VInt3 global)
@@ -116,12 +75,7 @@ namespace MobaGame
 
             public VInt3 InverseTransformPoint(VInt3 global)
             {
-                return new VInt3(VInt3.Dot(global - position, right) / _localScale.x, VInt3.Dot(global - position, up) / _localScale.y, VInt3.Dot(global - position, forward) / _localScale.z);
-            }
-
-            public VInt3 InverseTransformVector(VInt3 global)
-            {
-                return new VInt3(VInt3.Dot(global, right) / _localScale.x, VInt3.Dot(global, up) / _localScale.y, VInt3.Dot(global, forward) / _localScale.z);
+                return new VInt3(VInt3.Dot(global - position, right), VInt3.Dot(global - position, up), VInt3.Dot(global - position, forward));
             }
 
             public VInt3[] getBasis()
@@ -137,6 +91,16 @@ namespace MobaGame
                     new VInt3(right.y, up.y, forward.y),
                     new VInt3(right.z, up.z, forward.z)
                 };
+            }
+
+            public VIntTransform InvTransform(VIntTransform trans)
+            {
+                VInt3 position = InverseTransformPoint(trans.position);
+                VInt3 right = InverseTransformDirection(trans.right);
+                VInt3 up = InverseTransformDirection(trans.up);
+                VInt3 forward = InverseTransformDirection(trans.forward);
+                VIntTransform result = new VIntTransform(position, right, up, forward);
+                return result;
             }
         }
     }

@@ -11,7 +11,7 @@ namespace MobaGame.Collision
             VFixedPoint tmp;
 
             VInt3 dir = ToPos - fromPos;
-            if(SphereBoxCollisionAlgorithm.getSphereDistance(box, boxTransform, fromPos, sphere.getRadius(), VFixedPoint.Zero, out normal, out tmp))
+            if(SphereBoxCollisionAlgorithm.getSphereDistance(box, boxTransform, fromPos, sphere.getRadius(), out normal, out tmp))
             {
                 dist = VFixedPoint.Zero;
                 return false;

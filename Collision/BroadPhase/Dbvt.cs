@@ -234,7 +234,7 @@ namespace MobaGame.Collision
             }
         }
 
-        public void rayTestInternal(Node root, Dispatcher dispatcher, VInt3 rayFrom, VInt3 rayTo, VInt3 rayDirectionInverse, uint[] signs, VFixedPoint lambdaMax, VInt3 aabbMin, VInt3 aabbMax, short collisionFilterGroup, short collisionFilterMask, ICollide policy)
+        public void rayTestInternal(Node root, Dispatcher dispatcher, VInt3 rayFrom, VInt3 rayTo, VInt3 aabbMin, VInt3 aabbMax, short collisionFilterGroup, short collisionFilterMask, ICollide policy)
         {
             if (root != null)
             {
@@ -248,8 +248,8 @@ namespace MobaGame.Collision
                     stack.RemoveAt(stack.Count - 1);
                     bounds[0] = node.volume.Mins() - aabbMax;
                     bounds[1] = node.volume.Maxs() - aabbMin;
-                    VFixedPoint tmin = VFixedPoint.One, lambdaMin = VFixedPoint.Zero;
-                    bool result1 = AabbUtils.RayAabb2(rayFrom, rayDirectionInverse, signs, bounds, ref tmin, lambdaMin, lambdaMax);
+                    VFixedPoint tmin = VFixedPoint.One, tmax = VFixedPoint.One;
+                    bool result1 = AabbUtils.RayAabb2(rayFrom, rayTo, bounds, ref tmin, ref tmax);
                     if (result1)
                     {
                         if (node.isinternal())

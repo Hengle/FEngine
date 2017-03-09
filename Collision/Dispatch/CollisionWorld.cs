@@ -154,7 +154,7 @@ namespace MobaGame.Collision
             broadphase.rayTest(rayCB, dispatcher1, VInt3.zero, VInt3.zero, collisionFilterGroup, collisionFilterMask);
         }
 
-        public void OverlapTest(CollisionObject testObject, List<ManifoldResult> results, short collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER, short collisionFilterMask = CollisionFilterGroups.ALL_FILTER)
+        public void OverlapTest(CollisionObject testObject, List<PersistentManifold> results, short collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER, short collisionFilterMask = CollisionFilterGroups.ALL_FILTER)
         {
             SingleOverlapCallback overlapCB = new SingleOverlapCallback(testObject, dispatcher1, results);
             VInt3 aabbMin = VInt3.zero, aabbMax = VInt3.zero;
@@ -205,11 +205,11 @@ namespace MobaGame.Collision
 
     class SingleOverlapCallback : BroadphaseAabbCallback
     {
-        List<ManifoldResult> results;
+        List<PersistentManifold> results;
         Dispatcher dispatcher;
         CollisionObject collisionObject;
 
-        public SingleOverlapCallback(CollisionObject collisionObject, Dispatcher dispatcher, List<ManifoldResult> results):base(collisionObject)
+        public SingleOverlapCallback(CollisionObject collisionObject, Dispatcher dispatcher, List<PersistentManifold> results):base(collisionObject)
         {
             this.dispatcher = dispatcher;
             this.results = results;
@@ -224,7 +224,7 @@ namespace MobaGame.Collision
 
             CollisionObject collisionObject = proxy.clientObject;
 
-            ManifoldResult result = new ManifoldResult();
+            PersistentManifold result = new PersistentManifold(this.collisionObject, collisionObject);
             //only perform raycast if filterMask matches
 
             CollisionAlgorithm algorithm = dispatcher.findAlgorithm(collisionObject, this.collisionObject);
@@ -232,7 +232,7 @@ namespace MobaGame.Collision
                     dispatcher.getDispatchInfo(),
                     result);
 
-            if(result.hasContact)
+            if(result.getContactPointsNum() > 0)
             {
                 results.Add(result);
             }

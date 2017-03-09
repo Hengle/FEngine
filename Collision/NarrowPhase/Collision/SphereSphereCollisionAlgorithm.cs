@@ -6,7 +6,7 @@ namespace MobaGame.Collision
     public static class SphereSphereCollisionAlgorithm
     {
         public static void processCollision(CollisionObject col0, CollisionObject col1, DispatcherInfo dispatchInfo,
-            ManifoldResult resultOut)
+            PersistentManifold resultOut)
         {
             SphereShape sphere0 = (SphereShape) col0.getCollisionShape();
             SphereShape sphere1 = (SphereShape) col1.getCollisionShape();
@@ -24,13 +24,14 @@ namespace MobaGame.Collision
             // distance (negative means penetration)
             VFixedPoint dist = len - (radius0 + radius1);
 
-            VInt3 normalOnSurfaceB = new VInt3(VFixedPoint.One, VFixedPoint.Zero, VFixedPoint.Zero);
-            if (len > Globals.EPS) {
+            VInt3 normalOnSurfaceB = VInt3.zero;
+            if (dist < Globals.EPS) {
                 normalOnSurfaceB = diff/len;
             }
 
             // report a contact. internally this will be kept persistent, and contact reduction is done
-            resultOut.addContactPoint(normalOnSurfaceB, dist);
+            ManifoldPoint contactPoint = new ManifoldPoint(col0.getWorldTransform().position - normalOnSurfaceB * radius0, col1.getWorldTransform().position + normalOnSurfaceB * radius1, normalOnSurfaceB, dist);
+            resultOut.addManifoldPoint(contactPoint);
         }
     }
 }

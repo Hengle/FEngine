@@ -24,13 +24,13 @@ namespace MobaGame.Collision
                 VInt3 vec = VInt3.zero;
                 vec[i] = VFixedPoint.One;
 
-                VInt3 tmp1 = trans.InverseTransformVector(vec);
+                VInt3 tmp1 = trans.InverseTransformDirection(vec);
                 VInt3 tmp2 = localGetSupportingVertex(tmp1);
                 trans.TransformPoint(tmp2);
                 maxAabb[i] = tmp2[i] + margin;
 
                 vec[i] = -VFixedPoint.One;
-                tmp1 = trans.InverseTransformVector(vec);
+                tmp1 = trans.InverseTransformDirection(vec);
                 tmp2 = localGetSupportingVertex(tmp1);
                 trans.TransformPoint(tmp2);
                 minAabb[i] = tmp2[i] - margin;

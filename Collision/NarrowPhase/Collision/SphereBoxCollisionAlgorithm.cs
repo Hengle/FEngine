@@ -5,7 +5,7 @@ namespace MobaGame.Collision
 {
     public static class SphereBoxCollisionAlgorithm
     {
-        public static void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
+        public static void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, PersistentManifold resultOut)
         {
             bool isSwapped = body0.getCollisionShape() is SphereShape;
             CollisionObject sphereObj = isSwapped ? body1 : body0;
@@ -16,19 +16,21 @@ namespace MobaGame.Collision
             VInt3 sphereCenter = sphereObj.getWorldTransform().position;
             SphereShape sphere0  = (SphereShape)sphereObj.getCollisionShape();
             VFixedPoint radius = sphere0.getRadius();
-            VFixedPoint maxContactDistance = Globals.getContactBreakingThreshold();
 
-            if(getSphereDistance((BoxShape)boxObj.getCollisionShape(), boxObj.getWorldTransform(), sphereCenter, radius, maxContactDistance, out normalOnSurfaceB, out penetrationDepth))
+            if(getSphereDistance((BoxShape)boxObj.getCollisionShape(), boxObj.getWorldTransform(), sphereCenter, radius, out normalOnSurfaceB, out penetrationDepth))
             {
-                resultOut.addContactPoint(normalOnSurfaceB * (isSwapped ? -1 : 1), penetrationDepth);
+                VInt3 worldPosOnSphere = sphereCenter - normalOnSurfaceB * radius;
+                VInt3 worldPosOnBox = worldPosOnSphere + normalOnSurfaceB * penetrationDepth;
+                ManifoldPoint contactPoint = new ManifoldPoint(isSwapped ? worldPosOnBox : worldPosOnSphere, isSwapped ? worldPosOnSphere : worldPosOnBox, normalOnSurfaceB * (isSwapped ? -1 : 1), penetrationDepth);
+                resultOut.addManifoldPoint(contactPoint);
             }
         }
 
-        public static bool getSphereDistance(BoxShape boxShape, VIntTransform m44T, VInt3 sphereCenter, VFixedPoint radius, VFixedPoint maxContactDistance, out VInt3 normal, out VFixedPoint penetrationDepth)
+        public static bool getSphereDistance(BoxShape boxShape, VIntTransform m44T, VInt3 sphereCenter, VFixedPoint radius, out VInt3 normal, out VFixedPoint penetrationDepth)
         {
             VInt3 boxHalfExtent = boxShape.getHalfExtentsWithoutMargin();
             VFixedPoint boxMargin = boxShape.getMargin();
-            penetrationDepth = VFixedPoint.One;
+            penetrationDepth = VFixedPoint.Zero;
 
             // convert the sphere position to the box's local space
             VInt3 sphereRelPos = m44T.InverseTransformPoint(sphereCenter);
@@ -43,7 +45,7 @@ namespace MobaGame.Collision
             closestPoint.z = (FMath.Max(-boxHalfExtent.z, closestPoint.z));
 
             VFixedPoint intersectionDist = radius + boxMargin;
-            VFixedPoint contactDist = intersectionDist + maxContactDistance;
+            VFixedPoint contactDist = intersectionDist;
             normal = sphereRelPos - closestPoint;
 
             //if there is no penetration, we are done
@@ -69,7 +71,7 @@ namespace MobaGame.Collision
             //	v3PointOnSphere = sphereRelPos - (normal * fRadius);	
             penetrationDepth = distance - intersectionDist;
 
-            VInt3 tmp = m44T.TransformVector(normal);
+            VInt3 tmp = m44T.TransformDirection(normal);
             normal = tmp;
 
             return true;

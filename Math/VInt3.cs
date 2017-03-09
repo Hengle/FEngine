@@ -138,6 +138,25 @@ namespace MobaGame
                 return minIndex;
             }
 
+            public int MostSignificantComponent()
+            {
+                int maxIndex = 0;
+                VFixedPoint maxVal = x;
+                if (y > x)
+                {
+                    maxIndex = 1;
+                    maxVal = y;
+                }
+
+                if (z > maxVal)
+                {
+                    maxIndex = 2;
+                    maxVal = z;
+                }
+
+                return maxIndex;
+            }
+
             public VFixedPoint this[int index]
             {
                 get
@@ -306,7 +325,41 @@ namespace MobaGame
             {
                 return Cross(from.Normalize(), to.Normalize()).magnitude;
             }
-        }
 
+            public static VInt3 Min(VInt3 a, VInt3 b)
+            {
+                return new VInt3(FMath.Min(a.x, b.x), FMath.Min(a.y, b.y), FMath.Min(a.z, b.z));
+            }
+
+            public static VInt3 Max(VInt3 a, VInt3 b)
+            {
+                return new VInt3(FMath.Max(a.x, b.x), FMath.Max(a.y, b.y), FMath.Max(a.z, b.z));
+            }
+
+            public static bool operator > (VInt3 a, VInt3 b)
+            {
+                return a.x > b.x && a.y > b.y && a.z > b.z;
+            }
+
+            public static bool operator >= (VInt3 a, VInt3 b)
+            {
+                return a > b || a == b;
+            }
+
+            public static bool operator < (VInt3 a, VInt3 b)
+            {
+                return a.x < b.x && a.y < b.y && a.z < b.z;
+            }
+
+            public static bool operator <= (VInt3 a, VInt3 b)
+            {
+                return a < b || a == b;
+            }
+
+            public VInt3 recip()
+            {
+                return new VInt3(VFixedPoint.One / x, VFixedPoint.One / y, VFixedPoint.One / z);
+            }
+        }
     }
 }

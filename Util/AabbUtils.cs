@@ -6,15 +6,28 @@ namespace MobaGame.Collision
     public static class AabbUtils
     {
         public static bool RayAabb2(VInt3 rayFrom,
-                                  VInt3 rayInvDirection,
-								  uint[] raySign,
+                                  VInt3 rayTo,
                                   VInt3[] bounds,
                                   ref VFixedPoint tmin,
-								  VFixedPoint lambda_min,
-                                  VFixedPoint lambda_max)
+                                  ref VFixedPoint tmax
+								  )
         {
+            VInt3 rayDir = (rayTo - rayFrom);
+            VFixedPoint lambdaMax = rayDir.magnitude;
+            rayDir = rayDir.Normalize();
+
+            VInt3 rayInvDirection = new VInt3();
+            ///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
+            rayInvDirection.x = rayDir[0] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[0];
+            rayInvDirection.y = rayDir[1] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[1];
+            rayInvDirection.z = rayDir[2] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[2];
+            int[] raySign = new int[3];
+            raySign[0] = rayInvDirection.x < VFixedPoint.Zero ? 1 : 0;
+            raySign[1] = rayInvDirection.y < VFixedPoint.Zero ? 1 : 0;
+            raySign[2] = rayInvDirection.z < VFixedPoint.Zero ? 1 : 0;
+
             tmin = (bounds[raySign[0]].x - rayFrom.x) * rayInvDirection.x;
-            VFixedPoint tmax = (bounds[1 - raySign[0]].x - rayFrom.x) * rayInvDirection.x;
+            tmax = (bounds[1 - raySign[0]].x - rayFrom.x) * rayInvDirection.x;
             VFixedPoint tymin = (bounds[raySign[1]].y - rayFrom.y) * rayInvDirection.y;
             VFixedPoint tymax = (bounds[1 - raySign[1]].y - rayFrom.y) * rayInvDirection.y;
 
@@ -38,7 +51,7 @@ namespace MobaGame.Collision
 	        if (tzmax<tmax)
 
                 tmax = tzmax;
-	        return ( (tmin<lambda_max) && (tmax > lambda_min) );
+	        return ( (tmin< lambdaMax) && (tmax > VFixedPoint.Zero) );
         }
 
         static int btOutcode(VInt3 p, VInt3 halfExtent) 

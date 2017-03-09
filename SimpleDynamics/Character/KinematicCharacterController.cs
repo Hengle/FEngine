@@ -23,7 +23,7 @@ namespace MobaGame.Collision
         protected VFixedPoint currentStepOffset;
         protected VInt3 targetPosition;
 
-        List<ManifoldResult> manifolds = new List<ManifoldResult>();
+        List<PersistentManifold> manifolds = new List<PersistentManifold>();
 
         protected VInt3 touchingNormal;
 
@@ -154,20 +154,25 @@ namespace MobaGame.Collision
             collisionWorld.OverlapTest(me, manifolds);
             for(int i = 0; i < manifolds.Count; i++)
             {
-                ManifoldResult aresult = manifolds[i];
+                PersistentManifold aresult = manifolds[i];
                 int directionSign = aresult.body0 == me ? -1 : 1;
-                VFixedPoint pen = aresult.depth;
-                if(pen < VFixedPoint.Zero)
+                for(int j = 0; j < aresult.getContactPointsNum(); j++)
                 {
-                    if(pen < maxPen)
+                    ManifoldPoint apoint = aresult.getManifoldPoint(j);
+                    VFixedPoint pen = apoint.distance;
+                    if (pen < VFixedPoint.Zero)
                     {
-                        maxPen = pen;
-                        touchingNormal = aresult.normalWorldOnB * directionSign;
-                    }
+                        if (pen < maxPen)
+                        {
+                            maxPen = pen;
+                            touchingNormal = apoint.normalWorldOnB * directionSign;
+                        }
 
-                    currentPosition += aresult.normalWorldOnB * directionSign * pen * VFixedPoint.Create(0.2f);
-                    penetration = true;
+                        currentPosition += apoint.normalWorldOnB * directionSign * pen * VFixedPoint.Create(0.2f);
+                        penetration = true;
+                    }
                 }
+                
             }
 
             return penetration;

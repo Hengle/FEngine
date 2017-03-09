@@ -28,7 +28,7 @@ namespace MobaGame.Collision
         {
             //performDiscreteCollisionDetection();
             //resolve contact contraints
-            List<ManifoldResult> manifolds = dispatcher1.getAllManifolds();
+            /*List<ManifoldResult> manifolds = dispatcher1.getAllManifolds();
 
             for (int i = 0; i < collisionObjects.Count; i++)
             {
@@ -56,7 +56,7 @@ namespace MobaGame.Collision
             for (int i = 0; i < collisionObjects.Count; i++)
             {
                 collisionObjects[i].IntegrateVelocity(dt);
-            }
+            }*/
         }
     }
 }

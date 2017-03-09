@@ -5,7 +5,7 @@ namespace MobaGame.Collision
 {
     public static class BoxCapsuleCollisionAlgorithm
     {
-        public static void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, ManifoldResult resultOut)
+        public static void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, PersistentManifold resultOut)
         {
             bool needSwap = body0.getCollisionShape() is CapsuleShape;
             CollisionObject boxObject = needSwap ? body1 : body0;
@@ -18,85 +18,21 @@ namespace MobaGame.Collision
             VIntTransform capsuleTransform = capsuleObject.getWorldTransform();
 
             VInt3 e = boxShape.getHalfExtentsWithoutMargin();
-            VInt3 m = boxTransform.InverseTransformPoint(capsuleTransform.position);
-            VInt3 d = boxTransform.InverseTransformVector(capsuleTransform.TransformVector(capsuleShape.getUpAxis() * capsuleShape.getHalfHeight()));
+            VInt3 p0 = capsuleTransform.TransformPoint(capsuleShape.getUpAxis() * capsuleShape.getHalfHeight());
+            VInt3 p1 = capsuleTransform.TransformPoint(capsuleShape.getUpAxis() * -capsuleShape.getHalfHeight());
             VFixedPoint radius = capsuleShape.getRadius();
 
-            VFixedPoint depth = VFixedPoint.MinValue;
-            VFixedPoint currentDepth = VFixedPoint.Zero;
-            VInt3 hitNormal = VInt3.zero;
-   
-            VFixedPoint adx = d.x.Abs();
-            currentDepth = m.x.Abs() - (e.x + adx + radius);
-            if (currentDepth > VFixedPoint.Zero)
-                return;
-            if(currentDepth > depth)
-            {
-                depth = currentDepth;
-                hitNormal = boxTransform.right * (m[0] > VFixedPoint.Zero ? 1 : -1);
-            }
+            VInt3 boxParam = VInt3.zero; VFixedPoint lineParam = VFixedPoint.Zero;
+            DistanceBox.distanceSegmentBoxSquared(p0, p1, e, boxTransform, ref lineParam, ref boxParam);
 
-            VFixedPoint ady = d.y.Abs();
-            currentDepth = m.y.Abs() - (e.y + ady + radius);
-            if (currentDepth > VFixedPoint.Zero)
-                return;
-            if (currentDepth > depth)
-            {
-                depth = currentDepth;
-                hitNormal = boxTransform.up * (m[1] > VFixedPoint.Zero ? 1 : -1);
-            }
+            VInt3 boxWorldPos = boxTransform.TransformPoint(boxParam);
+            VInt3 lineWorldPos = p0 * (VFixedPoint.One - lineParam) + p1 * lineParam;
 
-            VFixedPoint adz = d.z.Abs();
-            currentDepth = m.z.Abs() - (e.z + adz + radius);
-            if (currentDepth > VFixedPoint.Zero)
-                return;
-            if (currentDepth > depth)
-            {
-                depth = currentDepth;
-                hitNormal = boxTransform.forward * (m[2] > VFixedPoint.Zero ? 1 : -1);
-            }
+            VInt3 diff = boxWorldPos - lineWorldPos;
+            VFixedPoint diffMagnitude = diff.magnitude;
+            VFixedPoint distance = diffMagnitude - radius;
 
-            VFixedPoint axis = m.y * d.z - m.z * d.y;
-            if(axis > Globals.EPS)
-            {
-                currentDepth = axis.Abs() - (e.y * adz + e.z * ady + radius);
-                if (currentDepth > VFixedPoint.Zero)
-                    return;
-                if (currentDepth > depth)
-                {
-                    depth = currentDepth;
-                    hitNormal = VInt3.Cross(d, VInt3.right) * (axis > VFixedPoint.Zero ? 1 : -1);
-                }
-            }
-
-            axis = m.z * d.x - m.x * d.z;
-            if (axis > Globals.EPS)
-            {
-                currentDepth = axis.Abs() - (e.x * adz + e.z * adx + radius);
-                if (currentDepth > VFixedPoint.Zero)
-                    return;
-                if (currentDepth > depth)
-                {
-                    depth = currentDepth;
-                    hitNormal = VInt3.Cross(d, VInt3.up) * (axis > VFixedPoint.Zero ? 1 : -1);
-                }
-            }
-
-            axis = m.x * d.y - m.y * d.x;
-            if (axis > Globals.EPS)
-            {
-                currentDepth = axis.Abs() - (e.x * ady + e.y * adx + radius);
-                if (currentDepth > VFixedPoint.Zero)
-                    return;
-                if (currentDepth > depth)
-                {
-                    depth = currentDepth;
-                    hitNormal = VInt3.Cross(d, VInt3.forward) * (axis > VFixedPoint.Zero ? 1 : -1);
-                }
-            }
-
-            hitNormal = boxTransform.TransformDirection(hitNormal).Normalize() * (needSwap ? 1 : -1);
-            resultOut.addContactPoint(hitNormal, depth); 
+            
         }
     }
 }
