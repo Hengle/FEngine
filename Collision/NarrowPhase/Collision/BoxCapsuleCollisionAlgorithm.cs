@@ -17,22 +17,51 @@ namespace MobaGame.Collision
             VIntTransform boxTransform = boxObject.getWorldTransform();
             VIntTransform capsuleTransform = capsuleObject.getWorldTransform();
 
-            VInt3 e = boxShape.getHalfExtentsWithoutMargin();
-            VInt3 p0 = capsuleTransform.TransformPoint(capsuleShape.getUpAxis() * capsuleShape.getHalfHeight());
-            VInt3 p1 = capsuleTransform.TransformPoint(capsuleShape.getUpAxis() * -capsuleShape.getHalfHeight());
-            VFixedPoint radius = capsuleShape.getRadius();
+            VInt3 p0 = capsuleTransform.TransformPoint(capsuleShape.getUpAxis() * capsuleShape.getHalfHeight()), p1 = capsuleTransform.TransformPoint(capsuleShape.getUpAxis() * -capsuleShape.getHalfHeight());
+            VFixedPoint lParam = VFixedPoint.Zero; VInt3 closestPointBoxWS = VInt3.zero;
+            VFixedPoint distSq = SegmentBoxDistance.distanceSegmentBoxSquared(p0, p1, boxShape.getHalfExtentsWithoutMargin(), boxTransform, ref lParam, ref closestPointBoxWS);
+            VInt3 closestPointLineWS = p0 * (VFixedPoint.One - lParam) + p1 * lParam;
 
-            VInt3 boxParam = VInt3.zero; VFixedPoint lineParam = VFixedPoint.Zero;
-            DistanceBox.distanceSegmentBoxSquared(p0, p1, e, boxTransform, ref lineParam, ref boxParam);
+            VFixedPoint dist = FMath.Sqrt(distSq) - capsuleShape.getRadius();
 
-            VInt3 boxWorldPos = boxTransform.TransformPoint(boxParam);
-            VInt3 lineWorldPos = p0 * (VFixedPoint.One - lineParam) + p1 * lineParam;
+            if(closestPointBoxWS != closestPointLineWS)
+            {
+                VInt3 normalOnBoxWS = (closestPointLineWS - closestPointBoxWS).Normalize();
 
-            VInt3 diff = boxWorldPos - lineWorldPos;
-            VFixedPoint diffMagnitude = diff.magnitude;
-            VFixedPoint distance = diffMagnitude - radius;
+                ManifoldPoint contactPoint = new ManifoldPoint(needSwap ? closestPointLineWS - normalOnBoxWS * capsuleShape.getRadius() : closestPointBoxWS,
+                    !needSwap ? closestPointLineWS - normalOnBoxWS * capsuleShape.getRadius() : closestPointBoxWS,
+                    normalOnBoxWS * (needSwap ? 1 : -1), dist); 
+            }
+            else //box and line are intersected
+            {
+                int reflection = 1;
+                int axis = 0;
+                VFixedPoint largestValue = VFixedPoint.Zero;
+                VInt3 boxToPoint = boxTransform.InverseTransformPoint(closestPointBoxWS);
+                for(int i = 0; i < 3; i++)
+                {
+                    VFixedPoint val = boxToPoint[i];
+                    int localReflection = 1;
+                    if(val < VFixedPoint.Zero)
+                    {
+                        localReflection = -1;
+                        val *= -1;
+                    }
+                    if(val > largestValue)
+                    {
+                        reflection = localReflection;
+                        axis = i;
+                        largestValue = val;
+                    }
+                }
 
-            
+                VInt3 normal = VInt3.zero; normal[axis] = VFixedPoint.One * reflection;
+                normal = boxTransform.TransformDirection(normal);
+
+                ManifoldPoint contactPoint = new ManifoldPoint(needSwap ? closestPointLineWS - normal * capsuleShape.getRadius() : closestPointBoxWS,
+                    !needSwap ? closestPointLineWS - normal * capsuleShape.getRadius() : closestPointBoxWS,
+                    normal * (needSwap ? 1 : -1), dist);
+            }
         }
     }
 }

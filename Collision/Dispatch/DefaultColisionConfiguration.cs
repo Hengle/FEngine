@@ -7,9 +7,11 @@ namespace MobaGame.Collision
     {
         protected CollisionAlgorithm emptyCreateFunc;
         protected CollisionAlgorithm sphereSphereCF;
+        protected CollisionAlgorithm sphereCapsuleCF;
         protected CollisionAlgorithm sphereBoxCF;
+        protected CollisionAlgorithm capsuleCapsuleCF;
+        protected CollisionAlgorithm boxCapsuleCF;
         protected CollisionAlgorithm boxBoxCF;
-        protected CollisionAlgorithm boxCapsultCF;
 
         protected RaytestAlgorithm emptyRaytestFunc;
         protected RaytestAlgorithm sphereRaytestFunc;
@@ -27,7 +29,9 @@ namespace MobaGame.Collision
         {
             sphereSphereCF = SphereSphereCollisionAlgorithm.processCollision;
             sphereBoxCF = SphereBoxCollisionAlgorithm.processCollision;
-            boxCapsultCF = BoxCapsuleCollisionAlgorithm.processCollision;
+            sphereCapsuleCF = SphereCapsuleCollisionAlgorithm.processCollision;
+            capsuleCapsuleCF = CapsuleCapsuleCollisionAlgorithm.processCollision;
+            boxCapsuleCF = BoxCapsuleCollisionAlgorithm.processCollision;
             boxBoxCF = BoxBoxCollisionAlgorithm.processCollision;
             emptyCreateFunc = EmptyAlgorithm.processCollision;
 
@@ -52,6 +56,16 @@ namespace MobaGame.Collision
                 return sphereSphereCF;
             }
 
+            if ((proxyType0 == BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE))
+            {
+                return sphereCapsuleCF;
+            }
+
+            if ((proxyType0 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE))
+            {
+                return sphereCapsuleCF;
+            }
+
             if ((proxyType0 == BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE) && (proxyType1==BroadphaseNativeType.BOX_SHAPE_PROXYTYPE))
             {
                 return	sphereBoxCF;
@@ -62,18 +76,23 @@ namespace MobaGame.Collision
                 return sphereBoxCF;
             }
 
-            if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE)) {
-                return boxBoxCF;
+            if ((proxyType0 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE))
+            {
+                return capsuleCapsuleCF;
             }
 
             if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE))
             {
-                return boxCapsultCF;
+                return boxCapsuleCF;
             }
 
             if ((proxyType0 == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE))
             {
-                return boxCapsultCF;
+                return boxCapsuleCF;
+            }
+
+            if ((proxyType0 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE) && (proxyType1 == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE)) {
+                return boxBoxCF;
             }
 
             // failed to find an algorithm

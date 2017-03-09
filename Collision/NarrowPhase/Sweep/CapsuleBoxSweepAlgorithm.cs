@@ -153,7 +153,7 @@ namespace MobaGame.Collision
         public static bool sweepCapsuleBox(VInt3 p0, VInt3 p1, VFixedPoint radius, VInt3 boxHalfExtension, VIntTransform boxTransform, VInt3 dir, VFixedPoint length, ref VFixedPoint fraction, ref VInt3 hitNormal)
         {
             VFixedPoint tmp1 = VFixedPoint.Zero; VInt3 tmp2 = VInt3.zero;
-            if(DistanceBox.distanceSegmentBoxSquared(p0, p1, boxHalfExtension, boxTransform, ref tmp1, ref tmp2) < radius * radius)
+            if(SegmentBoxDistance.distanceSegmentBoxSquared(p0, p1, boxHalfExtension, boxTransform, ref tmp1, ref tmp2) < radius * radius)
             {
                 fraction = VFixedPoint.Zero;
                 hitNormal = -dir;

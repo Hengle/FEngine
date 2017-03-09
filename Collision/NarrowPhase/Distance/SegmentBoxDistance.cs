@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MobaGame.Collision
 {
-    public static class DistanceBox
+    public static class SegmentBoxDistance
     {
         public static VFixedPoint distanceSegmentBoxSquared(VInt3 p0, VInt3 p1, VInt3 boxHalfExtent, VIntTransform boxTransform, ref VFixedPoint segmentParam,
                                         ref VInt3 boxParam)
