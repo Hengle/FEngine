@@ -21,7 +21,6 @@ namespace MobaGame.Collision
             {
                 recursedeletenode(this, root);
             }
-            //btAlignedFree(m_free);
             free = null;
         }
 
@@ -81,7 +80,6 @@ namespace MobaGame.Collision
 
         public static void collideTT(Node root0, Node root1, Dispatcher dispatcher, ICollide policy)
         {
-            //DBVT_CHECKTYPE
             if (root0 != null && root1 != null)
             {
                 List<sStkNN> stack = new List<sStkNN>(DOUBLE_STACKSIZE);
@@ -208,8 +206,8 @@ namespace MobaGame.Collision
 
         private static void deletenode(Dbvt pdbvt, Node node)
         {
-            //btAlignedFree(pdbvt->m_free);
             pdbvt.free = node;
+            node.height = -1;
         }
 
         private static void recursedeletenode(Dbvt pdbvt, Node node)
@@ -241,6 +239,7 @@ namespace MobaGame.Collision
             node.volume.set(volume);
             node.data = data;
             node.childs[1] = null;
+            node.height = 0;
             return node;
         }
 
@@ -252,49 +251,54 @@ namespace MobaGame.Collision
                 leaf.parent = null;
             }
             else {
-                if (!root.isleaf())
+                while (!root.isleaf())
                 {
-                    do
+                    if (DbvtAabbMm.Proximity(root.childs[0].volume, leaf.volume) <
+                        DbvtAabbMm.Proximity(root.childs[1].volume, leaf.volume))
                     {
-                        if (DbvtAabbMm.Proximity(root.childs[0].volume, leaf.volume) <
-                            DbvtAabbMm.Proximity(root.childs[1].volume, leaf.volume))
-                        {
-                            root = root.childs[0];
-                        }
-                        else {
-                            root = root.childs[1];
-                        }
+                        root = root.childs[0];
                     }
-                    while (!root.isleaf());
+                    else
+                    {
+                        root = root.childs[1];
+                    }
                 }
-                Node prev = root.parent;
-                Node node = createnode(pdbvt, prev, merge(leaf.volume, root.volume, new DbvtAabbMm()), null);
-                if (prev != null)
+                Node sibling = root;
+                Node oldParent = root.parent;
+                Node newParent = createnode(pdbvt, oldParent, merge(leaf.volume, sibling.volume, new DbvtAabbMm()), null);
+                if (oldParent != null)
                 {
-                    prev.childs[indexof(root)] = node;
-                    node.childs[0] = root;
-                    root.parent = node;
-                    node.childs[1] = leaf;
-                    leaf.parent = node;
-                    do
+                    if(oldParent.childs[0] == sibling)
                     {
-                        if (!prev.volume.Contain(node.volume))
-                        {
-                            DbvtAabbMm.Merge(prev.childs[0].volume, prev.childs[1].volume, prev.volume);
-                        }
-                        else {
-                            break;
-                        }
-                        node = prev;
+                        oldParent.childs[0] = newParent;
+                    }    
+                    else
+                    {
+                        oldParent.childs[1] = newParent;
                     }
-                    while (null != (prev = node.parent));
+
+                    newParent.childs[0] = sibling;
+                    newParent.childs[1] = leaf;
+                    sibling.parent = newParent;
+                    leaf.parent = newParent;
                 }
-                else {
-                    node.childs[0] = root;
-                    root.parent = node;
-                    node.childs[1] = leaf;
-                    leaf.parent = node;
-                    pdbvt.root = node;
+                else
+                {
+                    newParent.childs[0] = sibling;
+                    newParent.childs[1] = leaf;
+                    sibling.parent = newParent;
+                    leaf.parent = newParent;
+                }
+
+                Node node = leaf.parent;
+                while(node != null)
+                {
+                    node = Balance(pdbvt, node);
+                    Node child0 = node.childs[0];
+                    Node child1 = node.childs[1];
+                    node.height = Math.Max(child0.height, child1.height) + 1;
+                    node.volume = merge(child0.volume, child1.volume, new DbvtAabbMm()); 
+                    node = node.parent;
                 }
             }
         }
@@ -306,36 +310,143 @@ namespace MobaGame.Collision
                 pdbvt.root = null;
                 return null;
             }
-            else {
+            else
+            {
                 Node parent = leaf.parent;
-                Node prev = parent.parent;
+                Node grandParent = parent.parent;
                 Node sibling = parent.childs[1 - indexof(leaf)];
-                if (prev != null)
+                if(grandParent == null)
                 {
-                    prev.childs[indexof(parent)] = sibling;
-                    sibling.parent = prev;
+                    grandParent.childs[indexof(parent)] = sibling;
+                    sibling.parent = grandParent;
                     deletenode(pdbvt, parent);
-                    while (prev != null)
+
+                    Node node = grandParent;
+                    while(node != null)
                     {
-                        DbvtAabbMm pb = prev.volume;
-                        DbvtAabbMm.Merge(prev.childs[0].volume, prev.childs[1].volume, prev.volume);
-                        if (pb != prev.volume)
-                        {
-                            prev = prev.parent;
-                        }
-                        else {
-                            break;
-                        }
+                        node = Balance(pdbvt, node);
+                        Node child0 = node.childs[0];
+                        Node child1 = node.childs[1];
+                        node.height = Math.Max(child0.height, child1.height) + 1;
+                        node.volume = merge(child0.volume, child1.volume, new DbvtAabbMm());
+                        node = node.parent;
                     }
-                    return (prev != null ? prev : pdbvt.root);
                 }
-                else {
+                else
+                {
                     pdbvt.root = sibling;
                     sibling.parent = null;
                     deletenode(pdbvt, parent);
-                    return pdbvt.root;
                 }
+                return pdbvt.root;
             }
+        }
+
+        private static Node Balance(Dbvt pdbvt, Node A)
+        {
+            if(A.isleaf() || A.height < 2)
+            {
+                return A;
+            }
+
+            Node B = A.childs[0];
+            Node C = A.childs[1];
+
+            int balance = C.height - B.height;
+            
+            if(balance > 1)
+            {
+                Node F = C.childs[0];
+                Node G = C.childs[1];
+
+                // Swap A and C
+                C.childs[0] = A;
+                C.parent = A.parent;
+                // A's old parent should point to C
+                if (C.parent != null)
+                {
+                    C.parent.childs[indexof(A)] = C;
+                }
+                else
+                {
+                    pdbvt.root = C;
+                }
+                A.parent = C;
+
+                // Rotate
+                if (F.height > G.height)
+                {
+                    C.childs[1] = F;
+                    A.childs[1] = G;
+                    G.parent = A;
+                    A.volume = merge(B.volume, G.volume, new DbvtAabbMm());
+                    C.volume = merge(A.volume, F.volume, new DbvtAabbMm());
+
+                    A.height = 1 + Math.Max(B.height, G.height);
+                    C.height = 1 + Math.Max(A.height, F.height);
+                }
+                else
+                {
+                    C.childs[1] = G;
+                    A.childs[1] = F;
+                    F.parent = A;
+                    A.volume = merge(B.volume, F.volume, new DbvtAabbMm());
+                    C.volume = merge(A.volume, G.volume, new DbvtAabbMm());
+
+                    A.height = 1 + Math.Max(B.height, F.height);
+                    C.height = 1 + Math.Max(A.height, G.height);
+                }
+
+                return C; 
+            }
+
+            if (balance < -1)
+            {
+                Node D = B.childs[0];
+                Node E = B.childs[1];
+
+                // Swap A andB 
+                B.childs[0] = A;
+                B.parent = A.parent;
+                // A's old parent should point to B
+                if (B.parent != null)
+                {
+                    B.parent.childs[indexof(A)] = B;
+                }
+                else
+                {
+                    pdbvt.root = B;
+                }
+                A.parent = B;
+
+                // Rotate
+                if (D.height > E.height)
+                {
+                    B.childs[1] = D;
+                    A.childs[0] = E;
+                    E.parent = A;
+                    A.volume = merge(C.volume, E.volume, new DbvtAabbMm());
+                    B.volume = merge(A.volume, D.volume, new DbvtAabbMm());
+
+                    A.height = 1 + Math.Max(C.height, E.height);
+                    B.height = 1 + Math.Max(A.height, D.height);
+                }
+                else
+                {
+                    B.childs[1] = E;
+                    A.childs[0] = D;
+                    D.parent = A;
+                    A.volume = merge(C.volume, D.volume, new DbvtAabbMm());
+                    B.volume = merge(A.volume, E.volume, new DbvtAabbMm());
+
+                    A.height = 1 + Math.Max(C.height, D.height);
+                    B.height = 1 + Math.Max(A.height, E.height);
+                }
+
+                return B;
+            }
+
+            return A;
         }
 
         public class Node
@@ -345,6 +456,7 @@ namespace MobaGame.Collision
             public Node parent;
             public Node[] childs = new Node[2];
             public DbvtProxy data;
+            public int height = 0;
 
             private int _id = NextID++;
             public int id
@@ -363,7 +475,6 @@ namespace MobaGame.Collision
             }
         }
 
-        /** Stack element */
         public class sStkNN
         {
             public Node a;

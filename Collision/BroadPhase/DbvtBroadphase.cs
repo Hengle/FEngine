@@ -214,8 +214,6 @@ namespace MobaGame.Collision
         {
             BroadphaseRayTester callback = new BroadphaseRayTester(rayCallback);
 
-            VInt3 rayDirectionInverse;
-
             sets[DYNAMIC_SET].rayTestInternal(sets[DYNAMIC_SET].root,
                 dispatcher,
                 rayCallback.rayFrom,
