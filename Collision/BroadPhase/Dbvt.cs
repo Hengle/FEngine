@@ -30,61 +30,12 @@ namespace MobaGame.Collision
             return (root == null);
         }
 
-        public void optimizeIncremental(int passes)
-        {
-            if (passes < 0)
-            {
-                passes = leaves;
-            }
-
-            if (root != null && (passes > 0))
-            {
-                do
-                {
-                    Node node = root;
-                    int bit = 0;
-                    while (node.isinternal())
-                    {
-                        node = node.childs[(opath >> bit) & 1];
-                        bit = (bit + 1) & (/*sizeof(unsigned)*/4 * 8 - 1);
-                    }
-                    update(node);
-                    ++opath;
-                }
-                while (--passes != 0);
-            }
-        }
-
         public Node insert(DbvtAabbMm box, DbvtProxy data)
         {
             Node leaf = createnode(this, null, box, data);
             insertleaf(this, root, leaf);
             leaves++;
             return leaf;
-        }
-
-        public void update(Node leaf)
-        {
-            update(leaf, -1);
-        }
-
-        public void update(Node leaf, int lookahead)
-        {
-            Node root = removeleaf(this, leaf);
-            if (root != null)
-            {
-                if (lookahead >= 0)
-                {
-                    for (int i = 0; (i < lookahead) && root.parent != null; i++)
-                    {
-                        root = root.parent;
-                    }
-                }
-                else {
-                    root = this.root;
-                }
-            }
-            insertleaf(this, root, leaf);
         }
 
         public void update(Node leaf, DbvtAabbMm volume)
@@ -116,30 +67,6 @@ namespace MobaGame.Collision
             VInt3 tmp = new VInt3(margin, margin, margin);
             volume.Expand(tmp);
             volume.SignedExpand(velocity);
-
-            update(leaf, volume);
-            return true;
-        }
-
-        public bool update(Node leaf, DbvtAabbMm volume, VInt3 velocity)
-        {
-            if (leaf.volume.Contain(volume))
-            {
-                return false;
-            }
-            volume.SignedExpand(velocity);
-            update(leaf, volume);
-            return true;
-        }
-
-        public bool update(Node leaf, DbvtAabbMm volume, VFixedPoint margin)
-        {
-            if (leaf.volume.Contain(volume))
-            {
-                return false;
-            }
-            VInt3 tmp = new VInt3(margin, margin, margin);
-            volume.Expand(tmp);
 
             update(leaf, volume);
             return true;

@@ -36,10 +36,6 @@ namespace MobaGame.Collision
 
         public void collide(Dispatcher dispatcher)
         {
-            //optimize
-            sets[DYNAMIC_SET].optimizeIncremental(1 + (sets[DYNAMIC_SET].leaves * dupdates) / 100);
-            sets[FIXED_SET].optimizeIncremental(1 + (sets[FIXED_SET].leaves * fupdates) / 100);
-
             DbvtTreeCollider collider = new DbvtTreeCollider(this);
 
             //collide dynamics:
