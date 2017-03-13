@@ -52,7 +52,9 @@ namespace MobaGame.Collision
             {
                 cachedPoints++;
             }
-            pointCache[insertIndex].set(newPoint);
+            newPoint.localPointA = body0.getWorldTransform().InverseTransformPoint(newPoint.positionWorldOnA);
+            newPoint.localPointB = body0.getWorldTransform().InverseTransformPoint(newPoint.positionWorldOnB);
+            pointCache[insertIndex] = newPoint;
             return insertIndex;
         }
 
@@ -73,8 +75,8 @@ namespace MobaGame.Collision
             for(int i = cachedPoints - 1; i >= 0; i--)
             {
                 ManifoldPoint manifoldPoint = pointCache[i];
-                manifoldPoint.localPointA = trA.TransformPoint(manifoldPoint.positionWorldOnA);
-                manifoldPoint.localPointA = trB.TransformPoint(manifoldPoint.positionWorldOnB);
+                manifoldPoint.positionWorldOnA = trA.TransformPoint(manifoldPoint.localPointA);
+                manifoldPoint.positionWorldOnB = trB.TransformPoint(manifoldPoint.localPointB);
                 manifoldPoint.distance = VInt3.Dot(manifoldPoint.normalWorldOnB, manifoldPoint.positionWorldOnA - manifoldPoint.positionWorldOnB);
             }
 
@@ -87,17 +89,6 @@ namespace MobaGame.Collision
                 if(!validContactDistance(manifoldPoint))
                 {
                     removeContactPoint(i);
-                }
-                else
-                {
-                    tmp = manifoldPoint.normalWorldOnB * manifoldPoint.distance;
-                    projectedPoint = manifoldPoint.positionWorldOnA - tmp;
-                    projectedDifference = manifoldPoint.positionWorldOnB - projectedPoint;
-                    distance2d = projectedDifference.sqrMagnitude;
-                    if(distance2d > getContactBreakingThreshold() * getContactBreakingThreshold())
-                    {
-                        removeContactPoint(i);
-                    }
                 }
             }
         }
@@ -144,14 +135,6 @@ namespace MobaGame.Collision
             positionWorldOnB = pointB;
             normalWorldOnB = normal;
             this.distance = distance;
-        }
-
-        public void set(ManifoldPoint p)
-        {
-            positionWorldOnA = p.positionWorldOnA;
-            positionWorldOnB = p.positionWorldOnB;
-            normalWorldOnB = p.normalWorldOnB;
-            distance = p.distance;
         }
     }
 }
