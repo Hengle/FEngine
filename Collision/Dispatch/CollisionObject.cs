@@ -39,14 +39,9 @@ namespace MobaGame.Collision
 
         public CollisionObject()
         {
-            this.collisionFlags = CollisionFlags.STATIC_OBJECT;
+            this.collisionFlags = CollisionFlags.NORMAL_OBJECT;
             InvMass = VFixedPoint.One;
             LinearVel = VInt3.zero;
-        }
-
-        public virtual bool checkCollideWithOverride(CollisionObject co)
-        {
-            return true;
         }
 
         public bool isStaticObject()
@@ -102,16 +97,6 @@ namespace MobaGame.Collision
         public void setCollisionFlags(int collisionFlags)
         {
             this.collisionFlags = collisionFlags;
-        }
-
-        public bool CheckCollideWith(CollisionObject co)
-        {
-            if (checkCollideWith)
-            {
-                return checkCollideWithOverride(co);
-            }
-
-            return true;
         }
 
         public void ApplyImpulse(VInt3 impulse)

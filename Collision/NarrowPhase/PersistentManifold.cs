@@ -63,7 +63,7 @@ namespace MobaGame.Collision
             int lastUsedIndex = cachedPoints - 1;
             if(index != lastUsedIndex)
             {
-                pointCache[index].set(pointCache[lastUsedIndex]);
+                pointCache[index] = pointCache[lastUsedIndex];
             }
 
             cachedPoints--;

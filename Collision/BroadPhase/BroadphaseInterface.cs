@@ -49,13 +49,8 @@ namespace MobaGame.Collision
         {
             this.rayFrom = rayFrom;
             this.rayTo = rayTo;
-
-            
         }
 
         public abstract bool process(BroadphaseProxy proxy);
     }
-
-
-
 }

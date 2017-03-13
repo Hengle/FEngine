@@ -8,7 +8,10 @@
             CollisionObject colObj1 = collisionPair.pProxy1.clientObject;
 
             if (colObj0.isStaticOrKinematicObject() && colObj1.isStaticOrKinematicObject())
+            {
+                collisionPair.manifold.clearManifold(); 
                 return false;
+            }
 
             PersistentManifold manifold = collisionPair.manifold;
             int oldContacts = manifold.getContactPointsNum();

@@ -20,13 +20,6 @@ namespace MobaGame.Collision
             manifold = new PersistentManifold(pProxy0.clientObject, pProxy1.clientObject);
         }
 
-        public BroadphasePair(BroadphasePair p)
-        {
-            pProxy0 = p.pProxy0;
-            pProxy1 = p.pProxy1;
-            manifold = new PersistentManifold(pProxy0.clientObject, pProxy1.clientObject);
-        }
-
         public bool Equals(BroadphasePair obj)
         {
             if (obj == null)
