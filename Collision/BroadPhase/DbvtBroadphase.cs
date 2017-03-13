@@ -16,16 +16,10 @@ namespace MobaGame.Collision
         public DbvtProxy[] stageRoots = new DbvtProxy[STAGECOUNT]; // Stages list
         public OverlappingPairCache paircache;                         // Pair cache
         public VFixedPoint predictedframes;                                  // Frames predicted
-        public int fupdates;                                           // % of fixed updates per frame
-        public int dupdates;                                           // % of dynamic updates per frame
-        public bool releasepaircache;                               // Release pair cache on delete
 
         public DbvtBroadphase(OverlappingPairCache paircache)
         {
-            releasepaircache = (paircache != null? false : true);
             predictedframes = VFixedPoint.Two;
-            fupdates = 1;
-            dupdates = 1;
             this.paircache = paircache != null ? paircache : new HashedOverlappingPairCache();
             for (int i = 0; i < STAGECOUNT; i++)
             {

@@ -12,8 +12,8 @@ namespace MobaGame.Collision
             VIntTransform transform0 = body0.getWorldTransform();
             VIntTransform transform1 = body1.getWorldTransform();
 
-            VInt3 box0Extent = box0.getHalfExtentsWithoutMargin();
-            VInt3 box1Extent = box1.getHalfExtentsWithoutMargin();
+            VInt3 box0Extent = box0.getHalfExtent();
+            VInt3 box1Extent = box1.getHalfExtent();
 
             doBoxBoxGenerateContacts(box0Extent, box1Extent, transform0, transform1, resultOut);
         }

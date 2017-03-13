@@ -200,7 +200,7 @@ namespace MobaGame.Collision
             BoxShape box = (BoxShape)boxObject.getCollisionShape();
             VInt3 p0 = capsuleObject.getWorldTransform().TransformPoint(capsule.getUpAxis() * -capsule.getHalfHeight());
             VInt3 p1 = capsuleObject.getWorldTransform().TransformPoint(capsule.getUpAxis() * capsule.getHalfHeight());
-            if (sweepCapsuleBox(p0, p1, capsule.getRadius(), box.getHalfExtentsWithMargin(), boxObject.getWorldTransform(), dir, length, ref fraction, ref hitNormal))
+            if (sweepCapsuleBox(p0, p1, capsule.getRadius(), box.getHalfExtent(), boxObject.getWorldTransform(), dir, length, ref fraction, ref hitNormal))
             {
                 CastResult result = new CastResult();
                 result.fraction = fraction;

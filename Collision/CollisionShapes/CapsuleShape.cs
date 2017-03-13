@@ -3,56 +3,18 @@ using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    public class CapsuleShape: ConvexInternalShape
+    public class CapsuleShape: CollisionShape
     {
         protected int upAxis;
+        protected VFixedPoint halfHeight;
+        protected VFixedPoint radius;
+        protected VFixedPoint margin;
 
         public CapsuleShape(VFixedPoint radius, VFixedPoint height)
         {
             upAxis = 1;
-            implicitShapeDimensions = new VInt3(radius, height * VFixedPoint.Half, radius);
-        }
-
-        public override VInt3 localGetSupportingVertexWithoutMargin(VInt3 vec0)
-        {
-            VInt3 supVec = VInt3.zero;
-            VFixedPoint maxDot = VFixedPoint.MinValue;
-
-            VInt3 vec = vec0;
-            VFixedPoint lenSqr = vec.sqrMagnitude;
-            if (lenSqr < Globals.EPS) {
-                vec = VInt3.right;
-            }
-            else {
-                vec = vec.Normalize();
-            }
-
-            VFixedPoint radius = getRadius();
-            VInt3 pos = VInt3.zero;
-
-            pos[upAxis] = getHalfHeight();
-            VInt3 tmp1 = vec * localScaling;
-            tmp1 *= radius;
-            VInt3 tmp2 = vec * getMargin();
-            VInt3 vtx = pos + tmp1 - tmp2;
-            VFixedPoint newDot = VInt3.Dot(vec, vtx);
-            if (newDot > maxDot) {
-                maxDot = newDot;
-                supVec = vtx;
-            }
-
-            pos[upAxis] = -getHalfHeight();
-            tmp1 = vec * localScaling;
-            tmp1 *= radius;
-            tmp2 = vec * getMargin();
-            vtx = pos + tmp1 - tmp2;
-            newDot = VInt3.Dot(vec, vtx);
-            if (newDot > maxDot) {
-                maxDot = newDot;
-                supVec = vtx;
-            }
-
-            return supVec;
+            this.halfHeight = height;
+            this.radius = radius;
         }
 
         public override BroadphaseNativeType getShapeType() {
@@ -86,12 +48,21 @@ namespace MobaGame.Collision
         }
 
         public VFixedPoint getRadius() {
-            int radiusAxis = (upAxis + 2) % 3;
-            return implicitShapeDimensions[radiusAxis];
+            return radius; 
         }
 
         public VFixedPoint getHalfHeight() {
-            return implicitShapeDimensions[upAxis];
+            return halfHeight; 
+        }
+
+        public override void setMargin(VFixedPoint margin)
+        {
+            this.margin = margin;
+        }
+
+        public override VFixedPoint getMargin()
+        {
+            return margin;
         }
     }
 }

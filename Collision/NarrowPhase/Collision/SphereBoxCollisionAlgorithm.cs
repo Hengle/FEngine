@@ -28,7 +28,7 @@ namespace MobaGame.Collision
 
         public static bool getSphereDistance(BoxShape boxShape, VIntTransform m44T, VInt3 sphereCenter, VFixedPoint radius, out VInt3 normal, out VFixedPoint penetrationDepth)
         {
-            VInt3 boxHalfExtent = boxShape.getHalfExtentsWithoutMargin();
+            VInt3 boxHalfExtent = boxShape.getHalfExtent();
             VFixedPoint boxMargin = boxShape.getMargin();
             penetrationDepth = VFixedPoint.Zero;
 

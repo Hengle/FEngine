@@ -37,24 +37,16 @@ namespace MobaGame.Collision
             return leaf;
         }
 
-        public void update(Node leaf, DbvtAabbMm volume)
+        public bool update(Node leaf, DbvtAabbMm volume)
         {
-            Node root = removeleaf(this, leaf);
-            if (root != null)
+            if (leaf.volume.Contain(volume))
             {
-                if (lkhd >= 0)
-                {
-                    for (int i = 0; (i < lkhd) && root.parent != null; i++)
-                    {
-                        root = root.parent;
-                    }
-                }
-                else {
-                    root = this.root;
-                }
+                return false;
             }
+            Node root = removeleaf(this, leaf);
             leaf.volume.set(volume);
             insertleaf(this, root, leaf);
+            return true;
         }
 
         public bool update(Node leaf, DbvtAabbMm volume, VInt3 velocity, VFixedPoint margin)
@@ -67,8 +59,7 @@ namespace MobaGame.Collision
             volume.Expand(tmp);
             volume.SignedExpand(velocity);
 
-            update(leaf, volume);
-            return true;
+            return update(leaf, volume);
         }
 
         public void remove(Node leaf)
@@ -207,6 +198,11 @@ namespace MobaGame.Collision
         private static void deletenode(Dbvt pdbvt, Node node)
         {
             pdbvt.free = node;
+            node.childs[0] = null;
+            node.childs[1] = null;
+            node.data = null;
+            node.parent = null;
+            node.volume = null;
             node.height = -1;
         }
 
@@ -238,7 +234,6 @@ namespace MobaGame.Collision
             node.parent = parent;
             node.volume.set(volume);
             node.data = data;
-            node.childs[1] = null;
             node.height = 0;
             return node;
         }

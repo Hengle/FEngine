@@ -19,7 +19,7 @@ namespace MobaGame.Collision
 
             VInt3 p0 = capsuleTransform.TransformPoint(capsuleShape.getUpAxis() * capsuleShape.getHalfHeight()), p1 = capsuleTransform.TransformPoint(capsuleShape.getUpAxis() * -capsuleShape.getHalfHeight());
             VFixedPoint lParam = VFixedPoint.Zero; VInt3 closestPointBoxWS = VInt3.zero;
-            VFixedPoint distSq = SegmentBoxDistance.distanceSegmentBoxSquared(p0, p1, boxShape.getHalfExtentsWithoutMargin(), boxTransform, ref lParam, ref closestPointBoxWS);
+            VFixedPoint distSq = SegmentBoxDistance.distanceSegmentBoxSquared(p0, p1, boxShape.getHalfExtent(), boxTransform, ref lParam, ref closestPointBoxWS);
             VInt3 closestPointLineWS = p0 * (VFixedPoint.One - lParam) + p1 * lParam;
 
             VFixedPoint dist = FMath.Sqrt(distSq) - capsuleShape.getRadius();

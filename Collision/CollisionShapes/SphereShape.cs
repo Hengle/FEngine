@@ -3,16 +3,13 @@ using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    public class SphereShape: ConvexInternalShape
+    public class SphereShape: CollisionShape 
     {
-        public SphereShape(VFixedPoint radius) {
-            implicitShapeDimensions.x = radius;
-            collisionMargin = radius;
-        }
+        VFixedPoint radius;
+        VFixedPoint margin;
 
-        public override VInt3 localGetSupportingVertexWithoutMargin(VInt3 vec)
-        {
-            return VInt3.zero;
+        public SphereShape(VFixedPoint radius) {
+            this.radius = radius;
         }
 
         public override void getAabb(VIntTransform t, out VInt3 aabbMin, out VInt3 aabbMax)
@@ -27,18 +24,19 @@ namespace MobaGame.Collision
             return BroadphaseNativeType.SPHERE_SHAPE_PROXYTYPE;
         }
 
-        public VFixedPoint getRadius() {
-            return implicitShapeDimensions.x * localScaling.x;
+        public VFixedPoint getRadius()
+        {
+            return radius;
         }
 
-        public override void setMargin(VFixedPoint margin) {
-
+        public override void setMargin(VFixedPoint margin)
+        {
+            this.margin = margin;
         }
 
-        public override VFixedPoint getMargin() {
-            // to improve gjk behaviour, use radius+margin as the full margin, so never get into the penetration case
-            // this means, non-uniform scaling is not supported anymore
-            return getRadius();
+        public override VFixedPoint getMargin()
+        {
+            return margin;
         }
 
 
