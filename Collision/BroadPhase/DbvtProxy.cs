@@ -2,7 +2,6 @@
 {
     public class DbvtProxy: BroadphaseProxy
     {
-        public DbvtAabbMm aabb = new DbvtAabbMm();
         public Dbvt.Node leaf;
         public DbvtProxy last, next;
         public int stage;

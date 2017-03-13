@@ -10,10 +10,7 @@ namespace MobaGame.Collision
         public static readonly int DOUBLE_STACKSIZE = SIMPLE_STACKSIZE * 2;
 
         public Node root = null;
-        public Node free = null;
-        public int lkhd = -1;
         public int leaves = 0;
-        public int opath = 0;
 
         public void clear()
         {
@@ -21,7 +18,6 @@ namespace MobaGame.Collision
             {
                 recursedeletenode(this, root);
             }
-            free = null;
         }
 
         public bool empty()
@@ -37,36 +33,22 @@ namespace MobaGame.Collision
             return leaf;
         }
 
-        public bool update(DbvtProxy proxy, DbvtAabbMm volume)
-        {
-            if (proxy.leaf.volume.Contain(volume))
-            {
-                return false;
-            }
-            removeleaf(this, proxy.leaf);
-            proxy.leaf.volume = volume;
-            insertleaf(this, proxy.leaf);
-            return true;
-        }
-
-        public bool update(DbvtProxy proxy, DbvtAabbMm volume, VInt3 velocity, VFixedPoint margin)
-        {
-            if (proxy.leaf.volume.Contain(volume))
-            {
-                return false;
-            }
-            VInt3 tmp = new VInt3(margin, margin, margin);
-            volume.Expand(tmp);
-            volume.SignedExpand(velocity);
-
-            return update(proxy, volume);
-        }
-
         public void remove(Node leaf)
         {
             removeleaf(this, leaf);
             deletenode(this, leaf);
-            leaves--;
+        }
+
+        public bool update(Node leaf, DbvtAabbMm volume)
+        {
+            if (leaf.volume.Contain(volume))
+            {
+                return false;
+            }
+            removeleaf(this, leaf);
+            leaf.volume = volume;
+            insertleaf(this, leaf);
+            return true;
         }
 
         public static void collideTT(Node root0, Node root1, Dispatcher dispatcher, ICollide policy)
@@ -197,13 +179,13 @@ namespace MobaGame.Collision
 
         private static void deletenode(Dbvt pdbvt, Node node)
         {
-            pdbvt.free = node;
             node.childs[0] = null;
             node.childs[1] = null;
             node.data = null;
             node.parent = null;
             node.volume = null;
             node.height = -1;
+            pdbvt.leaves--;
         }
 
         private static void recursedeletenode(Dbvt pdbvt, Node node)
@@ -222,16 +204,7 @@ namespace MobaGame.Collision
 
         private static Node createnode(Dbvt pdbvt, Node parent, DbvtAabbMm volume, DbvtProxy data)
         {
-            
-            Node node;
-            if (pdbvt.free != null)
-            {
-                node = pdbvt.free;
-                pdbvt.free = null;
-            }
-            else {
-                node = new Node();
-            }
+            Node node = new Node();
             node.parent = parent;
             node.volume = volume;
             node.data = data;
@@ -248,32 +221,25 @@ namespace MobaGame.Collision
             }
             else
             {
-                while (!pdbvt.root.isleaf())
+                Node node = pdbvt.root;
+                while (!node.isleaf())
                 {
-                    if (DbvtAabbMm.Proximity(pdbvt.root.childs[0].volume, leaf.volume) <
-                        DbvtAabbMm.Proximity(pdbvt.root.childs[1].volume, leaf.volume))
+                    if (DbvtAabbMm.Proximity(node.childs[0].volume, leaf.volume) <
+                        DbvtAabbMm.Proximity(node.childs[1].volume, leaf.volume))
                     {
-                        pdbvt.root = pdbvt.root.childs[0];
+                        node = node.childs[0];
                     }
                     else
                     {
-                        pdbvt.root = pdbvt.root.childs[1];
+                        node = node.childs[1];
                     }
                 }
-                Node sibling = pdbvt.root;
-                Node oldParent = pdbvt.root.parent;
+                Node sibling = node;
+                Node oldParent = node.parent;
                 Node newParent = createnode(pdbvt, oldParent, merge(leaf.volume, sibling.volume, new DbvtAabbMm()), null);
                 if (oldParent != null)
                 {
-                    if(oldParent.childs[0] == sibling)
-                    {
-                        oldParent.childs[0] = newParent;
-                    }    
-                    else
-                    {
-                        oldParent.childs[1] = newParent;
-                    }
-
+                    oldParent.childs[indexof(sibling)] = newParent;
                     newParent.childs[0] = sibling;
                     newParent.childs[1] = leaf;
                     sibling.parent = newParent;
@@ -288,10 +254,10 @@ namespace MobaGame.Collision
                     pdbvt.root = newParent;
                 }
 
-                Node node = leaf.parent;
+                node = leaf.parent;
                 while(node != null)
                 {
-                    //node = Balance(pdbvt, node);
+                    node = Balance(pdbvt, node);
                     Node child0 = node.childs[0];
                     Node child1 = node.childs[1];
                     node.height = Math.Max(child0.height, child1.height) + 1;
@@ -322,7 +288,7 @@ namespace MobaGame.Collision
                     Node node = grandParent;
                     while(node != null)
                     {
-                        //node = Balance(pdbvt, node);
+                        node = Balance(pdbvt, node);
                         Node child0 = node.childs[0];
                         Node child1 = node.childs[1];
                         node.height = Math.Max(child0.height, child1.height) + 1;
@@ -360,9 +326,9 @@ namespace MobaGame.Collision
                 C.childs[0] = A;
                 C.parent = A.parent;
                 // A's old parent should point to C
-                if (C.parent != null)
+                if (A.parent != null)
                 {
-                    C.parent.childs[indexof(A)] = C;
+                    A.parent.childs[indexof(A)] = C;
                 }
                 else
                 {
@@ -406,9 +372,9 @@ namespace MobaGame.Collision
                 B.childs[0] = A;
                 B.parent = A.parent;
                 // A's old parent should point to B
-                if (B.parent != null)
+                if (A.parent != null)
                 {
-                    B.parent.childs[indexof(A)] = B;
+                    A.parent.childs[indexof(A)] = B;
                 }
                 else
                 {

@@ -45,8 +45,9 @@ namespace MobaGame.Collision
             {
                 stageRoots[DYNAMIC_SET] = listremove(current, stageRoots[DYNAMIC_SET]);
                 stageRoots[FIXED_SET] = listappend(current, stageRoots[FIXED_SET]);
+                DbvtAabbMm volume = current.leaf.volume;
                 sets[DYNAMIC_SET].remove(current.leaf);
-                current.leaf = sets[FIXED_SET].insert(current.aabb, current);
+                current.leaf = sets[FIXED_SET].insert(volume, current);
                 current.stage = FIXED_SET;
                 current = stageRoots[DYNAMIC_SET];
             }
@@ -62,7 +63,7 @@ namespace MobaGame.Collision
                         BroadphasePair p = pairs[i];
                         DbvtProxy pa = (DbvtProxy) p.pProxy0;
                         DbvtProxy pb = (DbvtProxy) p.pProxy1;
-                        if (!DbvtAabbMm.Intersect(pa.aabb, pb.aabb))
+                        if (!DbvtAabbMm.Intersect(pa.leaf.volume, pb.leaf.volume))
                         {
                             if (pa.getUid() > pb.getUid())
                             {
@@ -109,8 +110,8 @@ namespace MobaGame.Collision
 
         public override BroadphaseProxy createProxy(VInt3 aabbMin, VInt3 aabbMax, BroadphaseNativeType shapeType, CollisionObject collisionObject, short collisionFilterGroup, short collisionFilterMask, Dispatcher dispatcher) {
             DbvtProxy proxy = new DbvtProxy(collisionObject, collisionFilterGroup, collisionFilterMask);
-            DbvtAabbMm.FromMM(aabbMin, aabbMax, proxy.aabb);
-            proxy.leaf = sets[DYNAMIC_SET].insert(proxy.aabb, proxy);
+            DbvtAabbMm volume = DbvtAabbMm.FromMM(aabbMin, aabbMax, new DbvtAabbMm());
+            proxy.leaf = sets[DYNAMIC_SET].insert(volume, proxy);
             proxy.stage = DYNAMIC_SET;
             proxy.uniqueId = UUID.GetNextUUID();
             stageRoots[DYNAMIC_SET] = listappend(proxy, stageRoots[DYNAMIC_SET]);
@@ -131,28 +132,21 @@ namespace MobaGame.Collision
             
             if(aabb != proxy.leaf.volume)
             {
+                proxy.leaf.volume = aabb;
                 if (proxy.stage == FIXED_SET)
                 {
                     sets[FIXED_SET].remove(proxy.leaf);
+                    stageRoots[FIXED_SET] = listremove(proxy, stageRoots[FIXED_SET]);
                     proxy.leaf = sets[DYNAMIC_SET].insert(aabb, proxy);
-                }
-                else if (DbvtAabbMm.Intersect(proxy.leaf.volume, aabb))
-                {
-                    // Moving	
-                    VInt3 delta = (aabbMin + aabbMax) * VFixedPoint.Half;
-                    delta -= proxy.aabb.Center();
-                    delta *= predictedframes;
-                    sets[DYNAMIC_SET].update(proxy, aabb, delta, DBVT_BP_MARGIN);
+                    proxy.stage = DYNAMIC_SET;
+                    stageRoots[DYNAMIC_SET] = listappend(proxy, stageRoots[DYNAMIC_SET]);
                 }
                 else
                 {
                     // teleporting:
-                    sets[DYNAMIC_SET].update(proxy, aabb);
+                    sets[DYNAMIC_SET].update(proxy.leaf, aabb);
+
                 }
-                listremove(proxy, stageRoots[proxy.stage]);
-                proxy.aabb = new DbvtAabbMm(aabb);
-                proxy.stage = DYNAMIC_SET;
-                stageRoots[DYNAMIC_SET] = listappend(proxy, stageRoots[DYNAMIC_SET]);
             }
         }
 
