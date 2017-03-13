@@ -53,7 +53,7 @@ namespace MobaGame.Collision
                 cachedPoints++;
             }
             newPoint.localPointA = body0.getWorldTransform().InverseTransformPoint(newPoint.positionWorldOnA);
-            newPoint.localPointB = body0.getWorldTransform().InverseTransformPoint(newPoint.positionWorldOnB);
+            newPoint.localPointB = body1.getWorldTransform().InverseTransformPoint(newPoint.positionWorldOnB);
             pointCache[insertIndex] = newPoint;
             return insertIndex;
         }
