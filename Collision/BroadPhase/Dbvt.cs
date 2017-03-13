@@ -32,26 +32,26 @@ namespace MobaGame.Collision
         public Node insert(DbvtAabbMm box, DbvtProxy data)
         {
             Node leaf = createnode(this, null, box, data);
-            insertleaf(this, root, leaf);
+            insertleaf(this, leaf);
             leaves++;
             return leaf;
         }
 
-        public bool update(Node leaf, DbvtAabbMm volume)
+        public bool update(DbvtProxy proxy, DbvtAabbMm volume)
         {
-            if (leaf.volume.Contain(volume))
+            if (proxy.leaf.volume.Contain(volume))
             {
                 return false;
             }
-            Node root = removeleaf(this, leaf);
-            leaf.volume.set(volume);
-            insertleaf(this, root, leaf);
+            removeleaf(this, proxy.leaf);
+            proxy.leaf.volume = volume;
+            insertleaf(this, proxy.leaf);
             return true;
         }
 
-        public bool update(Node leaf, DbvtAabbMm volume, VInt3 velocity, VFixedPoint margin)
+        public bool update(DbvtProxy proxy, DbvtAabbMm volume, VInt3 velocity, VFixedPoint margin)
         {
-            if (leaf.volume.Contain(volume))
+            if (proxy.leaf.volume.Contain(volume))
             {
                 return false;
             }
@@ -59,7 +59,7 @@ namespace MobaGame.Collision
             volume.Expand(tmp);
             volume.SignedExpand(velocity);
 
-            return update(leaf, volume);
+            return update(proxy, volume);
         }
 
         public void remove(Node leaf)
@@ -222,6 +222,7 @@ namespace MobaGame.Collision
 
         private static Node createnode(Dbvt pdbvt, Node parent, DbvtAabbMm volume, DbvtProxy data)
         {
+            
             Node node;
             if (pdbvt.free != null)
             {
@@ -232,34 +233,35 @@ namespace MobaGame.Collision
                 node = new Node();
             }
             node.parent = parent;
-            node.volume.set(volume);
+            node.volume = volume;
             node.data = data;
             node.height = 0;
             return node;
         }
 
-        private static void insertleaf(Dbvt pdbvt, Node root, Node leaf)
+        private static void insertleaf(Dbvt pdbvt, Node leaf)
         {
             if (pdbvt.root == null)
             {
                 pdbvt.root = leaf;
                 leaf.parent = null;
             }
-            else {
-                while (!root.isleaf())
+            else
+            {
+                while (!pdbvt.root.isleaf())
                 {
-                    if (DbvtAabbMm.Proximity(root.childs[0].volume, leaf.volume) <
-                        DbvtAabbMm.Proximity(root.childs[1].volume, leaf.volume))
+                    if (DbvtAabbMm.Proximity(pdbvt.root.childs[0].volume, leaf.volume) <
+                        DbvtAabbMm.Proximity(pdbvt.root.childs[1].volume, leaf.volume))
                     {
-                        root = root.childs[0];
+                        pdbvt.root = pdbvt.root.childs[0];
                     }
                     else
                     {
-                        root = root.childs[1];
+                        pdbvt.root = pdbvt.root.childs[1];
                     }
                 }
-                Node sibling = root;
-                Node oldParent = root.parent;
+                Node sibling = pdbvt.root;
+                Node oldParent = pdbvt.root.parent;
                 Node newParent = createnode(pdbvt, oldParent, merge(leaf.volume, sibling.volume, new DbvtAabbMm()), null);
                 if (oldParent != null)
                 {
@@ -283,12 +285,13 @@ namespace MobaGame.Collision
                     newParent.childs[1] = leaf;
                     sibling.parent = newParent;
                     leaf.parent = newParent;
+                    pdbvt.root = newParent;
                 }
 
                 Node node = leaf.parent;
                 while(node != null)
                 {
-                    node = Balance(pdbvt, node);
+                    //node = Balance(pdbvt, node);
                     Node child0 = node.childs[0];
                     Node child1 = node.childs[1];
                     node.height = Math.Max(child0.height, child1.height) + 1;
@@ -298,19 +301,19 @@ namespace MobaGame.Collision
             }
         }
 
-        private static Node removeleaf(Dbvt pdbvt, Node leaf)
+        private static void removeleaf(Dbvt pdbvt, Node leaf)
         {
             if (leaf == pdbvt.root)
             {
                 pdbvt.root = null;
-                return null;
+                return;
             }
             else
             {
                 Node parent = leaf.parent;
-                Node grandParent = parent.parent;
+                Node grandParent = parent != null ? parent.parent : null;
                 Node sibling = parent.childs[1 - indexof(leaf)];
-                if(grandParent == null)
+                if(grandParent != null)
                 {
                     grandParent.childs[indexof(parent)] = sibling;
                     sibling.parent = grandParent;
@@ -319,7 +322,7 @@ namespace MobaGame.Collision
                     Node node = grandParent;
                     while(node != null)
                     {
-                        node = Balance(pdbvt, node);
+                        //node = Balance(pdbvt, node);
                         Node child0 = node.childs[0];
                         Node child1 = node.childs[1];
                         node.height = Math.Max(child0.height, child1.height) + 1;
@@ -333,7 +336,6 @@ namespace MobaGame.Collision
                     sibling.parent = null;
                     deletenode(pdbvt, parent);
                 }
-                return pdbvt.root;
             }
         }
 

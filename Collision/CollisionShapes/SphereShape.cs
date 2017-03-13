@@ -15,7 +15,8 @@ namespace MobaGame.Collision
         public override void getAabb(VIntTransform t, out VInt3 aabbMin, out VInt3 aabbMax)
         {
             VInt3 center = t.position;
-            VInt3 extent = new VInt3(getMargin(), getMargin(), getMargin());
+            VFixedPoint radiusWithMargin = radius + getMargin();
+            VInt3 extent = new VInt3(radiusWithMargin, radiusWithMargin, radiusWithMargin);
             aabbMin = center - extent;
             aabbMax = center + extent;
         }

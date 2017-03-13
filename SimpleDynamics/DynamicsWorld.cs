@@ -5,7 +5,7 @@ namespace MobaGame.Collision
 {
     public class DynamicsWorld: CollisionWorld
     {
-        public List<ActionInterface> actions;
+        public List<ActionInterface> actions = new List<ActionInterface>();
 
         int iteration;
         public DynamicsWorld(Dispatcher dispatcher, BroadphaseInterface broadphase):base(dispatcher, broadphase)
@@ -15,7 +15,6 @@ namespace MobaGame.Collision
 
         public override void Tick(VFixedPoint dt)
         {
-            updateAabbs();
             ResolveContactConstraint(dt);
             //process actions
             for (int i = 0; i < actions.Count; i++)
@@ -26,7 +25,7 @@ namespace MobaGame.Collision
 
         private void ResolveContactConstraint(VFixedPoint dt)
         {
-            //performDiscreteCollisionDetection();
+            performDiscreteCollisionDetection();
             //resolve contact contraints
             
             for(int i = 0; i < iteration; i++)

@@ -13,16 +13,14 @@
         {
             DbvtProxy pa = na.data;
             DbvtProxy pb = nb.data;
-            if (DbvtAabbMm.Intersect(pa.aabb, pb.aabb))
+            
+            if (pa.getUid() > pb.getUid())
             {
-                if (pa.getUid() > pb.getUid())
-                {
-                    DbvtProxy tmp = pa;
-                    pa = pb;
-                    pb = tmp;
-                }
-                pbp.paircache.addOverlappingPair(pa, pb);
+                DbvtProxy tmp = pa;
+                pa = pb;
+                pb = tmp;
             }
+            pbp.paircache.addOverlappingPair(pa, pb);
         }
     }
 }

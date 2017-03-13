@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace MobaGame
@@ -359,6 +358,14 @@ namespace MobaGame
             public VInt3 recip()
             {
                 return new VInt3(VFixedPoint.One / x, VFixedPoint.One / y, VFixedPoint.One / z);
+            }
+
+            public Vector3 Vec3
+            {
+                get
+                {
+                    return new Vector3(x.ToFloat, y.ToFloat, z.ToFloat);
+                }
             }
         }
     }

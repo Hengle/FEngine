@@ -32,5 +32,10 @@ namespace MobaGame.Collision
         {
             return dynamicWorld;
         }
+
+        public OverlappingPairCache getOverlappingPairCache()
+        {
+            return pbp;
+        }
     }
 }

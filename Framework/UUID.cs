@@ -13,6 +13,11 @@
             return nextID;
         }
 
+        public override string ToString()
+        {
+            return id.ToString();
+        }
+
         public override int GetHashCode()
         {
             return id;

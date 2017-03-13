@@ -37,7 +37,7 @@ namespace MobaGame.Collision
 
         protected void performDiscreteCollisionDetection()
         {
-            //updateAabbs();
+            updateAabbs();
             broadphase.calculateOverlappingPairs(dispatcher1);
             Dispatcher dispatcher = getDispatcher();
             {
@@ -123,18 +123,12 @@ namespace MobaGame.Collision
 
             colObj.getCollisionShape().getAabb(colObj.getWorldTransform(), out minAabb, out maxAabb);
             // need to increase the aabb for contact thresholds
-            VInt3 contactThreshold = new VInt3(Globals.getContactBreakingThreshold(), Globals.getContactBreakingThreshold(), Globals.getContactBreakingThreshold());
+            /*VInt3 contactThreshold = new VInt3(Globals.getContactBreakingThreshold(), Globals.getContactBreakingThreshold(), Globals.getContactBreakingThreshold());
             minAabb -= contactThreshold;
-            maxAabb += contactThreshold;
+            maxAabb += contactThreshold;*/
 
             BroadphaseInterface bp = broadphase;
-
-            // moving objects should be moderately sized, probably something wrong if not
-            VInt3 tmp = maxAabb - minAabb; // TODO: optimize
-            if (colObj.isStaticObject() || (tmp.sqrMagnitude < VFixedPoint.LARGE_NUMBER))
-            {
-                bp.setAabb(colObj.getBroadphaseHandle(), minAabb, maxAabb, dispatcher1);
-            }
+            bp.setAabb(colObj.getBroadphaseHandle(), minAabb, maxAabb, dispatcher1);
         }
 
         public void updateAabbs()

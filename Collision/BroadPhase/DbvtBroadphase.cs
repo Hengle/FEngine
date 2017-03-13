@@ -40,20 +40,17 @@ namespace MobaGame.Collision
 
             //dynamic -> fixed set:
             DbvtProxy current = stageRoots[DYNAMIC_SET];
-            if (current != null)
+
+            while (current != null)
             {
-                do
-                {
-                    DbvtProxy next = current.links[1];
-                    stageRoots[current.stage] = listremove(current, stageRoots[current.stage]);
-                    stageRoots[FIXED_SET] = listappend(current, stageRoots[FIXED_SET]);
-                    sets[DYNAMIC_SET].remove(current.leaf);
-                    current.leaf = sets[FIXED_SET].insert(current.aabb, current);
-                    current.stage = FIXED_SET;
-                    current = next;
-                }
-                while (current != null);
+                stageRoots[DYNAMIC_SET] = listremove(current, stageRoots[DYNAMIC_SET]);
+                stageRoots[FIXED_SET] = listappend(current, stageRoots[FIXED_SET]);
+                sets[DYNAMIC_SET].remove(current.leaf);
+                current.leaf = sets[FIXED_SET].insert(current.aabb, current);
+                current.stage = FIXED_SET;
+                current = stageRoots[DYNAMIC_SET];
             }
+            
 
             // clean up:
             {
@@ -82,25 +79,31 @@ namespace MobaGame.Collision
             }
         }
 
-        private static DbvtProxy listappend(DbvtProxy item, DbvtProxy list) {
-            item.links[0] = null;
-            item.links[1] = list;
-            if (list != null) list.links[0] = item;
-            list = item;
-            return list;
+        private static DbvtProxy listappend(DbvtProxy item, DbvtProxy list)
+        {
+            item.last = null;
+            item.next = list;
+            if (list != null) list.last = item;
+            return item;
         }
 
-        private static DbvtProxy listremove(DbvtProxy item, DbvtProxy list) {
-            if (item.links[0] != null) {
-                item.links[0].links[1] = item.links[1];
+        private static DbvtProxy listremove(DbvtProxy item, DbvtProxy list)
+        {
+            if (item.last != null)
+            {
+                item.last.next = item.next;
             }
-            else {
-                list = item.links[1];
+            else
+            {
+                list = item.next;
             }
 
-            if (item.links[1] != null) {
-                item.links[1].links[0] = item.links[0];
+            if (item.next != null)
+            {
+                item.next.last = item.last;
             }
+
+            item.last = item.next = null;
             return list;
         }
 
@@ -139,17 +142,17 @@ namespace MobaGame.Collision
                     VInt3 delta = (aabbMin + aabbMax) * VFixedPoint.Half;
                     delta -= proxy.aabb.Center();
                     delta *= predictedframes;
-                    sets[DYNAMIC_SET].update(proxy.leaf, aabb, delta, DBVT_BP_MARGIN);
+                    sets[DYNAMIC_SET].update(proxy, aabb, delta, DBVT_BP_MARGIN);
                 }
                 else
                 {
                     // teleporting:
-                    sets[DYNAMIC_SET].update(proxy.leaf, aabb);
+                    sets[DYNAMIC_SET].update(proxy, aabb);
                 }
                 listremove(proxy, stageRoots[proxy.stage]);
-                proxy.aabb.set(aabb);
+                proxy.aabb = new DbvtAabbMm(aabb);
                 proxy.stage = DYNAMIC_SET;
-                listappend(proxy, stageRoots[DYNAMIC_SET]);
+                stageRoots[DYNAMIC_SET] = listappend(proxy, stageRoots[DYNAMIC_SET]);
             }
         }
 
@@ -174,12 +177,12 @@ namespace MobaGame.Collision
                 }
                 else
                 {
-                    bounds.set(sets[DYNAMIC_SET].root.volume);
+                    bounds = new DbvtAabbMm(sets[DYNAMIC_SET].root.volume);
                 }
             }
             else if(!sets[FIXED_SET].empty())
             {
-                bounds.set(sets[FIXED_SET].root.volume);
+                bounds = new DbvtAabbMm(sets[FIXED_SET].root.volume);
             }
             else
             {

@@ -17,10 +17,9 @@ namespace MobaGame.Collision
                 return false;
             }
 
-            VInt3 aabbMin, aabbMax;
-            box.getAabb(VIntTransform.Identity, out aabbMin, out aabbMax);
+            VInt3 aabbMin = boxTransform.position - box.getHalfExtent(), aabbMax = boxTransform.position + box.getHalfExtent();
             aabbMax += VInt3.one * sphere.getRadius();
-
+            aabbMin -= VInt3.one * sphere.getRadius();
             return BoxRaytestAlgorithm.rayTestBox(fromPos, ToPos, aabbMax, boxTransform, ref dist, ref normal);
         }
 

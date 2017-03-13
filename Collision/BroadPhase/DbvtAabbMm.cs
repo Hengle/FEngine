@@ -13,11 +13,6 @@ namespace MobaGame.Collision
 
         public DbvtAabbMm(DbvtAabbMm o)
         {
-            set(o);
-        }
-
-        public void set(DbvtAabbMm o)
-        {
             mi = o.mi;
             mx = o.mx;
         }
