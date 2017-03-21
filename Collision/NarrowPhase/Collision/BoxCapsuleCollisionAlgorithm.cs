@@ -18,50 +18,39 @@ namespace MobaGame.Collision
             VIntTransform capsuleTransform = capsuleObject.getWorldTransform();
 
             VInt3 p0 = capsuleTransform.TransformPoint(capsuleShape.getUpAxis() * capsuleShape.getHalfHeight()), p1 = capsuleTransform.TransformPoint(capsuleShape.getUpAxis() * -capsuleShape.getHalfHeight());
-            VFixedPoint lParam = VFixedPoint.Zero; VInt3 closestPointBoxWS = VInt3.zero;
-            VFixedPoint distSq = SegmentBoxDistance.distanceSegmentBoxSquared(p0, p1, boxShape.getHalfExtent(), boxTransform, ref lParam, ref closestPointBoxWS);
+            VFixedPoint lParam = VFixedPoint.Zero; VInt3 closestPointBoxLS = VInt3.zero;
+            VFixedPoint distSq = SegmentBoxDistance.distanceSegmentBoxSquared(p0, p1, boxShape.getHalfExtent(), boxTransform, ref lParam, ref closestPointBoxLS);
+            VInt3 closestPointBoxWS = boxTransform.TransformPoint(closestPointBoxLS);
             VInt3 closestPointLineWS = p0 * (VFixedPoint.One - lParam) + p1 * lParam;
 
             VFixedPoint dist = FMath.Sqrt(distSq) - capsuleShape.getRadius();
 
-            if(closestPointBoxWS != closestPointLineWS)
+            if (dist > VFixedPoint.Zero)
+                return;
+
+            if((closestPointBoxWS - closestPointLineWS).sqrMagnitude > Globals.EPS2)
             {
                 VInt3 normalOnBoxWS = (closestPointLineWS - closestPointBoxWS).Normalize();
 
                 ManifoldPoint contactPoint = new ManifoldPoint(needSwap ? closestPointLineWS - normalOnBoxWS * capsuleShape.getRadius() : closestPointBoxWS,
                     !needSwap ? closestPointLineWS - normalOnBoxWS * capsuleShape.getRadius() : closestPointBoxWS,
-                    normalOnBoxWS * (needSwap ? 1 : -1), dist); 
+                    normalOnBoxWS * (needSwap ? 1 : -1), dist);
+                resultOut.addManifoldPoint(contactPoint);
             }
             else //box and line are intersected
             {
-                int reflection = 1;
-                int axis = 0;
-                VFixedPoint largestValue = VFixedPoint.Zero;
-                VInt3 boxToPoint = boxTransform.InverseTransformPoint(closestPointBoxWS);
-                for(int i = 0; i < 3; i++)
+                //EPA
+                LineShape coreShape = new LineShape(capsuleShape);
+                VInt3 pa = VInt3.zero, pb = VInt3.zero, normal = VInt3.zero;
+                VFixedPoint depth = VFixedPoint.Zero;
+                PxGJKStatus result = EpaSolver.calcPenDepth(coreShape, boxShape, capsuleTransform, boxTransform, ref pa, ref pb, ref normal, ref depth);
+                if (result == PxGJKStatus.EPA_CONTACT)
                 {
-                    VFixedPoint val = boxToPoint[i];
-                    int localReflection = 1;
-                    if(val < VFixedPoint.Zero)
-                    {
-                        localReflection = -1;
-                        val *= -1;
-                    }
-                    if(val > largestValue)
-                    {
-                        reflection = localReflection;
-                        axis = i;
-                        largestValue = val;
-                    }
+                    ManifoldPoint contactPoint = new ManifoldPoint(needSwap ? pa - normal * capsuleShape.getRadius() : pb, !needSwap ? pa - normal * capsuleShape.getRadius() : pb, needSwap ? normal : -normal, depth - capsuleShape.getRadius());
+                    resultOut.addManifoldPoint(contactPoint);
                 }
-
-                VInt3 normal = VInt3.zero; normal[axis] = VFixedPoint.One * reflection;
-                normal = boxTransform.TransformDirection(normal);
-
-                ManifoldPoint contactPoint = new ManifoldPoint(needSwap ? closestPointLineWS - normal * capsuleShape.getRadius() : closestPointBoxWS,
-                    !needSwap ? closestPointLineWS - normal * capsuleShape.getRadius() : closestPointBoxWS,
-                    normal * (needSwap ? 1 : -1), dist);
             }
         }
+
     }
 }

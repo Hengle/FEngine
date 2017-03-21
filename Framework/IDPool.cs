@@ -12,9 +12,8 @@ namespace MobaGame.Framework
 
         public IDPoolBase(int capacity)
         {
-            mFreeID = new int[capacity];
             this.capacity = capacity;
-            size = 0;
+            freeAll();
         }
 
         public void freeID(int id)
@@ -31,8 +30,9 @@ namespace MobaGame.Framework
 
         public virtual void freeAll()
         {
-            mCurrentID = 0;
             mFreeID = new int[capacity];
+            mCurrentID = 0;
+            size = 0;
         }
 
         public int getNewID()

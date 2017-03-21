@@ -25,14 +25,10 @@ namespace MobaGame.Collision
             //if start point is within cylinder, not intersect
             if (c < VFixedPoint.Zero) return false;
             //if segment is parallel to cylinder, they do not intersect with each other
-            /*if (a.Abs() < Globals.EPS)
+            if (a.Abs() < Globals.EPS)
             {
-                if (c > VFixedPoint.Zero) return false;
-                if (md < VFixedPoint.Zero) t = -mn / nn;
-                else if (md > dd) t = (nd - mn) / nn;
-                else t = VFixedPoint.Zero;
-                return true;
-            }*/
+                return false;
+            }
 
             VFixedPoint b = dd * mn - nd * md;
             VFixedPoint discr = b * b - a * c;
@@ -53,13 +49,19 @@ namespace MobaGame.Collision
                 return k + dd - md * 2 + t * ((md - nd) * 2 + t * nn) <= VFixedPoint.Zero;
             }*/
 
-            VInt3 parallelDirVector = d * VInt3.Dot(d, n) / d.sqrMagnitude;
-            VInt3 tmpNormal = (m - parallelDirVector).Normalize();
+            VInt3 hitPoint = sa + n * t;
+            VFixedPoint param = VFixedPoint.Zero;
+            Distance.distancePointSegmentSquared(p, q, hitPoint, ref param);
+            if (param <= VFixedPoint.Zero || param >= VFixedPoint.One)
+                return false;
+            VInt3 closestPoint = p * (VFixedPoint.One - param) + q * param;
+            normal = (hitPoint - closestPoint) / r;
             return true;
         }
 
         public static bool raycastCapsule(VInt3 from, VInt3 to, VInt3 p0, VInt3 p1, VFixedPoint radius, ref VInt3 hitNormal, ref VFixedPoint t)
         {
+            t = VFixedPoint.One;
             VInt3 capPos = (p0 + p1) * VFixedPoint.Half;
             VInt3 capsDir = p0 - p1;
             VFixedPoint kW = capsDir.sqrMagnitude;
@@ -78,30 +80,33 @@ namespace MobaGame.Collision
                 }
             }
 
+            VFixedPoint tmp = VFixedPoint.Zero;
+            if (Distance.distancePointSegmentSquared(p0, p1, from, ref tmp) < radius * radius)
+                return false;
+
             VFixedPoint tmpT = VFixedPoint.One;
-            VInt3 tmpNormal = VInt3.one;
-            bool hit = false;
-            hit = IntersectSegmentCylinder(from, to, p0, p1, radius, ref hitNormal, ref t);
+            VInt3 tmpNormal = VInt3.zero;
+            bool hitCyclinder = IntersectSegmentCylinder(from, to, p0, p1, radius, ref tmpNormal, ref tmpT);
+            if(hitCyclinder)
+            {
+                hitNormal = tmpNormal;
+                t = tmpT;
+            }
+
             bool hitSphere1 = SphereRaytestAlgorithm.rayTestSphere(from, to, p0, radius, ref tmpNormal, ref tmpT);
             if (hitSphere1 && tmpT < t)
             {
-                VInt3 hitPos = from * (VFixedPoint.One - tmpT) + to * tmpT;
-                if (VInt3.Dot(hitPos - p0, capsDir) * VInt3.Dot(hitPos, capsDir) > VFixedPoint.Zero)
-                {
-                    t = tmpT; hitNormal = tmpNormal; hit = true;
-                }
+                t = tmpT;
+                hitNormal = tmpNormal;
             }
             bool hitSphere2 = SphereRaytestAlgorithm.rayTestSphere(from, to, p1, radius, ref tmpNormal, ref tmpT);
             if (hitSphere2 && tmpT < t)
             {
-                VInt3 hitPos = from * (VFixedPoint.One - tmpT) + to * tmpT;
-                if (VInt3.Dot(hitPos - p0, capsDir) * VInt3.Dot(hitPos, capsDir) > VFixedPoint.Zero)
-                {
-                    t = tmpT; hitNormal = tmpNormal; hit = true;
-                }
+                t = tmpT;
+                hitNormal = tmpNormal;
             }
 
-            return hit; 
+            return hitCyclinder || hitSphere1 || hitSphere2; 
         }
 
         public static void rayTestSingle(VInt3 fromPos, VInt3 toPos, CollisionObject collisionObject, RayResultCallback resultCallback)

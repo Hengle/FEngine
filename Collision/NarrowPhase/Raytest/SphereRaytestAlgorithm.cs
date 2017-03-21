@@ -19,26 +19,31 @@ namespace MobaGame.Collision
 
         public static bool rayTestSphere(VInt3 fromPos, VInt3 toPos, VInt3 spherePosition, VFixedPoint radius, ref VInt3 hitNormal, ref VFixedPoint t0)
         { 
-            if((fromPos - toPos).sqrMagnitude < radius * radius)
+            if((fromPos - spherePosition).sqrMagnitude < radius * radius)
             {
                 //if start point in sphere, not contact
                 return false;
             }
 
-            VInt3 d = (toPos - fromPos).Normalize();
-            VInt3 p = fromPos;
+            VInt3 m = fromPos - spherePosition;
+            VInt3 d = toPos - fromPos;
+            VFixedPoint a = d.sqrMagnitude;
+            VFixedPoint b = VInt3.Dot(m, d);
+            VFixedPoint c = m.sqrMagnitude - radius * radius;
+            if(c > VFixedPoint.Zero && b > VFixedPoint.Zero)
+                return false;
 
-            VFixedPoint tm = -VInt3.Dot(p, d);
-            VFixedPoint lm2 = VInt3.Dot(p, p) - tm * tm;
-            VFixedPoint deltaT = FMath.Sqrt(VFixedPoint.One - lm2);
-            t0 = tm + deltaT;
-            if(t0 > VFixedPoint.Zero && t0 < VFixedPoint.One)
-            {
-                VInt3 contactPoint = p + d * t0;
-                hitNormal = contactPoint - spherePosition;
-                return true;
-            }
-            return false;
+            VFixedPoint discr = b * b - a * c;
+            if (discr < VFixedPoint.Zero)
+                return false;
+
+            t0 = (-b - FMath.Sqrt(discr)) / a;
+            if (t0 < VFixedPoint.Zero)
+                return false;
+
+            VInt3 q = fromPos + d * t0;
+            hitNormal = (q - spherePosition) / radius;
+            return true;
         }
     }
 }

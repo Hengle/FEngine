@@ -40,6 +40,9 @@ namespace MobaGame.Collision
             return margin;
         }
 
-
+        public override VInt3 support(VInt3 dir)
+        {
+            return dir * radius; 
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace MobaGame.Collision
 {
     public class CollisionObject
     {
+        public string name = "";
         protected VIntTransform worldTransform = VIntTransform.Identity;
         public VInt3 LinearVel
         {

@@ -7,51 +7,43 @@ namespace MobaGame.Collision
     {
         public static bool RayAabb2(VInt3 rayFrom,
                                   VInt3 rayTo,
-                                  VInt3[] bounds,
+                                  VInt3 aabbMin, VInt3 aabbMax,
                                   ref VFixedPoint tmin,
                                   ref VFixedPoint tmax
 								  )
         {
-            VInt3 rayDir = (rayTo - rayFrom);
-            VFixedPoint lambdaMax = rayDir.magnitude;
-            rayDir = rayDir.Normalize();
+            VInt3 d = rayTo - rayFrom;
+            VFixedPoint tminf = VFixedPoint.Zero;
+            VFixedPoint tmaxf = VFixedPoint.One;
+            for(int i = 0; i < 3; i++)
+            {
+                bool isParallel = d[i].Abs() < Globals.EPS;
+                if(isParallel)
+                {
+                    if ((rayFrom[i] < aabbMin[i] || rayFrom[i] > aabbMax[i]))
+                        return false;
+                    else
+                        continue;
+                }
+                else
+                {
+                    VFixedPoint odd = VFixedPoint.One / d[i];
+                    VFixedPoint t1 = (aabbMin[i] - rayFrom[i]) * odd;
+                    VFixedPoint t2 = (aabbMax[i] - rayFrom[i]) * odd;
+                    if(t1 > t2)
+                    {
+                        VFixedPoint tmp = t1;
+                        t1 = t2;
+                        t2 = tmp;
+                    }
 
-            VInt3 rayInvDirection = new VInt3();
-            ///what about division by zero? --> just set rayDirection[i] to INF/BT_LARGE_FLOAT
-            rayInvDirection.x = rayDir[0] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[0];
-            rayInvDirection.y = rayDir[1] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[1];
-            rayInvDirection.z = rayDir[2] == VFixedPoint.Zero ? VFixedPoint.LARGE_NUMBER : VFixedPoint.One / rayDir[2];
-            int[] raySign = new int[3];
-            raySign[0] = rayInvDirection.x < VFixedPoint.Zero ? 1 : 0;
-            raySign[1] = rayInvDirection.y < VFixedPoint.Zero ? 1 : 0;
-            raySign[2] = rayInvDirection.z < VFixedPoint.Zero ? 1 : 0;
+                    tminf = FMath.Max(tminf, t1);
+                    tmaxf = FMath.Min(tmaxf, t2);
+                }
+            }
 
-            tmin = (bounds[raySign[0]].x - rayFrom.x) * rayInvDirection.x;
-            tmax = (bounds[1 - raySign[0]].x - rayFrom.x) * rayInvDirection.x;
-            VFixedPoint tymin = (bounds[raySign[1]].y - rayFrom.y) * rayInvDirection.y;
-            VFixedPoint tymax = (bounds[1 - raySign[1]].y - rayFrom.y) * rayInvDirection.y;
-
-	        if ( (tmin > tymax) || (tymin > tmax) )
-		        return false;
-
-	        if (tymin > tmin)
-		        tmin = tymin;
-
-	        if (tymax<tmax)
-
-                tmax = tymax;
-
-            VFixedPoint tzmin = (bounds[raySign[2]].z - rayFrom.z) * rayInvDirection.z;
-            VFixedPoint tzmax = (bounds[1 - raySign[2]].z - rayFrom.z) * rayInvDirection.z;
-
-	        if ( (tmin > tzmax) || (tzmin > tmax) )
-		        return false;
-	        if (tzmin > tmin)
-		        tmin = tzmin;
-	        if (tzmax<tmax)
-
-                tmax = tzmax;
-	        return ( (tmin< lambdaMax) && (tmax > VFixedPoint.Zero) );
+            tmin = tminf; tmax = tmaxf;
+            return !(tmin > tmax || tmin > VFixedPoint.One);
         }
 
         static int btOutcode(VInt3 p, VInt3 halfExtent) 
@@ -129,28 +121,8 @@ namespace MobaGame.Collision
 		    halfExtentsWithMargin.z += margin;
 
             VInt3 center = trans.position;
-            VInt3 extent = trans.TransformDirection(halfExtentsWithMargin).Abs(); 
-
-            aabbMinOut = center - extent;
-            aabbMaxOut = center + extent;
-        }
-
-        public static void transformAabb(VInt3 localAabbMin, VInt3 localAabbMax, VFixedPoint margin, VIntTransform trans, out VInt3 aabbMinOut, out VInt3 aabbMaxOut)
-        {
-
-            VInt3 localHalfExtents = (localAabbMax - localAabbMin) * VFixedPoint.Half;
-            localHalfExtents.x += margin;
-            localHalfExtents.y += margin;
-            localHalfExtents.z += margin;
-
-            VInt3 localCenter = (localAabbMax + localAabbMin) * VFixedPoint.Half;
-            VInt3 center = trans.TransformPoint(localCenter);
-            VInt3 extent = new VInt3();
-
-            extent.x = VInt3.Dot(localHalfExtents, new VInt3(trans.right.x.Abs(), trans.right.y.Abs(), trans.right.z.Abs()));
-            extent.y = VInt3.Dot(localHalfExtents, new VInt3(trans.up.x.Abs(), trans.up.y.Abs(), trans.up.z.Abs()));
-            extent.z = VInt3.Dot(localHalfExtents, new VInt3(trans.forward.x.Abs(), trans.forward.y.Abs(), trans.forward.z.Abs()));
-
+            VInt3[] basis = trans.getTransposeBasis();
+            VInt3 extent = new VInt3(VInt3.Dot(basis[0].Abs(), halfExtents), VInt3.Dot(basis[1].Abs(), halfExtents), VInt3.Dot(basis[2].Abs(), halfExtents));
             aabbMinOut = center - extent;
             aabbMaxOut = center + extent;
         }

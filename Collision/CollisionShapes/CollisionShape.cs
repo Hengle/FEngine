@@ -12,5 +12,7 @@ namespace MobaGame.Collision
 
         public abstract VFixedPoint getMargin();
 
+        public abstract VInt3 support(VInt3 dir);
+
     }
 }

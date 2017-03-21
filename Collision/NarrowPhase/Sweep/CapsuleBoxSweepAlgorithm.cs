@@ -3,8 +3,30 @@ using MobaGame.FixedMath;
 
 namespace MobaGame.Collision
 {
-    class CapsuleBoxSweepAlgorithm
+    public static class CapsuleBoxSweepAlgorithm
     {
+
+        static CapsuleBoxSweepAlgorithm()
+        {
+            boxP = new VInt3[8];
+            for (int i = 0; i < 8; i++)
+            {
+                boxP[i] = VInt3.zero;
+            }
+
+            boxTris = new Triangle[12];
+            for (int i = 0; i < 12; i++)
+            {
+                boxTris[i] = new Triangle();
+            }
+
+            triangles = new Triangle[12 * 7];
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                triangles[i] = new Triangle();
+            }
+        }
+
         public static void objectQuerySingle(CollisionObject castObject, VInt3 FromPos, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
         {
             
@@ -86,14 +108,6 @@ namespace MobaGame.Collision
         static VInt3[] boxP;
         static void computeBoxPoints(VInt3 aabbMax, VInt3 aabbMin)
         {
-            if(boxP == null)
-            {
-                boxP = new VInt3[8];
-                for (int i = 0; i < 8; i++)
-                {
-                    boxP[i] = VInt3.zero;
-                }
-            }
 
             {
                 boxP[0].x = aabbMin.x; boxP[0].y = aabbMin.y;  boxP[0].z = aabbMin.z;
@@ -121,16 +135,6 @@ namespace MobaGame.Collision
         static int extrudeBox(VInt3 aabbMax, VIntTransform world, VInt3 extrusionDir, Triangle[] tris, VInt3 dir)
         {
             computeBoxPoints(aabbMax,-aabbMax);
-
-            if(boxTris == null)
-            {
-                boxTris = new Triangle[12];
-                for(int i = 0; i < 12; i++)
-                {
-                    boxTris[i] = new Triangle();
-                }
-            }
-
             for(int i = 0; i < 12; i++)
             {
                 int VRef0 = Indices[i * 3 + 0];
@@ -162,18 +166,8 @@ namespace MobaGame.Collision
 
             VInt3 extrusionDir = (p1 - p0) * VFixedPoint.Half;
             {
-                if (triangles == null)
-                {
-                    triangles = new Triangle[12 * 7];
-                    for (int i = 0; i < triangles.Length; i++)
-                    {
-                        triangles[i] = new Triangle();
-                    }
-                }
-
                 int nbTris = extrudeBox(boxHalfExtension, boxTransform, extrusionDir, triangles, dir);
-
-
+                
                 if(SphereTriangleSweepAlgorithm.sweepSphereTriangles(triangles, nbTris, (p1 + p0) * VFixedPoint.Half, radius, dir, length, ref fraction, ref hitNormal, true))
                 {
                     return true;

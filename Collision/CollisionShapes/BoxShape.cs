@@ -37,5 +37,13 @@ namespace MobaGame.Collision
         {
             AabbUtils.transformAabb(getHalfExtent(), getMargin(), trans, out aabbMin, out aabbMax);
         }
+
+        public override VInt3 support(VInt3 dir)
+        {
+            return new VInt3(dir.x > VFixedPoint.Zero ? VFixedPoint.One : -VFixedPoint.One,
+                dir.y > VFixedPoint.Zero ? VFixedPoint.One : -VFixedPoint.One,
+                dir.z > VFixedPoint.Zero ? VFixedPoint.One : -VFixedPoint.One
+                ) * halfExtent;
+        }
     }
 }

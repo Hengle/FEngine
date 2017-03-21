@@ -75,7 +75,8 @@ namespace MobaGame
 
             public VInt3 InverseTransformPoint(VInt3 global)
             {
-                return new VInt3(VInt3.Dot(global - position, right), VInt3.Dot(global - position, up), VInt3.Dot(global - position, forward));
+                VInt3 diff = global - position;
+                return new VInt3(VInt3.Dot(diff, right), VInt3.Dot(diff, up), VInt3.Dot(diff, forward));
             }
 
             public VInt3[] getBasis()
@@ -93,7 +94,7 @@ namespace MobaGame
                 };
             }
 
-            public VIntTransform InvTransform(VIntTransform trans)
+            public VIntTransform Transform(VIntTransform trans)
             {
                 VInt3 position = InverseTransformPoint(trans.position);
                 VInt3 right = InverseTransformDirection(trans.right);

@@ -16,6 +16,17 @@ namespace MobaGame.Collision
             VInt3 box1Extent = box1.getHalfExtent();
 
             doBoxBoxGenerateContacts(box0Extent, box1Extent, transform0, transform1, resultOut);
+            if(resultOut.getContactPointsNum() == 0)
+            {
+                VInt3 pa = VInt3.zero, pb = VInt3.zero, normal = VInt3.zero;
+                VFixedPoint depth = VFixedPoint.Zero;
+                PxGJKStatus result = EpaSolver.calcPenDepth(box0, box1, transform0, transform1, ref pa, ref pb, ref normal, ref depth);
+                if(result == PxGJKStatus.EPA_CONTACT)
+                {
+                    ManifoldPoint contactPoint = new ManifoldPoint(pa, pb, normal, depth);
+                    resultOut.addManifoldPoint(contactPoint);
+                }
+            }
         }
 
         static void doBoxBoxGenerateContacts(VInt3 box0Extent, VInt3 box1Extent, VIntTransform transform0, VIntTransform transform1, PersistentManifold resultOut)
@@ -23,7 +34,7 @@ namespace MobaGame.Collision
             VFixedPoint ea0 = box0Extent.x, ea1 = box0Extent.y, ea2 = box0Extent.z;
             VFixedPoint eb0 = box1Extent.x, eb1 = box1Extent.y, eb2 = box1Extent.z;
 
-            VIntTransform transform1To0 = transform0.InvTransform(transform1);
+            VIntTransform transform1To0 = transform0.Transform(transform1);
             VInt3 position1To0 = transform1To0.position;
             VFixedPoint tx = position1To0.x;
             VFixedPoint ty = position1To0.y;
@@ -70,7 +81,7 @@ namespace MobaGame.Collision
 
             //ua2
             {
-                sign[1] = tz;
+                sign[2] = tz;
 
                 rb = VInt3.Dot(abs0To1Col2, box1Extent);
                 radiusSum = ea2 + rb;
@@ -180,8 +191,8 @@ namespace MobaGame.Collision
             {
                 VFixedPoint absSign = (col1.z * tx - col1.x * tz).Abs();
 
-                VFixedPoint vtemp0 = abs1To0Col0.z * ea0;
-                VFixedPoint vtemp1 = abs1To0Col0.x * ea2;
+                VFixedPoint vtemp0 = abs1To0Col1.z * ea0;
+                VFixedPoint vtemp1 = abs1To0Col1.x * ea2;
                 ra = vtemp0 + vtemp1;
 
                 VFixedPoint vtemp01 = abs0To1Col1.z * eb0;
@@ -269,7 +280,7 @@ namespace MobaGame.Collision
                 }
             }
 
-            VIntTransform newTransformV = VIntTransform.Identity;
+            VIntTransform newTransformV;
             VInt3 axis00 = transform0.right;
             VInt3 axis01 = transform0.up;
             VInt3 axis02 = transform0.forward;
@@ -294,10 +305,12 @@ namespace MobaGame.Collision
                             mtd = nAxis00;
                             newTransformV = new VIntTransform((transform0.position + axis00 * ea0), axis02, axis01, nAxis00);
                         }
-                        VIntTransform transform1ToNew = newTransformV.InvTransform(transform1);
+
+                        VIntTransform transform1ToNew = newTransformV.Transform(transform1);
                         VInt3 localNormal = newTransformV.InverseTransformDirection(mtd);
-                        getIncidentPolygon(ref pts, incidentFaceNormalInNew, -localNormal, transform1ToNew, box1Extent);
-                        calculateContacts(ea2, ea1, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, false);
+                        getIncidentPolygon(ref pts, ref incidentFaceNormalInNew, -localNormal, transform1ToNew, box1Extent);
+
+                        calculateContacts(ea2, ea1, ea0, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, false);
                         break;
                     }
                     
@@ -314,10 +327,12 @@ namespace MobaGame.Collision
                             mtd = nAxis01;
                             newTransformV = new VIntTransform((transform0.position + axis01 * ea1), axis00, axis02, nAxis01);
                         }
-                        VIntTransform transform1ToNew = newTransformV.InvTransform(transform1);
+
+                        VIntTransform transform1ToNew = newTransformV.Transform(transform1);
                         VInt3 localNormal = newTransformV.InverseTransformDirection(mtd);
-                        getIncidentPolygon(ref pts, incidentFaceNormalInNew, -localNormal, transform1ToNew, box1Extent);
-                        calculateContacts(ea0, ea2, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, false);
+                        getIncidentPolygon(ref pts, ref incidentFaceNormalInNew, -localNormal, transform1ToNew, box1Extent);
+
+                        calculateContacts(ea0, ea2, ea1, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, false);
                         break;
                     }
 
@@ -334,10 +349,12 @@ namespace MobaGame.Collision
                             mtd = nAxis02;
                             newTransformV = new VIntTransform((transform0.position + axis02 * ea2), axis00, -axis01, nAxis02);
                         }
-                        VIntTransform transform1ToNew = newTransformV.InvTransform(transform1);
+
+                        VIntTransform transform1ToNew = newTransformV.Transform(transform1);
                         VInt3 localNormal = newTransformV.InverseTransformDirection(mtd);
-                        getIncidentPolygon(ref pts, incidentFaceNormalInNew, -localNormal, transform1ToNew, box1Extent);
-                        calculateContacts(ea0, ea1, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, false);
+                        getIncidentPolygon(ref pts, ref incidentFaceNormalInNew, -localNormal, transform1ToNew, box1Extent);
+
+                        calculateContacts(ea0, ea1, ea2, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, false);
                         break;
                     }
 
@@ -346,17 +363,19 @@ namespace MobaGame.Collision
                         if (sign[3] <= VFixedPoint.Zero)
                         {
                             mtd = axis10;
-                            newTransformV = new VIntTransform((transform1.position - axis10 * eb0), axis12, axis11, -axis10);
+                            newTransformV = new VIntTransform((transform1.position + axis10 * eb0), axis12, axis11, -axis10);
                         }
                         else
                         {
                             mtd = -axis10;
-                            newTransformV = new VIntTransform((transform1.position + axis10 * eb0), -axis12, axis11, axis10);
+                            newTransformV = new VIntTransform((transform1.position - axis10 * eb0), -axis12, axis11, axis10);
                         }
-                        VIntTransform transform1ToNew = newTransformV.InvTransform(transform0);
+
+                        VIntTransform transform1ToNew = newTransformV.Transform(transform0);
                         VInt3 localNormal = newTransformV.InverseTransformDirection(mtd);
-                        getIncidentPolygon(ref pts, incidentFaceNormalInNew, localNormal, transform1ToNew, box0Extent);
-                        calculateContacts(eb2, eb1, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, true);
+                        getIncidentPolygon(ref pts, ref incidentFaceNormalInNew, localNormal, transform1ToNew, box0Extent);
+
+                        calculateContacts(eb2, eb1, eb0, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, true);
                         break;
                     }
 
@@ -365,17 +384,19 @@ namespace MobaGame.Collision
                         if (sign[4] <= VFixedPoint.Zero)
                         {
                             mtd = axis11;
-                            newTransformV = new VIntTransform((transform1.position - axis11 * eb1), axis10, axis12, -axis11);
+                            newTransformV = new VIntTransform((transform1.position + axis11 * eb1), axis10, axis12, -axis11);
                         }
                         else
                         {
                             mtd = -axis11;
-                            newTransformV = new VIntTransform((transform1.position + axis11 * eb1), axis10, -axis12, axis11);
+                            newTransformV = new VIntTransform((transform1.position - axis11 * eb1), axis10, -axis12, axis11);
                         }
-                        VIntTransform transform1ToNew = newTransformV.InvTransform(transform0);
+
+                        VIntTransform transform1ToNew = newTransformV.Transform(transform0);
                         VInt3 localNormal = newTransformV.InverseTransformDirection(mtd);
-                        getIncidentPolygon(ref pts, incidentFaceNormalInNew, localNormal, transform1ToNew, box0Extent);
-                        calculateContacts(eb0, eb2, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, true);
+                        getIncidentPolygon(ref pts, ref incidentFaceNormalInNew, localNormal, transform1ToNew, box0Extent);
+
+                        calculateContacts(eb0, eb2, eb1, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, true);
                         break;
                     }
 
@@ -384,17 +405,19 @@ namespace MobaGame.Collision
                         if (sign[5] <= VFixedPoint.Zero)
                         {
                             mtd = axis12;
-                            newTransformV = new VIntTransform((transform1.position - axis12 * eb2), axis10, -axis11, -axis12);
+                            newTransformV = new VIntTransform((transform1.position + axis12 * eb2), axis10, -axis11, -axis12);
                         }
                         else
                         {
                             mtd = -axis12;
-                            newTransformV = new VIntTransform((transform1.position + axis12 * eb2), axis10, axis11, axis12);
+                            newTransformV = new VIntTransform((transform1.position - axis12 * eb2), axis10, axis11, axis12);
                         }
-                        VIntTransform transform1ToNew = newTransformV.InvTransform(transform0);
+
+                        VIntTransform transform1ToNew = newTransformV.Transform(transform0);
                         VInt3 localNormal = newTransformV.InverseTransformDirection(mtd);
-                        getIncidentPolygon(ref pts, incidentFaceNormalInNew, localNormal, transform1ToNew, box0Extent);
-                        calculateContacts(eb0, eb1, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, true);
+                        getIncidentPolygon(ref pts, ref incidentFaceNormalInNew, localNormal, transform1ToNew, box0Extent);
+
+                        calculateContacts(eb0, eb1, eb2, pts, incidentFaceNormalInNew, localNormal, Globals.EPS, newTransformV, resultOut, true);
                         break;
                     }
                 default:
@@ -403,7 +426,7 @@ namespace MobaGame.Collision
             }
         }
 
-        static void getIncidentPolygon(ref VInt3[] pts, VInt3 faceNormal, VInt3 axis, VIntTransform transf1To0, VInt3 extents)
+        static void getIncidentPolygon(ref VInt3[] pts, ref VInt3 faceNormal, VInt3 axis, VIntTransform transf1To0, VInt3 extents)
         {
             VFixedPoint ex = extents.x, ey = extents.y, ez = extents.z;
             VInt3 u0 = transf1To0.right, u1 = transf1To0.up, u2 = transf1To0.forward;
@@ -467,7 +490,7 @@ namespace MobaGame.Collision
             }
         }
 
-        static void calculateContacts(VFixedPoint extentX, VFixedPoint extentY, VInt3[] pts, 
+        static void calculateContacts(VFixedPoint extentX, VFixedPoint extentY, VFixedPoint extentZ, VInt3[] pts, 
             VInt3 incidentfaceNormalInNew, VInt3 localNormal, VFixedPoint contactDist, VIntTransform transformNew, 
             PersistentManifold resultOut, bool flip)
         {
@@ -594,7 +617,7 @@ namespace MobaGame.Collision
                 }
             }
 
-            VInt3 ext = new VInt3(extentX, extentY, VFixedPoint.MaxValue);
+            VInt3 ext = new VInt3(extentX, extentY, extentZ * VFixedPoint.Two);
             VInt3 negExt = new VInt3(nExtentX, nExtentY, -(contactDist + Globals.EPS));
 
             for(int start = 0, end = 3; start < 4; end = start++)
@@ -611,9 +634,9 @@ namespace MobaGame.Collision
                     continue;
 
                 VFixedPoint tmin = VFixedPoint.Zero, tmax = VFixedPoint.Zero;
-                if (AabbUtils.RayAabb2(p0, p1, new VInt3[] { ext, negExt }, ref tmin, ref tmax))
+                if (AabbUtils.RayAabb2(p0, p1, negExt, ext, ref tmin, ref tmax))
                 {
-                    if (!con0)
+                    if (!con0 && tmin > VFixedPoint.Zero)
                     {
                         VInt3 intersectP = p0 * (VFixedPoint.One - tmin) + p1 * tmin;
                         VInt3 localPointA = intersectP; localPointA.z = VFixedPoint.Zero; localPointA = transformNew.TransformPoint(localPointA);
@@ -621,7 +644,7 @@ namespace MobaGame.Collision
                         ManifoldPoint contactPoint = new ManifoldPoint(flip ? localPointB : localPointA, flip ? localPointA : localPointB, localNormal, -intersectP.z);
                         resultOut.addManifoldPoint(contactPoint);
                     }
-                    if (!con1)
+                    if (!con1 && tmax < VFixedPoint.One)
                     {
                         VInt3 intersectP = p0 * (VFixedPoint.One - tmax) + p1 * tmax;
                         VInt3 localPointA = intersectP; localPointA.z = VFixedPoint.Zero; localPointA = transformNew.TransformPoint(localPointA);
@@ -653,7 +676,7 @@ namespace MobaGame.Collision
                 bool con0 = tx == jx && ty == jy;
                 bool con1 = tx == ix && ty == iy;
 
-                if (con0 == con1)
+                if (con0 || con1)
                     return true;
 
                 bool yflag0 = jy > ty;

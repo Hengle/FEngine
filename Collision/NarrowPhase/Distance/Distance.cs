@@ -5,6 +5,7 @@ namespace MobaGame.Collision
 {
     public static class Distance
     {
+
         /*
         A segment is defined by S(t) = mP0 * (1 - t) + mP1 * t, with 0 <= t <= 1
         Alternatively, a segment is S(t) = Origin + t * Direction for 0 <= t <= 1.

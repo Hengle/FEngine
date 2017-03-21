@@ -7,7 +7,7 @@ namespace MobaGame.Collision
     {
         public static void processCollision(CollisionObject body0, CollisionObject body1, DispatcherInfo dispatchInfo, PersistentManifold resultOut)
         {
-            bool isSwapped = body0.getCollisionShape() is SphereShape;
+            bool isSwapped = body1.getCollisionShape() is SphereShape;
             CollisionObject sphereObj = isSwapped ? body1 : body0;
             CollisionObject boxObj = isSwapped ? body0 : body1;
 
@@ -20,7 +20,7 @@ namespace MobaGame.Collision
             if(getSphereDistance((BoxShape)boxObj.getCollisionShape(), boxObj.getWorldTransform(), sphereCenter, radius, out normalOnSurfaceB, out penetrationDepth))
             {
                 VInt3 worldPosOnSphere = sphereCenter - normalOnSurfaceB * radius;
-                VInt3 worldPosOnBox = worldPosOnSphere + normalOnSurfaceB * penetrationDepth;
+                VInt3 worldPosOnBox = worldPosOnSphere - normalOnSurfaceB * penetrationDepth;
                 ManifoldPoint contactPoint = new ManifoldPoint(isSwapped ? worldPosOnBox : worldPosOnSphere, isSwapped ? worldPosOnSphere : worldPosOnBox, normalOnSurfaceB * (isSwapped ? -1 : 1), penetrationDepth);
                 resultOut.addManifoldPoint(contactPoint);
             }

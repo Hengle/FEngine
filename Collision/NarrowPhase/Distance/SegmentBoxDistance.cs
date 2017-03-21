@@ -62,28 +62,28 @@ namespace MobaGame.Collision
             {
                 if (dir.y > VFixedPoint.Zero)
                 {
-                    if (dir.z > VFixedPoint.Zero) caseNoZero(pnt, dir, boxExtent, ref lineParam, ref sqrDistance);
-                    else case0(0, 1, 2, pnt, dir, boxExtent, ref lineParam, ref sqrDistance);
+                    if (dir.z > VFixedPoint.Zero) caseNoZero(ref pnt, dir, boxExtent, ref lineParam, ref sqrDistance);
+                    else case0(0, 1, 2, ref pnt, dir, boxExtent, ref lineParam, ref sqrDistance);
                 }
                 else
                 {
-                    if (dir.z > VFixedPoint.Zero) case0(0, 2, 1, pnt, dir, boxExtent, ref lineParam, ref sqrDistance);  // (+,0,+)
-                    else case00(0, 1, 2, pnt, dir, boxExtent, ref lineParam, ref sqrDistance);	// (+,0,0)
+                    if (dir.z > VFixedPoint.Zero) case0(0, 2, 1, ref pnt, dir, boxExtent, ref lineParam, ref sqrDistance);  // (+,0,+)
+                    else case00(0, 1, 2, ref pnt, dir, boxExtent, ref lineParam, ref sqrDistance);	// (+,0,0)
                 }
             }
             else
             {
                 if (dir.y > VFixedPoint.Zero)
                 {
-                    if (dir.z > VFixedPoint.Zero) case0(1, 2, 0, pnt, dir, boxExtent, ref lineParam, ref sqrDistance);  // (0,+,+)
-                    else case00(1, 0, 2, pnt, dir, boxExtent, ref lineParam, ref sqrDistance);  // (0,+,0)
+                    if (dir.z > VFixedPoint.Zero) case0(1, 2, 0, ref pnt, dir, boxExtent, ref lineParam, ref sqrDistance);  // (0,+,+)
+                    else case00(1, 0, 2, ref pnt, dir, boxExtent, ref lineParam, ref sqrDistance);  // (0,+,0)
                 }
                 else
                 {
-                    if (dir.z > VFixedPoint.Zero) case00(2, 0, 1, pnt, dir, boxExtent, ref lineParam, ref sqrDistance); // (0,0,+)
+                    if (dir.z > VFixedPoint.Zero) case00(2, 0, 1, ref pnt, dir, boxExtent, ref lineParam, ref sqrDistance); // (0,0,+)
                     else
                     {
-                        case000(pnt, boxExtent, ref sqrDistance);                                       // (0,0,0)
+                        case000(ref pnt, boxExtent, ref sqrDistance);                                       // (0,0,0)
                         lineParam = VFixedPoint.Zero;
                     }
                 }
@@ -97,7 +97,7 @@ namespace MobaGame.Collision
             return sqrDistance;
         }
 
-        static void caseNoZero(VInt3 pnt, VInt3 dir, VInt3 extent, ref VFixedPoint lineParam, ref VFixedPoint sqrDistance)
+        static void caseNoZero(ref VInt3 pnt, VInt3 dir, VInt3 extent, ref VFixedPoint lineParam, ref VFixedPoint sqrDistance)
         {
             VInt3 kPmE = pnt - extent;
 
@@ -111,12 +111,12 @@ namespace MobaGame.Collision
                 if (fProdDzPx >= fProdDxPz)
                 {
                     // line intersects x = e0
-                    face(0, 1, 2, pnt, dir, extent, kPmE, ref lineParam, ref sqrDistance);
+                    face(0, 1, 2, ref pnt, dir, extent, kPmE, ref lineParam, ref sqrDistance);
                 }
                 else
                 {
                     // line intersects z = e2
-                    face(2, 0, 1, pnt, dir, extent, kPmE, ref lineParam, ref sqrDistance);
+                    face(2, 0, 1, ref pnt, dir, extent, kPmE, ref lineParam, ref sqrDistance);
                 }
             }
             else
@@ -126,17 +126,17 @@ namespace MobaGame.Collision
                 if (fProdDzPy >= fProdDyPz)
                 {
                     // line intersects y = e1
-                    face(1, 2, 0, pnt, dir, extent, kPmE, ref lineParam, ref sqrDistance);
+                    face(1, 2, 0, ref pnt, dir, extent, kPmE, ref lineParam, ref sqrDistance);
                 }
                 else
                 {
                     // line intersects z = e2
-                    face(2, 0, 1, pnt, dir, extent, kPmE, ref lineParam, ref sqrDistance);
+                    face(2, 0, 1, ref pnt, dir, extent, kPmE, ref lineParam, ref sqrDistance);
                 }
             }
         }
 
-        static void case0(int i0, int i1, int i2, VInt3 pnt, VInt3 dir, VInt3 extents, ref VFixedPoint lineParam, ref VFixedPoint sqrDistance)
+        static void case0(int i0, int i1, int i2, ref VInt3 pnt, VInt3 dir, VInt3 extents, ref VFixedPoint lineParam, ref VFixedPoint sqrDistance)
         {
             VFixedPoint fPmE0 = pnt[i0] - extents[i0];
             VFixedPoint fPmE1 = pnt[i1] - extents[i1];
@@ -204,7 +204,7 @@ namespace MobaGame.Collision
             }
         }
 
-        static void case00(int i0, int i1, int i2, VInt3 pnt, VInt3 dir, VInt3 extents, ref VFixedPoint lineParam, ref VFixedPoint sqrDistance)
+        static void case00(int i0, int i1, int i2, ref VInt3 pnt, VInt3 dir, VInt3 extents, ref VFixedPoint lineParam, ref VFixedPoint sqrDistance)
         {
             VFixedPoint fDelta = VFixedPoint.Zero;
 
@@ -239,7 +239,7 @@ namespace MobaGame.Collision
             }
         }
 
-        static void case000(VInt3 rkPnt, VInt3 extents, ref VFixedPoint rfSqrDistance)
+        static void case000(ref VInt3 rkPnt, VInt3 extents, ref VFixedPoint rfSqrDistance)
         {
             VFixedPoint fDelta = VFixedPoint.Zero;
 
@@ -283,7 +283,7 @@ namespace MobaGame.Collision
             }
         }
 
-        static void face(int i0, int i1, int i2, VInt3 rkPnt, VInt3 rkDir, VInt3 extents, VInt3 rkPmE, ref VFixedPoint pfLParam, ref VFixedPoint rfSqrDistance)
+        static void face(int i0, int i1, int i2, ref VInt3 rkPnt, VInt3 rkDir, VInt3 extents, VInt3 rkPmE, ref VFixedPoint pfLParam, ref VFixedPoint rfSqrDistance)
         {
             VInt3 kPpE = VInt3.zero;
             VFixedPoint fLSqr = VFixedPoint.Zero, fInv = VFixedPoint.Zero, fTmp = VFixedPoint.Zero, fParam = VFixedPoint.Zero, fT = VFixedPoint.Zero, fDelta = VFixedPoint.Zero;

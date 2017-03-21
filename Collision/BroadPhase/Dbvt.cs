@@ -138,16 +138,14 @@ namespace MobaGame.Collision
             {
 
                 List<Node> stack = new List<Node>(DOUBLE_STACKSIZE);
-                stack[0] = root;
+                stack.Add(root);
                 VInt3[] bounds = new VInt3[2];
                 do
                 {
                     Node node = stack[stack.Count - 1];
                     stack.RemoveAt(stack.Count - 1);
-                    bounds[0] = node.volume.Mins() - aabbMax;
-                    bounds[1] = node.volume.Maxs() - aabbMin;
                     VFixedPoint tmin = VFixedPoint.One, tmax = VFixedPoint.One;
-                    bool result1 = AabbUtils.RayAabb2(rayFrom, rayTo, bounds, ref tmin, ref tmax);
+                    bool result1 = AabbUtils.RayAabb2(rayFrom, rayTo, node.volume.Mins() - aabbMax, node.volume.Maxs() - aabbMin, ref tmin, ref tmax);
                     if (result1)
                     {
                         if (node.isinternal())

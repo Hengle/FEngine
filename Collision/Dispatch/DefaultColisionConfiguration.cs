@@ -106,12 +106,12 @@ namespace MobaGame.Collision
                 return sphereRaytestFunc;
             }
 
-            if (proxyType < BroadphaseNativeType.BOX_SHAPE_PROXYTYPE)
+            if (proxyType == BroadphaseNativeType.BOX_SHAPE_PROXYTYPE)
             {
                 return boxRaytestFunc;
             }
 
-            if (proxyType < BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE)
+            if (proxyType == BroadphaseNativeType.CAPSULE_SHAPE_PROXYTYPE)
             {
                 return capsuleRaytestFunc;
             }

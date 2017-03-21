@@ -16,8 +16,8 @@
             PersistentManifold manifold = collisionPair.manifold;
             int oldContacts = manifold.getContactPointsNum();
             manifold.refreshContactPoints(colObj0.getWorldTransform(), colObj1.getWorldTransform());
-            if (oldContacts == manifold.getContactPointsNum() && oldContacts > 0)
-                return true;
+            /*if (oldContacts == manifold.getContactPointsNum() && oldContacts > 0)
+                return true;*/
 
             manifold.clearManifold();
             CollisionAlgorithm algorithm = dispatcher.findAlgorithm(colObj0, colObj1);

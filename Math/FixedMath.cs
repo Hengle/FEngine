@@ -42,7 +42,17 @@ namespace MobaGame
             public static VFixedPoint Sqrt(VFixedPoint f1)
             {
                 if (f1.ValueBar < 0)
-                    throw new FMathException(FMathException.REASON.SQRT_MINUS);
+                {
+                    if(f1.ValueBar < -16)
+                    {
+                        throw new FMathException(FMathException.REASON.SQRT_MINUS);
+                    }
+                    else
+                    {
+                        return VFixedPoint.Zero;
+                    }
+                }
+                    
                 ulong a = (ulong)f1.ValueBar;
                 ulong num = 0L;
                 ulong num2 = 0L;

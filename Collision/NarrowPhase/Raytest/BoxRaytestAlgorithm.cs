@@ -28,7 +28,7 @@ namespace MobaGame.Collision
 
             if (AabbUtils.RayAabb(rayFromPointLocal, rayToPointLocal, -boxHalfExtent, boxHalfExtent, ref t, ref normalInLocal))
             {
-                normal = boxTransform.TransformDirection(normalInLocal);
+                normal = -boxTransform.TransformDirection(normalInLocal);
                 return true;
             }
 

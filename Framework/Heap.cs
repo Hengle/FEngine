@@ -6,12 +6,13 @@ namespace MobaGame.Framework
     public class Heap<T> where T : IComparable<T>
     {
         int HeapSize;
-        List<T> Data;
+        T[] Data;
+        int capacity;
 
-        public Heap()
+        public Heap(int capacity)
         {
-            HeapSize = 0;
-            Data = new List<T>();
+            this.capacity = capacity;
+            Clear();
         }
 
         public bool IsEmpty()
@@ -22,6 +23,7 @@ namespace MobaGame.Framework
         public void Clear()
         {
             HeapSize = 0;
+            Data = new T[capacity]; ;
         }
 
         public T this[int key]
@@ -36,9 +38,9 @@ namespace MobaGame.Framework
         {
             int newIndex;
             int parentIndex = parent(HeapSize);
-            if(HeapSize >= Data.Capacity)
+            if(HeapSize >= Data.Length)
             {
-                Data.Capacity *= 2;
+                Data = new T[Data.Length * 2];
             }
 
             for (newIndex = HeapSize; newIndex > 0 && value.CompareTo(Data[parentIndex]) < 0; newIndex = parentIndex, parentIndex = parent(newIndex))
