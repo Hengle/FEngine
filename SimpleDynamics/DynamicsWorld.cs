@@ -5,7 +5,7 @@ namespace MobaGame.Collision
 {
     public class DynamicsWorld: CollisionWorld
     {
-        public List<ActionInterface> actions = new List<ActionInterface>();
+        List<ActionInterface> actions = new List<ActionInterface>();
 
         int iteration;
         public DynamicsWorld(Dispatcher dispatcher, BroadphaseInterface broadphase):base(dispatcher, broadphase)
@@ -21,6 +21,16 @@ namespace MobaGame.Collision
             {
                 actions[i].updateAction(this, dt);
             }
+        }
+
+        public void addAction(ActionInterface action)
+        {
+            actions.Add(action);
+        }
+
+        public void delAction(ActionInterface action)
+        {
+            actions.Remove(action);
         }
 
         private void ResolveContactConstraint(VFixedPoint dt)

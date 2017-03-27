@@ -57,7 +57,7 @@ namespace MobaGame.Collision
         {
             bool needSwap = castObject.getCollisionShape() is CapsuleShape;
             CollisionObject sphereObject = needSwap ? collisionObject : castObject;
-            CollisionObject capsuleObject = !needSwap ? castObject : collisionObject;
+            CollisionObject capsuleObject = needSwap ? castObject : collisionObject;
             SphereShape sphere = (SphereShape)sphereObject.getCollisionShape();
             CapsuleShape capsule = (CapsuleShape)capsuleObject.getCollisionShape();
 

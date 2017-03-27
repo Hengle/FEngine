@@ -27,10 +27,6 @@ namespace MobaGame.Collision
             }
         }
 
-        public static void objectQuerySingle(CollisionObject castObject, VInt3 FromPos, VInt3 ToPos, CollisionObject collisionObject, List<CastResult> results, VFixedPoint allowedPenetration)
-        {
-            
-        }
 
         static void OUTPUT_TRI(Triangle[] triangles, ref int index, VInt3 p0, VInt3 p1, VInt3 p2)
         {
@@ -144,8 +140,8 @@ namespace MobaGame.Collision
                 Triangle atriangle = boxTris[i];
 
                 atriangle.verts[0] = world.TransformPoint(boxP[VRef0]);
-                atriangle.verts[0] = world.TransformPoint(boxP[VRef1]);
-                atriangle.verts[0]= world.TransformPoint(boxP[VRef2]);
+                atriangle.verts[1] = world.TransformPoint(boxP[VRef1]);
+                atriangle.verts[2]= world.TransformPoint(boxP[VRef2]);
                 
             }
 
@@ -200,6 +196,7 @@ namespace MobaGame.Collision
                 result.fraction = fraction;
                 result.hitObject = collisionObject;
                 result.normal = hitNormal * (needSwap ? -1 : 1);
+                results.Add(result);
             }
         }
     }

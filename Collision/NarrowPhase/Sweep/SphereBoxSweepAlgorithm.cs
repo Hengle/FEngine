@@ -13,8 +13,9 @@ namespace MobaGame.Collision
             VInt3 dir = ToPos - fromPos;
             if(SphereBoxCollisionAlgorithm.getSphereDistance(box, boxTransform, fromPos, sphere.getRadius(), out normal, out tmp))
             {
+                normal = (fromPos - ToPos).Normalize();
                 dist = VFixedPoint.Zero;
-                return false;
+                return true;
             }
 
             VInt3 aabbMin = boxTransform.position - box.getHalfExtent(), aabbMax = boxTransform.position + box.getHalfExtent();
@@ -42,6 +43,7 @@ namespace MobaGame.Collision
                 result.hitObject = collisionObject;
                 result.fraction = dist;
                 result.normal = normal * (needSwap ? -1 : 1);
+                results.Add(result);
             }
         }
     }

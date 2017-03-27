@@ -159,16 +159,17 @@ namespace MobaGame.Collision
         public void SweepTest(CollisionObject testObject, VInt3 end, List<CastResult> results, short collisionFilterGroup = CollisionFilterGroups.DEFAULT_FILTER, short collisionFilterMask = CollisionFilterGroups.ALL_FILTER)
         {
             VInt3 aabbMin, aabbMax;
-            testObject.getCollisionShape().getAabb(testObject.getWorldTransform(), out aabbMin, out aabbMax);
+            testObject.getCollisionShape().getAabb(VIntTransform.Identity, out aabbMin, out aabbMax);
 
             VInt3 start = testObject.getWorldTransform().position;
             VInt3 dir = end - start;
+            if (dir.sqrMagnitude < Globals.EPS2)
+                return;
             DbvtAabbMm aabb = new DbvtAabbMm();
             aabb = DbvtAabbMm.FromVec(start, end, aabb);
-            aabb.Expand((aabbMax - aabbMin) * VFixedPoint.Half);
-
+            aabb.Expand(aabbMax);
             SingleSweepCallback sweepCB = new SingleSweepCallback(testObject, end, dispatcher1, results);
-            broadphase.aabbTest(aabbMin, aabbMax, sweepCB, dispatcher1, collisionFilterGroup, collisionFilterMask);
+            broadphase.aabbTest(aabb.Mins(), aabb.Maxs(), sweepCB, dispatcher1, collisionFilterGroup, collisionFilterMask);
         }
     }
 

@@ -46,7 +46,7 @@ namespace MobaGame.Collision
         }
 
         public VFixedPoint getRadius() {
-            return radius; 
+            return radius + margin; 
         }
 
         public VFixedPoint getHalfHeight() {
@@ -67,11 +67,11 @@ namespace MobaGame.Collision
         {
             if(dir[upAxis] > VFixedPoint.Zero)
             {
-                return getUpAxis() * halfHeight + dir * radius;
+                return getUpAxis() * halfHeight + dir * getRadius();
             } 
             else
             {
-                return -getUpAxis() * halfHeight + dir * radius;
+                return -getUpAxis() * halfHeight + dir * getRadius();
             }
         }
     }

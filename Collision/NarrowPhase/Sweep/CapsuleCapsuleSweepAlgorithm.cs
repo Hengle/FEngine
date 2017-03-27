@@ -105,8 +105,8 @@ namespace MobaGame.Collision
             // 1. Extrude lss0 by lss1's length
             // 2. Inflate extruded shape by lss1's radius
             // 3. Raycast against resulting quad
-            VInt3 D = (lss1p1 - lss1p0) * VFixedPoint.Half;
-            VInt3 p0 = lss0p0 - D, p1 = lss0p1 - D, p0b = lss0p0 + D, p1b = lss0p1 + D;
+            VInt3 D = (lss0p1 - lss0p0) * VFixedPoint.Half;
+            VInt3 p0 = lss1p0 - D, p1 = lss1p1 - D, p0b = lss1p0 + D, p1b = lss1p1 + D;
             VInt3 normal = VInt3.Cross(p1b - p0b, p1 - p0b); normal = normal.Normalize();
             dist = VFixedPoint.One; bool status = false;
 
@@ -134,7 +134,7 @@ namespace MobaGame.Collision
             {
                 VInt3[] caps = new VInt3[]
                 {
-                    p0, p1, p1, p1b, p1b, p0b, p0, p0b
+                    p0, p1, p1, p1b, p1b, p0b, p0b, p0
                 };
                 VInt3 tmpNormal = VInt3.zero;
                 for(int i = 0; i < 4; i++)
@@ -142,7 +142,7 @@ namespace MobaGame.Collision
                     VFixedPoint s = VFixedPoint.Zero;
                     if(CapsuleRaytestAlgorithm.raycastCapsule(FromPos, toPos, caps[i * 2], caps[i * 2 + 1], radiusSun, ref tmpNormal, ref s))
                     {
-                        if(s > VFixedPoint.Zero && s < VFixedPoint.One)
+                        if(s > VFixedPoint.Zero && s < dist)
                         {
                             dist = s;
                             status = true;
@@ -155,7 +155,7 @@ namespace MobaGame.Collision
             {
                 VInt3 x, y;
                 Distance.SegmentSegmentDist2(lss0p0 + dir * length * dist, lss0p1 - lss0p0, lss1p0, lss1p1 - lss1p0, out x, out y);
-                hitNormal = (y - x).Normalize();
+                hitNormal = (x - y).Normalize();
             }
             return status;
         }
@@ -170,7 +170,7 @@ namespace MobaGame.Collision
                 CastResult result = new CastResult();
                 result.fraction = t;
                 result.hitObject = collisionObject;
-                result.hitPoint = hitNormal;
+                result.normal = hitNormal;
                 results.Add(result);
             }
         }

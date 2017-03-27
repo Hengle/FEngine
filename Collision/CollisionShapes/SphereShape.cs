@@ -15,7 +15,7 @@ namespace MobaGame.Collision
         public override void getAabb(VIntTransform t, out VInt3 aabbMin, out VInt3 aabbMax)
         {
             VInt3 center = t.position;
-            VFixedPoint radiusWithMargin = radius + getMargin();
+            VFixedPoint radiusWithMargin = radius + margin + getMargin();
             VInt3 extent = new VInt3(radiusWithMargin, radiusWithMargin, radiusWithMargin);
             aabbMin = center - extent;
             aabbMax = center + extent;
@@ -27,7 +27,7 @@ namespace MobaGame.Collision
 
         public VFixedPoint getRadius()
         {
-            return radius;
+            return radius + margin;
         }
 
         public override void setMargin(VFixedPoint margin)

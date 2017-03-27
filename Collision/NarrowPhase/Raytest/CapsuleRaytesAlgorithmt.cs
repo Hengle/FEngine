@@ -33,7 +33,8 @@ namespace MobaGame.Collision
             VFixedPoint b = dd * mn - nd * md;
             VFixedPoint discr = b * b - a * c;
             if (discr < VFixedPoint.Zero) return false;
-            t = (-b - FMath.Sqrt(discr)) / a;
+            VFixedPoint discrSqrt = FMath.Sqrt(discr);
+            t = (-b - discrSqrt) / a;
             if (t < VFixedPoint.Zero || t > VFixedPoint.One) return false;
             //we don't need result of segment and endcap
             /*if(md + t * nd < VFixedPoint.Zero)

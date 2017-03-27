@@ -1,6 +1,5 @@
 ﻿using MobaGame.FixedMath;
 using System.Collections.Generic;
-using System;
 
 namespace MobaGame.Collision
 {
@@ -19,17 +18,15 @@ namespace MobaGame.Collision
         protected VFixedPoint addedMargin;
         protected VInt3 walkDirection;
         protected VInt3 normalizedDirection;
-        protected VInt3 currentPosition;
+        public VInt3 currentPosition
+        {
+            protected set; get;
+        }
         protected VFixedPoint currentStepOffset;
         protected VInt3 targetPosition;
 
         List<PersistentManifold> manifolds = new List<PersistentManifold>();
-
-        protected VInt3 touchingNormal;
-
         protected bool wasOnGround;
-
-        protected VFixedPoint velocityTimeInterval;
         protected int upAxis;
 
         public KinematicCharacterController(CollisionObject me, VFixedPoint stepHeight): this(me, stepHeight, 1)
@@ -42,9 +39,10 @@ namespace MobaGame.Collision
             this.upAxis = upAxis;
             this.addedMargin = VFixedPoint.Two / VFixedPoint.Create(100);
             this.me = me;
+            this.stepHeight = stepHeight;
             this.gravity = VFixedPoint.Create(10); // 1G acceleration
             this.fallSpeed = VFixedPoint.Create(55); // Terminal velocity of a sky diver in m/s.
-            this.jumpSpeed = VFixedPoint.Create(10); 
+            this.jumpSpeed = VFixedPoint.Create(10);
             this.wasOnGround = false;
             VFixedPoint maxSlopeRadians = VFixedPoint.Create(50) / VFixedPoint.Create(180) / FMath.Trig.Rag2Deg;
             maxSlopeCosine = FMath.Trig.Cos(maxSlopeRadians);
@@ -56,11 +54,10 @@ namespace MobaGame.Collision
             playerStep(collisionWorld, deltaTimeStep);
         }
 
-        public void setVelocityForTimeInterval(VInt3 velocity, VFixedPoint timeInterval)
+        public void setVelocityForTimeInterval(VInt3 velocity)
         {
             walkDirection = velocity;
             normalizedDirection = walkDirection.Normalize();
-		    velocityTimeInterval = timeInterval;
 	    }
 
         public void warp(VInt3 origin)
@@ -70,8 +67,9 @@ namespace MobaGame.Collision
             me.setWorldTransform(transform);
         }
 
-        public void preStep(CollisionWorld collisionWorld)
+        void preStep(CollisionWorld collisionWorld)
         {
+            currentPosition = me.getWorldTransform().position;
             int numPenetrationLoops = 0;
             while(recoverFromPenetration(collisionWorld))
             {
@@ -81,11 +79,11 @@ namespace MobaGame.Collision
                     break;
                 }
             }
-            currentPosition = me.getWorldTransform().position;
+            
             targetPosition = currentPosition;
         }
 
-        public void playerStep(CollisionWorld collisionWorld, VFixedPoint dt)
+        void playerStep(CollisionWorld collisionWorld, VFixedPoint dt)
         {
             wasOnGround = onGround();
 
@@ -105,10 +103,11 @@ namespace MobaGame.Collision
             //climb up slope
             stepUp(collisionWorld);
 
-            VFixedPoint dtMoving = FMath.Min(dt, velocityTimeInterval);
-            velocityTimeInterval -= dt;
+            VFixedPoint dtMoving = dt;
             VInt3 move = walkDirection * dtMoving;
+
             stepForwardAndStrafe(collisionWorld, move);
+            
             //slide down slope
             stepDown(collisionWorld, dt);
 
@@ -145,36 +144,31 @@ namespace MobaGame.Collision
             return perpendicular;
         }
 
+        static VFixedPoint alpha = VFixedPoint.Create(0.2f);
+
         protected bool recoverFromPenetration(CollisionWorld collisionWorld)
         {
             bool penetration = false;
-            VFixedPoint maxPen = VFixedPoint.Zero;
 
             manifolds.Clear();
+            me.getCollisionShape().setMargin(VFixedPoint.Create(0.1f));
             collisionWorld.OverlapTest(me, manifolds);
             for(int i = 0; i < manifolds.Count; i++)
             {
                 PersistentManifold aresult = manifolds[i];
-                int directionSign = aresult.body0 == me ? -1 : 1;
+                int directionSign = aresult.body0 == me ? 1 : -1;
                 for(int j = 0; j < aresult.getContactPointsNum(); j++)
                 {
                     ManifoldPoint apoint = aresult.getManifoldPoint(j);
                     VFixedPoint pen = apoint.distance;
-                    if (pen < VFixedPoint.Zero)
-                    {
-                        if (pen < maxPen)
-                        {
-                            maxPen = pen;
-                            touchingNormal = apoint.normalWorldOnB * directionSign;
-                        }
-
-                        currentPosition += apoint.normalWorldOnB * directionSign * pen * VFixedPoint.Create(0.2f);
-                        penetration = true;
-                    }
+                    if (pen >= VFixedPoint.Zero)
+                        continue;
+                    currentPosition += apoint.normalWorldOnB * directionSign * pen * alpha;
+                    penetration = true;
                 }
                 
             }
-
+            me.getCollisionShape().setMargin(VFixedPoint.Zero);
             return penetration;
         }
 
@@ -250,13 +244,9 @@ namespace MobaGame.Collision
                 start.position = currentPosition;
                 end.position = targetPosition;
 
-                VFixedPoint margin = me.getCollisionShape().getMargin();
-                me.getCollisionShape().setMargin(margin + addedMargin);
-
                 List<CastResult> results = new List<CastResult>();
                 me.setWorldTransform(start);
                 collisionWorld.SweepTest(me, end.position, results);
-                me.getCollisionShape().setMargin(margin);
 
                 if (results.Count > 0)
                 {
@@ -271,6 +261,7 @@ namespace MobaGame.Collision
                             hitNormalWorld = results[i].normal;
                         }
                     }
+
                     fraction -= closestHitFraction;
                     updateTargetPositionBasedOnCollision(hitNormalWorld);
                     VInt3 currentDir = targetPosition - currentPosition;

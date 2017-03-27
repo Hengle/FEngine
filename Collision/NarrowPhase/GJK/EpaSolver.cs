@@ -1,7 +1,6 @@
 ﻿using MobaGame.FixedMath;
 using MobaGame.Framework;
 using System;
-using UnityEngine;
 
 namespace MobaGame.Collision
 {
@@ -75,8 +74,8 @@ namespace MobaGame.Collision
 
             simplexSolver.getSimplex(aBuf, bBuf, Q);
 
-            VFixedPoint upper_bound = VFixedPoint.Create(65535);
-            VFixedPoint lower_bound = VFixedPoint.Create(-65535);
+            VFixedPoint upper_bound = VFixedPoint.MaxValue;
+            VFixedPoint lower_bound = VFixedPoint.MinValue;
 
             int numVertsLocal = 0;
             heap.Clear();

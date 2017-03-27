@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 
 namespace MobaGame
 {
@@ -120,7 +120,27 @@ namespace MobaGame
 
             public static VFixedPoint operator *(VFixedPoint a, VFixedPoint b)
             {
-                return new VFixedPoint((a.ValueBar * b.ValueBar) >> SHIFT_AMOUNT);
+                try
+                {
+                    checked
+                    {
+                        return new VFixedPoint((a.ValueBar * b.ValueBar) >> SHIFT_AMOUNT);
+                    }
+                }
+                catch(OverflowException e)
+                {
+                    long aHi = a.ValueBar >> 32;
+                    long aLo = a.ValueBar & int.MaxValue;
+                    long bHi = b.ValueBar >> 32;
+                    long bLo = b.ValueBar & int.MaxValue;
+
+                    long abHi = (aHi * bHi) << (64 - SHIFT_AMOUNT);
+                    long abMe = (aHi * bLo + aLo * bHi) << (32 - SHIFT_AMOUNT);
+                    long abLo = aLo * bLo;
+
+                    return new VFixedPoint(abHi + abMe  + abLo);
+                }
+                
             }
 
             public static VFixedPoint operator *(VFixedPoint a, long b)

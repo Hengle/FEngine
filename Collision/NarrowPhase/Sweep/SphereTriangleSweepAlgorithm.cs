@@ -250,7 +250,7 @@ namespace MobaGame.Collision
                 bool unused = false;
                 if (!sweepSphereVsTri(currentTri.verts, triNormal, center, radius, unitDir, distance, ref currentDistance, ref unused, testInitialOverlap))
                     continue;
-
+                sweepSphereVsTri(currentTri.verts, triNormal, center, radius, unitDir, distance, ref currentDistance, ref unused, testInitialOverlap);
                 VFixedPoint hitDot = -VInt3.Dot(triNormal, unitDir).Abs();
                 if (!keepTriangle(currentDistance, hitDot, curT, bestAlignment, distance, Globals.EPS))
                     continue;

@@ -81,8 +81,8 @@ namespace MobaGame.Collision
         public static DbvtAabbMm FromVec(VInt3 from, VInt3 to, DbvtAabbMm output)
         {
             DbvtAabbMm box = output;
-            box.mi.x = FMath.Min(from.x, to.x);box.mi.y = FMath.Min(from.y, to.y);box.mi.x = FMath.Min(from.z, to.z);
-            box.mx.x = FMath.Max(from.x, to.x);box.mx.y = FMath.Max(from.y, to.y);box.mx.x = FMath.Max(from.z, to.z);
+            box.mi.x = FMath.Min(from.x, to.x);box.mi.y = FMath.Min(from.y, to.y);box.mi.z = FMath.Min(from.z, to.z);
+            box.mx.x = FMath.Max(from.x, to.x);box.mx.y = FMath.Max(from.y, to.y);box.mx.z = FMath.Max(from.z, to.z);
             return box;
 
         }

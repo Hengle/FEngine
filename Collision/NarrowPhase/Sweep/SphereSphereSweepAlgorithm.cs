@@ -52,8 +52,9 @@ namespace MobaGame.Collision
                                         ref VInt3 normal
                                       )
         {
-            VInt3 vab = A1 - A0;
+            VInt3 va = A1 - A0;
             VInt3 AB = B0 - A0;
+            VInt3 vab = -va;
             VFixedPoint rab = ra + rb;
 
             VFixedPoint a = vab.sqrMagnitude;
@@ -65,7 +66,7 @@ namespace MobaGame.Collision
             if(c <= VFixedPoint.Zero || a == VFixedPoint.Zero)
             {
                 u0 = VFixedPoint.Zero;
-                normal = B0 - A0;
+                normal = A0 - B0;
                 return true;
             }
 
@@ -78,9 +79,9 @@ namespace MobaGame.Collision
                     u1 = tmp;
                 }
 
-                if (u1 < VFixedPoint.Zero || u0 > VFixedPoint.Zero) return false;
+                if (u1 < VFixedPoint.Zero || u0 > VFixedPoint.One) return false;
 
-                normal = (B0 - (A0 + vab * u0)).Normalize();
+                normal = ((A0 + va * u0) - B0).Normalize();
                 return true;
             }
 
