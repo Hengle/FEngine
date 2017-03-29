@@ -235,7 +235,7 @@ namespace MobaGame.Collision
                 if (rejectTriangle(center, unitDir, curT, radius, currentTri.verts, dpc0))
                     continue;
 
-                VInt3 triNormal = currentTri.denormalizedNormal;
+                VInt3 triNormal = currentTri.normal;
 
                 if (VInt3.Dot(triNormal, unitDir) > VFixedPoint.Zero)
                     continue;
@@ -250,7 +250,7 @@ namespace MobaGame.Collision
                 bool unused = false;
                 if (!sweepSphereVsTri(currentTri.verts, triNormal, center, radius, unitDir, distance, ref currentDistance, ref unused, testInitialOverlap))
                     continue;
-                sweepSphereVsTri(currentTri.verts, triNormal, center, radius, unitDir, distance, ref currentDistance, ref unused, testInitialOverlap);
+                
                 VFixedPoint hitDot = -VInt3.Dot(triNormal, unitDir).Abs();
                 if (!keepTriangle(currentDistance, hitDot, curT, bestAlignment, distance, Globals.EPS))
                     continue;
@@ -267,6 +267,7 @@ namespace MobaGame.Collision
                 index = i;
             }
 
+            curT = curT / distance;
             return computeSphereTriangleImpactData(index, curT, center, unitDir, bestTriNormal, triangles, ref fraction, ref hitNormal);
         }
 

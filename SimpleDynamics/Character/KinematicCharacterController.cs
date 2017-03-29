@@ -1,5 +1,6 @@
 ﻿using MobaGame.FixedMath;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace MobaGame.Collision
 {
@@ -44,7 +45,7 @@ namespace MobaGame.Collision
             this.fallSpeed = VFixedPoint.Create(55); // Terminal velocity of a sky diver in m/s.
             this.jumpSpeed = VFixedPoint.Create(10);
             this.wasOnGround = false;
-            VFixedPoint maxSlopeRadians = VFixedPoint.Create(50) / VFixedPoint.Create(180) / FMath.Trig.Rag2Deg;
+            VFixedPoint maxSlopeRadians = VFixedPoint.Create(45) / FMath.Trig.Rag2Deg;
             maxSlopeCosine = FMath.Trig.Cos(maxSlopeRadians);
         }
 
@@ -151,8 +152,8 @@ namespace MobaGame.Collision
             bool penetration = false;
 
             manifolds.Clear();
-            me.getCollisionShape().setMargin(VFixedPoint.Create(0.1f));
             collisionWorld.OverlapTest(me, manifolds);
+            
             for(int i = 0; i < manifolds.Count; i++)
             {
                 PersistentManifold aresult = manifolds[i];
@@ -168,23 +169,19 @@ namespace MobaGame.Collision
                 }
                 
             }
-            me.getCollisionShape().setMargin(VFixedPoint.Zero);
             return penetration;
         }
 
         protected void stepUp(CollisionWorld collisionWorld)
         {
             VIntTransform start = VIntTransform.Identity, end = VIntTransform.Identity;
-
             targetPosition = currentPosition + upAxisDirection[upAxis] * (stepHeight + (verticalOffset > VFixedPoint.Zero ? verticalOffset : VFixedPoint.Zero));
             start.position = currentPosition + upAxisDirection[upAxis] * (me.getCollisionShape().getMargin() + addedMargin);
             end.position = targetPosition;
-
             VInt3 up = -upAxisDirection[upAxis];
             List<CastResult> results = new List<CastResult>();
             me.setWorldTransform(start);
             collisionWorld.SweepTest(me, end.position, results);
-
             if (results.Count > 0)
             {
                 VFixedPoint closestHitFraction = VFixedPoint.One;
@@ -235,9 +232,7 @@ namespace MobaGame.Collision
         {
             VIntTransform start = VIntTransform.Identity, end = VIntTransform.Identity;
             targetPosition = currentPosition + walkMove;
-
             VFixedPoint fraction = VFixedPoint.One;
-
             int maxIter = 10;
             while(fraction > VFixedPoint.Create(0.01f) && maxIter-- > 0)
             {
@@ -289,14 +284,13 @@ namespace MobaGame.Collision
         protected void stepDown(CollisionWorld collisionWorld, VFixedPoint dt)
         {
             VIntTransform start = VIntTransform.Identity, end = VIntTransform.Identity;
-
+            
             VFixedPoint additionalDownStep = wasOnGround ? stepHeight : VFixedPoint.Zero;
             VInt3 stepDrop = upAxisDirection[upAxis] * (currentStepOffset + additionalDownStep);
             VFixedPoint downVelocity = (additionalDownStep == VFixedPoint.Zero && verticalVelocity < VFixedPoint.Zero ? -verticalVelocity : VFixedPoint.Zero) * dt;
             VInt3 gravityDrop = upAxisDirection[upAxis] * downVelocity;
             targetPosition -= stepDrop;
             targetPosition -= gravityDrop;
-
             start.position = currentPosition; end.position = targetPosition;
 
             List<CastResult> results = new List<CastResult>();
@@ -311,7 +305,7 @@ namespace MobaGame.Collision
                     VFixedPoint fraction = results[i].fraction;
                     if(VInt3.Dot(results[i].normal, upAxisDirection[upAxis]) < maxSlopeCosine)
                     {
-                        fraction = VFixedPoint.One;
+                        continue;
                     }
 
                     if(fraction < closestHitFraction)
@@ -328,6 +322,7 @@ namespace MobaGame.Collision
                 // we dropped the full height
                 currentPosition = targetPosition;
             }
+            
         }
 
         public bool onGround()

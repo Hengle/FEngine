@@ -136,7 +136,7 @@ namespace MobaGame
 
                     long abHi = (aHi * bHi) << (64 - SHIFT_AMOUNT);
                     long abMe = (aHi * bLo + aLo * bHi) << (32 - SHIFT_AMOUNT);
-                    long abLo = aLo * bLo;
+                    long abLo = aLo * bLo >> SHIFT_AMOUNT;
 
                     return new VFixedPoint(abHi + abMe  + abLo);
                 }
